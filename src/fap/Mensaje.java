@@ -1,12 +1,15 @@
 package fap;
 
-public abstract class Mensaje {
+public abstract class Mensaje{
 
 	private String origen;
 	private String destino;
 	private CodigosMensajes tipoMensaje;
 	
-	
+	public Mensaje(String origen, String destino,CodigosMensajes tipoMensaje){
+		this.origen = origen;
+		this.destino = destino;
+	}
 
 	/**
 	 * @return the origen
@@ -61,7 +64,16 @@ public abstract class Mensaje {
 	}
 
 
-
 	@Override
-	public abstract String toString();
+	public String toString(){
+		return this.printCabecera() + this.printCuerpo(); 
+	}
+
+	protected String printCuerpo() {
+		return "";
+	}
+
+	protected String printCabecera() {
+		return origen + destino + this.tipoMensaje.toString();
+	}
 }
