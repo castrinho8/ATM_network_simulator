@@ -11,4 +11,8 @@ public enum CodigosMensajes {
 	private CodigosMensajes(int numero){
 		this.numero = numero;
 	}
+	
+	public int getNum(){
+		return this.numero;
+	}
 }

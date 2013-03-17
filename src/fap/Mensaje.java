@@ -7,62 +7,13 @@ public abstract class Mensaje{
 	private CodigosMensajes tipoMensaje;
 	
 	public Mensaje(String origen, String destino,CodigosMensajes tipoMensaje){
-		this.origen = origen;
-		this.destino = destino;
-	}
-
-	/**
-	 * @return the origen
-	 */
-	protected String getOrigen() {
-		return origen;
-	}
-
-
-
-	/**
-	 * @param origen the origen to set
-	 */
-	protected void setOrigen(String origen) {
-		this.origen = origen;
-	}
-
-
-
-	/**
-	 * @return the destino
-	 */
-	protected String getDestino() {
-		return destino;
-	}
-
-
-
-	/**
-	 * @param destino the destino to set
-	 */
-	protected void setDestino(String destino) {
-		this.destino = destino;
-	}
-
-
-
-	/**
-	 * @return the tipoMensaje
-	 */
-	protected CodigosMensajes getTipoMensaje() {
-		return tipoMensaje;
-	}
-
-
-
-	/**
-	 * @param tipoMensaje the tipoMensaje to set
-	 */
-	protected void setTipoMensaje(CodigosMensajes tipoMensaje) {
+		assert(origen.length()<=8);
+		assert(destino.length()<=8);
+		
 		this.tipoMensaje = tipoMensaje;
+		this.origen = origen;
+		this.destino = destino;
 	}
-
 
 	@Override
 	public String toString(){
@@ -74,6 +25,6 @@ public abstract class Mensaje{
 	}
 
 	protected String printCabecera() {
-		return origen + destino + this.tipoMensaje.toString();
+		return String.format("%8s%8s%2i", origen,destino,this.tipoMensaje.getNum());
 	}
 }

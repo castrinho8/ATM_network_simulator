@@ -23,7 +23,8 @@ public abstract class MensajeDatos extends Mensaje {
 
 	@Override
 	protected String printCabecera() {
-		return super.printCabecera() + ""; //TODO
+		return super.printCabecera() + 
+				String.format("%2i%5i%1i", numcanal, nmsg, codonline ? 1 : 0);
 	}
 	
 }
