@@ -3,13 +3,14 @@
               Any modifications will be overwritten.
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. --><project basedir="." default="build" name="PracticaACS">
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="CajerosACS">
     <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../../../../../opt/eclipse"/>
+    <property name="ECLIPSE_HOME" value="../../eclipse"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.7"/>
-    <property name="source" value="1.7"/>
-    <path id="PracticaACS.classpath">
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="CajerosACS.classpath">
         <pathelement location="bin"/>
     </path>
     <target name="init">
@@ -30,7 +31,7 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
-            <classpath refid="PracticaACS.classpath"/>
+            <classpath refid="CajerosACS.classpath"/>
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
