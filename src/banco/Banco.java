@@ -35,8 +35,8 @@ public class Banco {
 		//Crear tablas si no están creadas.
 	}
 
-    String getName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getName() {
+    	return this.nombre;
     }
 	
 }
