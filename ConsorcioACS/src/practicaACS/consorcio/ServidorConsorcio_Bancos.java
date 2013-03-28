@@ -1,6 +1,10 @@
 package practicaACS.consorcio;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Calendar;
@@ -36,6 +40,13 @@ public class ServidorConsorcio_Bancos {
 	//-------END GETTERS & SETTERS-------
 	
 	/**
+	 * Funcion que comprueba si el banco pasado por parametro tiene sesion iniciada.
+	 */
+	public boolean hasSesion(String id_banco){
+		return this.bancos.containsKey(id_banco);
+	}
+	
+	/**
 	 * Consulta si el banco para la tarjeta indicada se encuentra activo.
 	 */
 	public boolean consultar_protocolo(String tarjeta){
@@ -47,24 +58,24 @@ public class ServidorConsorcio_Bancos {
 	 * Detiene el trafico del banco indicado
 	 */
 	public void detener_trafico(String banco){
-    	this.bancos.get(banco).detener_trafico();
+    	this.bancos.get(banco).detener_trafico(recibido)
 	}
 	
 	/**
      * Levanta el servidorBancos
      */
-    public void levantar_servidorBancos() throws IOException{
+    public void levantar_servidorBancos() throws ClassNotFoundException, IOException{
     	ServerSocket servidor = new ServerSocket(this.port);
 
     	Calendar time = Calendar.getInstance();
     	System.out.println("APERTURA: Sesion Servidor de Bancos comenzada a las " + time.getTime());
 
-    	while (this.estado_serv_bancos == EstadoSesion.ACTIVA) {
-    	     Socket incoming = servidor.accept();
-
-    	     Thread t = new ConexionConsorcio_Bancos(this.consorcio,incoming);
-    	     t.start();
-    	}
+		while (this.estado_serv_bancos == EstadoSesion.ACTIVA) {
+			Socket incoming = servidor.accept();
+			
+			Thread t = new ConexionConsorcio_Bancos(this.consorcio,this,incoming);
+		    t.start();
+		}
     	
     	time = Calendar.getInstance();
     	System.out.println("CIERRE: Sesion Servidor de Bancos termidada a las " + time.getTime());
@@ -77,7 +88,7 @@ public class ServidorConsorcio_Bancos {
     	this.estado_serv_bancos = EstadoSesion.CERRADA;
     	//cerrar todas las conexiones con los bancos
     	for(Object banco : this.bancos.values()){
-    		banco.
+    		banco
     	}
     }
 
@@ -85,7 +96,7 @@ public class ServidorConsorcio_Bancos {
      * Recupera los mensajes del banco
      */
     public void realiza_recuperacion(String banco){
-    	for(Object message : this.bancos.get(banco).getUltimosEnvios().values()){
+    	for(Object message : this.bancos.get(banco).){
     		this.consorcio.getBancos_client().send_message((Mensaje) message);
     	}
     }

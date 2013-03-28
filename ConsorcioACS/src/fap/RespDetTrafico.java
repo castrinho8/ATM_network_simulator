@@ -2,8 +2,8 @@ package fap;
 
 public class RespDetTrafico extends Mensaje {
 
-	private int cod_resp;
-	private int cod_error;
+	private CodigosRespuesta cod_resp;
+	private CodigosError cod_error;
 	
 	/**
 	 * Contructor del mensaje Respuesta Detener Trafico.
@@ -12,8 +12,8 @@ public class RespDetTrafico extends Mensaje {
 	 * @param cod_resp Código de Respuesta
 	 * @param cod_error Código de error.
 	 */
-	public RespDetTrafico(String origen, String destino, int cod_resp,
-			int cod_error) {
+	public RespDetTrafico(String origen, String destino, CodigosRespuesta cod_resp,
+			CodigosError cod_error) {
 		super(origen, destino,CodigosMensajes.DETENERTRAFICO);
 		this.cod_resp = cod_resp;
 		this.cod_error = cod_error;

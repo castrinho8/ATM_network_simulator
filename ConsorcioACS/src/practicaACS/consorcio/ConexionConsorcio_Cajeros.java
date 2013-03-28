@@ -65,7 +65,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//subcabecera
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = this.();
+		boolean codonline = this.consorcio;
 		//cuerpo
 		CodigosRespuesta cod_resp = this.consorcio.getDatabase().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
 		boolean signo = true;

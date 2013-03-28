@@ -33,7 +33,15 @@ public class SolAperturaSesion extends Mensaje {
 		this.time = time;
 		this.puerto = puerto;
 	}
+	
+	public int getNcanales() {
+		return ncanales;
+	}
 
+	public String getPuerto() {
+		return puerto;
+	}
+	
 	@Override
 	protected String printCuerpo(){
 		return String.format("%2i%10s%8s%20s",
@@ -42,4 +50,5 @@ public class SolAperturaSesion extends Mensaje {
 				new SimpleDateFormat("hh:mm:ss").format(this.time),
 				puerto);
 	}
+
 }
