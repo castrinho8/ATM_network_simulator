@@ -29,43 +29,43 @@ public class VentanaBanco extends javax.swing.JFrame {
         jTabbedPane1 = new javax.swing.JTabbedPane();
         contasTab = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tablacontas = new javax.swing.JTable();
         jSeparator1 = new javax.swing.JSeparator();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        textmovimentos = new javax.swing.JTextArea();
         jLabel5 = new javax.swing.JLabel();
-        jToggleButton2 = new javax.swing.JToggleButton();
-        jButton7 = new javax.swing.JButton();
+        botonengadirconta = new javax.swing.JToggleButton();
+        botoneliminarconta = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         monYcontrolTab = new javax.swing.JPanel();
-        jToggleButton1 = new javax.swing.JToggleButton();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        botonforzarrecuperacion = new javax.swing.JToggleButton();
+        botonabrirsesion = new javax.swing.JButton();
+        botoncerrarsesion = new javax.swing.JButton();
+        botondetenertrafico = new javax.swing.JButton();
+        botonreanudartrafico = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        tablacanles = new javax.swing.JTable();
         jSeparator2 = new javax.swing.JSeparator();
         jScrollPane4 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
+        textlog = new javax.swing.JTextArea();
         jLabel2 = new javax.swing.JLabel();
         tarxTab = new javax.swing.JPanel();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
+        botonengadirtarxeta = new javax.swing.JButton();
+        botoneliminartarxeta = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jScrollPane5 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
+        listatarxetas = new javax.swing.JList();
         jScrollPane6 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList();
+        listacontasasociadas = new javax.swing.JList();
         jSeparator3 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jTabbedPane1.setName(""); // NOI18N
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tablacontas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
                 {null, null},
@@ -74,20 +74,20 @@ public class VentanaBanco extends javax.swing.JFrame {
             },
             new String [] { "Numero Conta", "Saldo" }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tablacontas);
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane2.setViewportView(jTextArea1);
+        textmovimentos.setColumns(20);
+        textmovimentos.setRows(5);
+        jScrollPane2.setViewportView(textmovimentos);
 
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel5.setText("Movimentos");
 
-        jToggleButton2.setText("Engadir Conta");
+        botonengadirconta.setText("Engadir Conta");
 
-        jButton7.setText("Eliminar Conta");
+        botoneliminarconta.setText("Eliminar Conta");
 
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel6.setText("Contas");
@@ -100,9 +100,9 @@ public class VentanaBanco extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(contasTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(contasTabLayout.createSequentialGroup()
-                        .addComponent(jToggleButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(botonengadirconta, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(botoneliminarconta, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -125,8 +125,8 @@ public class VentanaBanco extends javax.swing.JFrame {
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE))
                     .addGroup(contasTabLayout.createSequentialGroup()
                         .addGroup(contasTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jToggleButton2)
-                            .addComponent(jButton7))
+                            .addComponent(botonengadirconta)
+                            .addComponent(botoneliminarconta))
                         .addGap(7, 7, 7)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -136,30 +136,30 @@ public class VentanaBanco extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Contas", contasTab);
 
-        jToggleButton1.setText("Forzar Modo Recuperacion");
-        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+        botonforzarrecuperacion.setText("Forzar Modo Recuperacion");
+        botonforzarrecuperacion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButton1ActionPerformed(evt);
+                botonforzarrecuperacionActionPerformed(evt);
             }
         });
 
-        jButton1.setText("Abrir Sesion");
+        botonabrirsesion.setText("Abrir Sesion");
 
-        jButton2.setText("Cerrar Sesion");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        botoncerrarsesion.setText("Cerrar Sesion");
+        botoncerrarsesion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                botoncerrarsesionActionPerformed(evt);
             }
         });
 
-        jButton3.setText("Detener Trafico");
+        botondetenertrafico.setText("Detener Trafico");
 
-        jButton4.setText("Reanudar Trafico");
+        botonreanudartrafico.setText("Reanudar Trafico");
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Canales");
+        jLabel1.setText("Canles");
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        tablacanles.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -170,13 +170,13 @@ public class VentanaBanco extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane3.setViewportView(jTable2);
+        jScrollPane3.setViewportView(tablacanles);
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jScrollPane4.setViewportView(jTextArea2);
+        textlog.setColumns(20);
+        textlog.setRows(5);
+        jScrollPane4.setViewportView(textlog);
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Log");
@@ -189,15 +189,15 @@ public class VentanaBanco extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jToggleButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(botonforzarrecuperacion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(monYcontrolTabLayout.createSequentialGroup()
                         .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(botoncerrarsesion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                            .addComponent(botonabrirsesion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(botondetenertrafico, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(botonreanudartrafico, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -214,15 +214,15 @@ public class VentanaBanco extends javax.swing.JFrame {
                 .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator2)
                     .addGroup(monYcontrolTabLayout.createSequentialGroup()
-                        .addComponent(jToggleButton1)
+                        .addComponent(botonforzarrecuperacion)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton1)
-                            .addComponent(jButton3))
+                            .addComponent(botonabrirsesion)
+                            .addComponent(botondetenertrafico))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton2)
-                            .addComponent(jButton4))
+                            .addComponent(botoncerrarsesion)
+                            .addComponent(botonreanudartrafico))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -236,9 +236,9 @@ public class VentanaBanco extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Monitorizacion e Control", monYcontrolTab);
 
-        jButton5.setText("Engadir Tarxeta");
+        botonengadirtarxeta.setText("Engadir Tarxeta");
 
-        jButton6.setText("Eliminar Tarxeta");
+        botoneliminartarxeta.setText("Eliminar Tarxeta");
 
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel3.setText("Tarxetas");
@@ -246,19 +246,19 @@ public class VentanaBanco extends javax.swing.JFrame {
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel4.setText("Contas Asociadas");
 
-        jList1.setModel(new javax.swing.AbstractListModel() {
+        listatarxetas.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane5.setViewportView(jList1);
+        jScrollPane5.setViewportView(listatarxetas);
 
-        jList2.setModel(new javax.swing.AbstractListModel() {
+        listacontasasociadas.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane6.setViewportView(jList2);
+        jScrollPane6.setViewportView(listacontasasociadas);
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -269,7 +269,7 @@ public class VentanaBanco extends javax.swing.JFrame {
             .addGroup(tarxTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(tarxTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE)
+                    .addComponent(botonengadirtarxeta, javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -277,7 +277,7 @@ public class VentanaBanco extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(tarxTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane6)
-                    .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(botoneliminartarxeta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -288,8 +288,8 @@ public class VentanaBanco extends javax.swing.JFrame {
                 .addGroup(tarxTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(tarxTabLayout.createSequentialGroup()
                         .addGroup(tarxTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton5)
-                            .addComponent(jButton6))
+                            .addComponent(botonengadirtarxeta)
+                            .addComponent(botoneliminartarxeta))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(tarxTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tarxTabLayout.createSequentialGroup()
@@ -326,13 +326,13 @@ public class VentanaBanco extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
+    private void botonforzarrecuperacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonforzarrecuperacionActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton1ActionPerformed
+    }//GEN-LAST:event_botonforzarrecuperacionActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void botoncerrarsesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botoncerrarsesionActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_botoncerrarsesionActionPerformed
 
     /**
      * @param args the command line arguments
@@ -369,22 +369,22 @@ public class VentanaBanco extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton botonabrirsesion;
+    private javax.swing.JButton botoncerrarsesion;
+    private javax.swing.JButton botondetenertrafico;
+    private javax.swing.JButton botoneliminarconta;
+    private javax.swing.JButton botoneliminartarxeta;
+    private javax.swing.JToggleButton botonengadirconta;
+    private javax.swing.JButton botonengadirtarxeta;
+    private javax.swing.JToggleButton botonforzarrecuperacion;
+    private javax.swing.JButton botonreanudartrafico;
     private javax.swing.JPanel contasTab;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JList jList1;
-    private javax.swing.JList jList2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -395,13 +395,13 @@ public class VentanaBanco extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea jTextArea2;
-    private javax.swing.JToggleButton jToggleButton1;
-    private javax.swing.JToggleButton jToggleButton2;
+    private javax.swing.JList listacontasasociadas;
+    private javax.swing.JList listatarxetas;
     private javax.swing.JPanel monYcontrolTab;
+    private javax.swing.JTable tablacanles;
+    private javax.swing.JTable tablacontas;
     private javax.swing.JPanel tarxTab;
+    private javax.swing.JTextArea textlog;
+    private javax.swing.JTextArea textmovimentos;
     // End of variables declaration//GEN-END:variables
 }
