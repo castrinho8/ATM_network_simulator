@@ -39,12 +39,9 @@ public class BancoTab extends javax.swing.JPanel {
         banco = b;
         setName(banco.getName());
         initComponents();
-        setDatosTabla(new Object[][]{
-        		{null,null,null}	
-        });
+        setDatosTabla(b.getDatosCuentas());
              
     }
-
 
     private void initComponents() {
 
@@ -64,6 +61,7 @@ public class BancoTab extends javax.swing.JPanel {
         textLogs.setLineWrap(true);
         textLogs.setRows(5);
         textLogs.setTabSize(4);
+        textLogs.setEditable(false);
         scrollLog.setViewportView(textLogs);
         
         scrollTablaBotones.setViewportView(tablaBanco);
@@ -201,13 +199,17 @@ public class BancoTab extends javax.swing.JPanel {
     public void emptyLog(){
     	textLogs.setText("");
     }
-
-    
+ 
     public void addLogLine(String concepto){
     	Calendar cal = Calendar.getInstance();
     	cal.getTime();
     	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
     	textLogs.append(sdf.format(cal.getTime()) + "\t" + concepto + "\n");
     }
+
+	
+    public Banco getBanco() {
+		return banco;		
+	}
     
 }

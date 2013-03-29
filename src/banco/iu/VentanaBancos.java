@@ -6,6 +6,7 @@ package banco.iu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -13,12 +14,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 
 import banco.Banco;
+import banco.InsertBancoException;
 
 /**
  *
  * @author ch01
  */
-public class VentanaBancos extends javax.swing.JFrame {
+public class VentanaBancos extends javax.swing.JFrame implements AddBancoListener,DeleteBancoListener {
 
 	private JMenu menuBanco;
     private JMenu menuContas;
@@ -165,18 +167,19 @@ public class VentanaBancos extends javax.swing.JFrame {
      */
     public static void main(String args[]) {
     	VentanaBancos b = new VentanaBancos();
-        b.tabbedframe.add(new BancoTab(new Banco("CaixaGaliza")));
-        b.tabbedframe.add(new BancoTab(new Banco("CaixaRuralGalega")));
+        for(Banco banc :Banco.getBancosBD()){
+        	b.tabbedframe.add(new BancoTab(banc));
+        }
         b.setVisible(true);
     }
 
     
     private void addBanco(){
-    	
+    	new DialogoAddBanco(this).setVisible(true);
     }
     
     private void deleteBanco(){
-    	
+    	new DialogoDeleteBanco(this,tabbedframe.getSelectedComponent().getName()).setVisible(true);
     }
 
     private void addConta(){
@@ -193,6 +196,22 @@ public class VentanaBancos extends javax.swing.JFrame {
     
     private void displayAxuda() {
 	
+	}
+
+	@Override
+	public void addBanco(String name) {
+		try {
+			tabbedframe.add(new BancoTab(new Banco(name)));
+		} catch (InsertBancoException e) {
+		//TODO
+			System.err.println("Error ao engadir un novo banco.");
+		}
+	}
+
+	@Override
+	public void deleteBancoSelecionado() {
+		((BancoTab) tabbedframe.getSelectedComponent()).getBanco().remove();
+		this.tabbedframe.remove(tabbedframe.getSelectedComponent());
 	}
     
 }
