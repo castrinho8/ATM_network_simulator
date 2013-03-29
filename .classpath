@@ -2,5 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java/mysql-connector-java-5.1.24-bin.jar" sourcepath="lib/mysql-connector-java/src">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/ch01/Dropbox/UNI_Fedora/ACS/RepositorioPractica/lib/mysql-connector-java/docs/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
