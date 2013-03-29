@@ -2,11 +2,11 @@ package fap;
 
 public class RespCierreSesion extends Mensaje {
 
-	private int cod_resp;
+	private CodigosRespuesta cod_resp;
 	private CodigosError cod_error;
 	
 
-	public RespCierreSesion(String origen, String destino, int cod_resp,
+	public RespCierreSesion(String origen, String destino, CodigosRespuesta cod_resp,
 			CodigosError cod_error) {
 		super(origen, destino,CodigosMensajes.CIERRESESION);
 		this.cod_resp = cod_resp;

@@ -1,5 +1,7 @@
 package practicaACS.consorcio;
 
+import java.util.Hashtable;
+
 import fap.*;
 
 //Libreria de acceso a la base de datos
@@ -53,4 +55,32 @@ public class Database_lib {
 	public void almacenar_envio(Mensaje message){
 		
 	}
+	
+	//---------------ENVIOS----------------
+	private Hashtable<banco,canal,Mensaje,conestado?> ultimos_envios;
+
+	/**
+	 * Cambia el ultimo envio del canal indicado por el pasado por parametro
+	 */
+	public void anhadir_ultimo_envio(int canal, Mensaje message){
+		if(ultimos_envios.containsKey(canal))
+			ultimos_envios.remove(canal);
+		
+		ultimos_envios.put(canal,message);
+	}
+	
+	/**
+	 * Devuelve el ultimo envio de un canal
+	 */
+	public Mensaje obtener_ultimo_envio(int canal){
+		return (Mensaje) ultimos_envios.get(canal);
+	}
+	
+	/**
+	 * Devuelve el hashtable con todos los ultimos envios de un banco
+	 */
+	public Hashtable getUltimosEnvios(){
+		return ultimos_envios;
+	}
+	
 }

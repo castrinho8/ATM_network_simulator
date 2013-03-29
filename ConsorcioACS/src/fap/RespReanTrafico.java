@@ -2,8 +2,8 @@ package fap;
 
 public class RespReanTrafico extends Mensaje {
 
-	private int cod_resp;
-	private int cod_error;
+	private CodigosRespuesta cod_resp;
+	private CodigosError cod_error;
 	
 	
 	/**
@@ -13,8 +13,8 @@ public class RespReanTrafico extends Mensaje {
 	 * @param cod_resp Código de Respuesa
 	 * @param cod_error Codigo de Error
 	 */
-	public RespReanTrafico(String origen, String destino, int cod_resp,
-			int cod_error) {
+	public RespReanTrafico(String origen, String destino, CodigosRespuesta cod_resp,
+			CodigosError cod_error) {
 		super(origen, destino,CodigosMensajes.REANUDARTRAFICO);
 		this.cod_resp = cod_resp;
 		this.cod_error = cod_error;

@@ -10,7 +10,7 @@ package fap;
 public class RespAperturaSesion extends Mensaje {
 
 	
-	private int cod_resp;
+	private CodigosRespuesta cod_resp;
 	private CodigosError cod_error;
 	
 	/**
@@ -20,11 +20,11 @@ public class RespAperturaSesion extends Mensaje {
 	 * @param cod_resp
 	 * @param cod_error
 	 */
-	public RespAperturaSesion(String origen, String destino, int cod_resp,
+	public RespAperturaSesion(String origen, String destino, CodigosRespuesta cod_resp,
 			CodigosError cod_error) {
 		super(origen, destino,CodigosMensajes.RESREINTEGRO);
 		
-		assert(cod_resp == 00 || cod_resp == 11);
+		assert(cod_resp == CodigosRespuesta.CONSACEPTADA || cod_resp == CodigosRespuesta.CAPTARJ);
 		
 		this.cod_resp = cod_resp;
 		this.cod_error = cod_error;
