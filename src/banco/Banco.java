@@ -24,24 +24,10 @@ public class Banco {
 			throw new InsertBancoException();
 		}
 		
-		inicializarBanco(n);
+		//inicializarBanco(n);
 		
 		
 		return n;
-	}
-
-	private static void inicializarBanco(int n) {
-
-		ClienteBDBanco.instance().insertTarjeta(n,1);
-		ClienteBDBanco.instance().insertCuenta(n,1,1,1000);
-		ClienteBDBanco.instance().insertCuenta(n,1,2,2000);
-		ClienteBDBanco.instance().insertCuenta(n,1,3,3000);
-
-		ClienteBDBanco.instance().insertTarjeta(n,2);
-		ClienteBDBanco.instance().insertTarjeta(n,3);
-		ClienteBDBanco.instance().insertTarjeta(n,4);
-		ClienteBDBanco.instance().insertTarjeta(n,5);
-
 	}
 
 	public void addTarjeta(){
