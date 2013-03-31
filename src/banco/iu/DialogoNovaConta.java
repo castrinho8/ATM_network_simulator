@@ -12,7 +12,9 @@ import java.awt.event.ActionListener;
  */
 public class DialogoNovaConta extends javax.swing.JDialog {
 
-    private javax.swing.JButton jButton1;
+
+	private static final long serialVersionUID = 7952674157045399233L;
+	private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

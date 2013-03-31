@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
  */
 public class DialogoSiNon extends javax.swing.JDialog {
 
+	private static final long serialVersionUID = -1047575789916210070L;
 	private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;

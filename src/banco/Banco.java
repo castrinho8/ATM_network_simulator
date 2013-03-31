@@ -1,6 +1,11 @@
 package banco;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import banco.iu.VentanaBanco;
 
@@ -9,10 +14,35 @@ public class Banco {
 	private String nombre;
 	private ClienteBDBanco bd;
 	private VentanaBanco iu;
+	private int puerto;
 	
-	public Banco(String name,String urlbd) {
+	public Banco(String configfile){
+		Properties prop = new Properties();
+	    InputStream is;
+		try {
+			is = new FileInputStream(configfile);
+		    prop.load(is);
+		} catch (FileNotFoundException e) {
+			System.err.println("Non se encontrou arquivo de configuracion " + configfile + ".");
+			System.exit(-1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		this.nombre = prop.getProperty("banco.name");
+		this.puerto = new Integer(prop.getProperty("banco.port"));
+		String bdname = prop.getProperty("bd.name");
+		String bdadd = prop.getProperty("bd.add");
+		String bduser = prop.getProperty("bd.user");
+		String bdpass = prop.getProperty("bd.pass");
+		this.bd = new ClienteBDBanco("jdbc:mysql://" + bdadd + "/" + bdname + "?user=" + bduser + "&password=" + bdpass);
+	}
+	
+	
+	public Banco(String name,String urlbd,int puerto) {
 		this.nombre = name;
 		this.bd = new ClienteBDBanco(urlbd);
+		this.puerto = puerto;
 	}
 	
 	public void setIU(VentanaBanco iu){
@@ -88,6 +118,12 @@ public class Banco {
 	}
 
 	public void cerrarSesion() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void iniciarSesion(int numCanles) {
 		// TODO Auto-generated method stub
 		
 	}

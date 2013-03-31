@@ -9,6 +9,11 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -22,47 +27,22 @@ import banco.Tarxeta;
  *
  * @author ch01
  */
-public class VentanaBanco extends javax.swing.JFrame implements NovaContaListener, NovaTarxetaListener, NovaContaAsociadaListener {
+public class VentanaBanco extends javax.swing.JFrame implements NovaContaListener, NovaTarxetaListener, NovaContaAsociadaListener,
+IniciarSesionListener {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5641750155014378657L;
-	private javax.swing.JButton botonabrirsesion;
-    private javax.swing.JButton botondetenertrafico;
-    private javax.swing.JButton botoneliminarconta;
-    private javax.swing.JButton botoneliminartarxeta;
-    private javax.swing.JButton botonengadirconta;
-    private javax.swing.JButton botonengadirtarxeta;
-    private javax.swing.JButton botonengadircontaasociada;
-    private javax.swing.JButton botoneliminarcontaasociada;
-    private javax.swing.JToggleButton botonforzarrecuperacion;
-    private javax.swing.JPanel contasTab;
-    private javax.swing.JButton botonestablecervalorespordefecto;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JScrollPane jScrollPane6;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
+	private JButton botonabrirsesion,botondetenertrafico,botoneliminarconta,botoneliminartarxeta, botonestablecervalorespordefecto;
+    private JButton botonengadirconta, botonengadirtarxeta, botonengadircontaasociada, botoneliminarcontaasociada;
+    private JToggleButton botonforzarrecuperacion;
+    private JPanel contasTab,monYcontrolTab,tarxTab;
+    private JLabel jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6;
+    private JScrollPane jScrollPane1, jScrollPane2, jScrollPane3;
+    private JScrollPane jScrollPane4, jScrollPane5, jScrollPane6;
+    private javax.swing.JSeparator jSeparator1,jSeparator2,jSeparator3;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JList<String> listacontasasociadas;
-    private javax.swing.JList<String> listatarxetas;
-    private javax.swing.JPanel monYcontrolTab;
-    private javax.swing.JTable tablacanles;
-    private javax.swing.JTable tablacontas;
-    private javax.swing.JPanel tarxTab;
+    private javax.swing.JList<String> listacontasasociadas,listatarxetas;
+    private JTable tablacanles,movementos,tablacontas;
     private javax.swing.JTextArea textlog;
-    private javax.swing.JTable movementos;
     private Banco banco;
 	private boolean sesionabierta = false;
 	private boolean traficoactivo;
@@ -74,9 +54,9 @@ public class VentanaBanco extends javax.swing.JFrame implements NovaContaListene
     	this.banco = b;
         initComponents();
         this.setTitle("Ventana Banco \"" + b.getName() + "\"" + " - ACS 2012/2013");
-        
         this.actualizarContas();
         this.actualizarTarxetas();
+        b.setIU(this);
     }
 
 	private void initComponents() {
@@ -118,8 +98,6 @@ public class VentanaBanco extends javax.swing.JFrame implements NovaContaListene
         botoneliminarcontaasociada = new JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jTabbedPane1.setName(""); // NOI18N
 
         // TAB CONTAS
                 
@@ -536,7 +514,7 @@ public class VentanaBanco extends javax.swing.JFrame implements NovaContaListene
 	}
 
 	protected void abrirSesion() {
-		// TODO Auto-generated method stub
+		new DialogoAbrirSesion(this).setVisible(true);
 		this.botondetenertrafico.setEnabled(true);
 		this.botonabrirsesion.setText("Cerrar Sesión");
 		this.sesionabierta = true;
@@ -727,35 +705,6 @@ public class VentanaBanco extends javax.swing.JFrame implements NovaContaListene
 		banco.engadirConta(new Conta(num,saldo));
 		this.actualizarContas();
 	}
-	
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("GTK+".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(VentanaBanco.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(VentanaBanco.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(VentanaBanco.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(VentanaBanco.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new VentanaBanco(new Banco("fjslkdj","jdbc:mysql://localhost/acs?user=acsuser&password=password")).setVisible(true);
-            }
-        });
-    }
 
 	@Override
 	public void engadirTarxeta(int cdgtarxeta) {
@@ -767,6 +716,10 @@ public class VentanaBanco extends javax.swing.JFrame implements NovaContaListene
 	public void engadirContaAsociada(int cdgtarxeta, int cdgconta) {
 		banco.engadirContaAsociada(cdgtarxeta, cdgconta);
 		this.actualizarContasAsociadas();
+	}
+
+	public void iniciarSesion(int numCanles){
+		banco.iniciarSesion(numCanles);
 	}
 
 }

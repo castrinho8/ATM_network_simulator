@@ -13,7 +13,8 @@ import java.awt.event.ActionListener;
  */
 public class DialogoNovaContaAsociada extends javax.swing.JDialog {
 
-    private javax.swing.JButton jButton1;
+	private static final long serialVersionUID = -2264005040465745624L;
+	private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JComboBox<Integer> jComboBox1;
     private javax.swing.JLabel jLabel1;
@@ -62,8 +63,6 @@ public class DialogoNovaContaAsociada extends javax.swing.JDialog {
         
     }
 
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
