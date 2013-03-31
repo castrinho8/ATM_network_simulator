@@ -24,7 +24,7 @@ public class ClienteBDBanco {
 	
 	public void engadirTarxeta(int codigo) {
 		try {
-			this.statement.executeUpdate("insert into Tarxeta values ('" + codigo + "')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (" + codigo + ")");
 		} catch (SQLException e) {
 			System.err.print(e);
 		}
@@ -32,7 +32,7 @@ public class ClienteBDBanco {
 	
 	public void eliminarTarxeta(int codigo) {
 		try {
-			this.statement.executeUpdate("delete from Tarxeta where tcod = ", codigo);
+			this.statement.executeUpdate("DELETE FROM Tarxeta WHERE tcod = " + codigo);
 		} catch (SQLException e) {
 			System.err.print(e);
 		}
@@ -40,7 +40,7 @@ public class ClienteBDBanco {
 
 	public void engadirConta(int numero, float saldo) {
 		try {
-			this.statement.executeUpdate("insert into Conta values ('" + numero + "," + saldo + "')");
+			this.statement.executeUpdate("INSERT INTO Conta (ccod,saldo) VALUES (" + numero + "," + saldo + ")");
 		} catch (SQLException e) {
 			System.err.print(e);
 		}
@@ -48,7 +48,7 @@ public class ClienteBDBanco {
 
 	public void eliminarConta(int codigo) {
 		try {
-			this.statement.executeUpdate("delete from Conta where ccod = ", codigo);
+			this.statement.executeUpdate("DELETE FROM Conta WHERE ccod = " + codigo);
 		} catch (SQLException e) {
 			System.err.print(e);
 		}
@@ -56,7 +56,7 @@ public class ClienteBDBanco {
 
 	public void engadirContaAsociada(int cdgtarxeta, int cdgconta) {
 		try {
-			this.statement.executeUpdate("insert into ContaTarxeta(ccod,tcod) values ('" + cdgconta + "," + cdgtarxeta + "')");
+			this.statement.executeUpdate("insert into ContaTarxeta(ccod,tcod) values (" + cdgconta + "," + cdgtarxeta + ")");
 		} catch (SQLException e) {
 			System.err.print(e);
 		}		
@@ -140,6 +140,43 @@ public class ClienteBDBanco {
 		} catch (SQLException e) {
 			System.err.println(e);
 			return null;
+		}
+	}
+
+	public void valoresPorDefecto() {
+		try {
+			this.statement.executeUpdate("delete from Conta where true");
+			this.statement.executeUpdate("delete from Tarxeta where true");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (1)");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (2)");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (3)");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (4)");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (5)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (0,0000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (1,1000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (2,2000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (3,3000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (4,4000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (5,5000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (6,6000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (7,7000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (8,8000)");
+			this.statement.executeUpdate("INSERT INTO Conta VALUES (9,9000)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(1,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(2,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(3,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(1,2)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(3,2)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(4,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(5,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(6,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(7,4)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(8,4)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(0,5)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(9,5)");	
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

@@ -22,14 +22,13 @@ import banco.Tarxeta;
  *
  * @author ch01
  */
-public class VentanaBanco extends javax.swing.JFrame {
+public class VentanaBanco extends javax.swing.JFrame implements NovaContaListener, NovaTarxetaListener, NovaContaAsociadaListener {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 5641750155014378657L;
 	private javax.swing.JButton botonabrirsesion;
-    private javax.swing.JButton botoncerrarsesion;
     private javax.swing.JButton botondetenertrafico;
     private javax.swing.JButton botoneliminarconta;
     private javax.swing.JButton botoneliminartarxeta;
@@ -38,7 +37,6 @@ public class VentanaBanco extends javax.swing.JFrame {
     private javax.swing.JButton botonengadircontaasociada;
     private javax.swing.JButton botoneliminarcontaasociada;
     private javax.swing.JToggleButton botonforzarrecuperacion;
-    private javax.swing.JButton botonreanudartrafico;
     private javax.swing.JPanel contasTab;
     private javax.swing.JButton botonestablecervalorespordefecto;
     private javax.swing.JLabel jLabel1;
@@ -66,6 +64,8 @@ public class VentanaBanco extends javax.swing.JFrame {
     private javax.swing.JTextArea textlog;
     private javax.swing.JTable movementos;
     private Banco banco;
+	private boolean sesionabierta = false;
+	private boolean traficoactivo;
 	
     /**
      * Creates new form VentanaBanco
@@ -73,11 +73,10 @@ public class VentanaBanco extends javax.swing.JFrame {
     public VentanaBanco(Banco b) {
     	this.banco = b;
         initComponents();
-        this.setTitle(b.getName());
+        this.setTitle("Ventana Banco \"" + b.getName() + "\"" + " - ACS 2012/2013");
         
-        this.setTablaContas(this.formatTaboaContas(b.getContas()));
-        this.setListaTarxetas(this.formatListTarxetas(b.getTarxetas()));
-        
+        this.actualizarContas();
+        this.actualizarTarxetas();
     }
 
 	private void initComponents() {
@@ -97,9 +96,7 @@ public class VentanaBanco extends javax.swing.JFrame {
         monYcontrolTab = new javax.swing.JPanel();
         botonforzarrecuperacion = new javax.swing.JToggleButton();
         botonabrirsesion = new javax.swing.JButton();
-        botoncerrarsesion = new javax.swing.JButton();
         botondetenertrafico = new javax.swing.JButton();
-        botonreanudartrafico = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         tablacanles = new javax.swing.JTable();
@@ -133,14 +130,7 @@ public class VentanaBanco extends javax.swing.JFrame {
     	rowSM.addListSelectionListener(new ListSelectionListener() {
     		public void valueChanged(ListSelectionEvent e) {
     			if (e.getValueIsAdjusting()) return;
-    			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-    			if (lsm.isSelectionEmpty()) {
-    				System.out.println("No rows are selected.");
-    			}else {
-    				int selectedRow = lsm.getMinSelectionIndex();
-    				Object nconta = tablacontas.getModel().getValueAt(selectedRow, 0);
-    				setMovementos(formatTaboaMovementos(banco.getMovementosConta((Integer) nconta)));
-    			}
+    			actualizarMovementos();
     		}
     	});
     	
@@ -175,6 +165,14 @@ public class VentanaBanco extends javax.swing.JFrame {
         jLabel6.setText("Contas");
 
         botonestablecervalorespordefecto.setText("Establecer Valores por Defecto");
+        botonestablecervalorespordefecto.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				establecerValoresDefecto();
+			}
+        	
+        });
 
         javax.swing.GroupLayout contasTabLayout = new javax.swing.GroupLayout(contasTab);
         contasTab.setLayout(contasTabLayout);
@@ -278,14 +276,7 @@ public class VentanaBanco extends javax.swing.JFrame {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (e.getValueIsAdjusting()) return;
-    			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-    			if (lsm.isSelectionEmpty()) {
-    				System.out.println("No rows are selected.");
-    			}else {
-    				int selectedRow = lsm.getMinSelectionIndex();
-    				Object nconta = listatarxetas.getModel().getElementAt(selectedRow);
-    				setListaContasAsociadas(formatListContas(banco.getContasAsociadas(new Integer((String)nconta))));
-    			}
+				VentanaBanco.this.actualizarContasAsociadas();
 			}
         	
         });
@@ -363,37 +354,27 @@ public class VentanaBanco extends javax.swing.JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				abrirSesion();
+				if(VentanaBanco.this.sesionabierta){
+					cerrarSesion();
+				}else{
+					abrirSesion();
+				}
+				
 			}
         	
         });
 
-        botoncerrarsesion.setText("Cerrar Sesion");
-        botoncerrarsesion.addActionListener(new ActionListener(){
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				cerrarSesion();
-			}
-        	
-        });
-
+        botondetenertrafico.setEnabled(false);
         botondetenertrafico.setText("Detener Trafico");
         botondetenertrafico.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				detenerTrafico();
-			}
-        	
-        });
-
-        botonreanudartrafico.setText("Reanudar Trafico");
-        botonreanudartrafico.addActionListener(new ActionListener(){
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				reanudarTrafico();
+				if(VentanaBanco.this.traficoactivo){
+					detenerTrafico();
+				}else{
+					reanudarTrafico();
+				}
 			}
         	
         });
@@ -424,12 +405,10 @@ public class VentanaBanco extends javax.swing.JFrame {
                     .addComponent(botonforzarrecuperacion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(monYcontrolTabLayout.createSequentialGroup()
                         .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(botoncerrarsesion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                             .addComponent(botonabrirsesion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(botondetenertrafico, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(botonreanudartrafico, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(botondetenertrafico, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -451,10 +430,6 @@ public class VentanaBanco extends javax.swing.JFrame {
                         .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(botonabrirsesion)
                             .addComponent(botondetenertrafico))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(botoncerrarsesion)
-                            .addComponent(botonreanudartrafico))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -489,29 +464,70 @@ public class VentanaBanco extends javax.swing.JFrame {
         pack();
     }
 
-	protected void eliminarcontaasociada() {
-		// TODO Auto-generated method stub
-		
+	protected void establecerValoresDefecto() {
+		new DialogoSiNon("Estas seguro de que queres establecer os valores por defecto?",new Runnable(){
+
+					@Override
+					public void run() {
+						banco.establecerValoresPorDefecto();
+						VentanaBanco.this.actualizarContas();
+						VentanaBanco.this.actualizarTarxetas();
+						VentanaBanco.this.actualizarContasAsociadas();
+						VentanaBanco.this.actualizarMovementos();
+					}
+			
+		}).setVisible(true);
 	}
 
+	protected void eliminarcontaasociada() {
+		int selectedindex = this.listatarxetas.getSelectedIndex();
+		if(selectedindex == -1) return;
+		final int cdgtarxeta = new Integer( (String) this.listatarxetas.getModel().getElementAt(selectedindex));
+		
+		selectedindex = this.listacontasasociadas.getSelectedIndex();
+		String aux = (String) this.listacontasasociadas.getModel().getElementAt(selectedindex);
+		final int cdgconta = new Integer(aux.substring(0,aux.indexOf('(')));
+		
+		new DialogoSiNon("Estas seguro de que queres desasociar a tarxeta " +
+				cdgtarxeta + "e a conta " + cdgconta + "?",new Runnable(){
+
+					@Override
+					public void run() {
+						banco.eliminarContaAsociada(cdgtarxeta, cdgconta);
+						VentanaBanco.this.actualizarContasAsociadas();
+					}
+			
+		}).setVisible(true);
+	}
+	
 	protected void engadircontaasociada() {
-		// TODO Auto-generated method stub
+		int selectedindex = this.listatarxetas.getSelectedIndex();
+		if(selectedindex == -1) return;
+		final int cdgtarxeta = new Integer( (String) this.listatarxetas.getModel().getElementAt(selectedindex));
+		
+		ArrayList<Conta> arraycontas = banco.getContas();
+		
+		Integer[] contas = new Integer[arraycontas.size()];
+		int i = 0;
+		for(Conta c : arraycontas){
+			contas[i++] = c.getNumero();
+		}
+		
+		new DialogoNovaContaAsociada(this, cdgtarxeta, contas).setVisible(true);
+		
 		
 	}
 
 	protected void reanudarTrafico() {
 		// TODO Auto-generated method stub
-		
+		this.botondetenertrafico.setText("Detener Tráfico");
+		this.traficoactivo = true;
 	}
 
 	protected void detenerTrafico() {
 		// TODO Auto-generated method stub
-		
-	}
-
-	protected void cerrarSesion() {
-		// TODO Auto-generated method stub
-		
+		this.botondetenertrafico.setText("Reanudar Tráfico");
+		this.traficoactivo = false;
 	}
 
 	protected void forzarRecuperacion() {
@@ -521,32 +537,67 @@ public class VentanaBanco extends javax.swing.JFrame {
 
 	protected void abrirSesion() {
 		// TODO Auto-generated method stub
-		
+		this.botondetenertrafico.setEnabled(true);
+		this.botonabrirsesion.setText("Cerrar Sesión");
+		this.sesionabierta = true;
 	}
+	
+	protected void cerrarSesion() {
+		this.reanudarTrafico();
+		new DialogoSiNon("Esta seguro de que desexa cerrar a sesión?", new Runnable(){
 
-	protected void forzarrecuperacion() {
-		// TODO Auto-generated method stub
-		
+			@Override
+			public void run() {
+				banco.cerrarSesion();
+			}
+			
+		}).setVisible(true);
+		this.botondetenertrafico.setEnabled(false);
+		this.botonabrirsesion.setText("Abrir Sesión");
+		this.sesionabierta = false;
 	}
 
 	protected void eliminarTarxeta() {
-		// TODO Auto-generated method stub
+		int selrow = this.listatarxetas.getSelectedIndex();
+		if (selrow == -1) return;
+		final int cdgtarxeta = new Integer((String) listatarxetas.getModel().getElementAt(selrow));
 		
+		new DialogoSiNon("Esta seguro de que queres eliminar a tarxeta número " + cdgtarxeta + "?",new Runnable(){
+
+			@Override
+			public void run() {
+				banco.eliminarTarxeta(cdgtarxeta);
+				VentanaBanco.this.actualizarTarxetas();
+				VentanaBanco.this.actualizarContasAsociadas();
+			}
+			
+		}).setVisible(true);
 	}
 
 	protected void engadirTarxeta() {
-		// TODO Auto-generated method stub
-		
+		new DialogoNovaTarxeta(this).setVisible(true);
 	}
 
 	protected void eliminarConta() {
-		// TODO Auto-generated method stub
 		
+		int selrow = this.tablacontas.getSelectedRow();
+		if (selrow == -1) return;
+		final int cdgConta = (Integer) tablacontas.getModel().getValueAt(selrow, 0);
+		
+		new DialogoSiNon("Esta seguro de que queres eliminar a conta número " + cdgConta + "?",new Runnable(){
+
+					@Override
+					public void run() {
+						banco.eliminarConta(cdgConta);
+						VentanaBanco.this.actualizarContas();
+						VentanaBanco.this.actualizarContasAsociadas();
+					}
+			
+		}).setVisible(true);
 	}
 
 	protected void engadirConta() {
-		// TODO Auto-generated method stub
-		
+		new DialogoNovaConta(this).setVisible(true);
 	}
 
 	private void setMovementos(Object[][] data){
@@ -637,7 +688,46 @@ public class VentanaBanco extends javax.swing.JFrame {
  		}
  		return res;
 	}
+ 	
+ 	protected void actualizarContasAsociadas(){
+ 		int selrow = listatarxetas.getSelectedIndex();
+ 		ArrayList<Conta> res;
+ 		
+ 		if(selrow != -1){
+ 			String ntarxeta = (String) listatarxetas.getModel().getElementAt(selrow);
+ 			res = banco.getContasAsociadas(new Integer(ntarxeta));
+ 		}else{
+ 			res = new ArrayList<Conta>();
+ 		}
+		setListaContasAsociadas(formatListContas(res));
+	}
+	
+	protected void actualizarContas(){
+		setTablaContas(this.formatTaboaContas(banco.getContas()));
+	}
+	
+	protected void actualizarMovementos(){
+		int selrow = tablacontas.getSelectedRow();
+		ArrayList<Movemento> res;
+		if(selrow != -1){
+			Integer nconta = (Integer) tablacontas.getModel().getValueAt(tablacontas.getSelectedRow(), 0);
+			res = banco.getMovementosConta(nconta);
+		}else{
+			res = new ArrayList<Movemento>();
+		}
+		setMovementos(formatTaboaMovementos(res));
+	}
+	
+	protected void actualizarTarxetas(){
+        setListaTarxetas(this.formatListTarxetas(banco.getTarxetas()));
+	}
 
+	@Override
+	public void engadirConta(int num, float saldo) {
+		banco.engadirConta(new Conta(num,saldo));
+		this.actualizarContas();
+	}
+	
     /**
      * @param args the command line arguments
      */
@@ -666,4 +756,17 @@ public class VentanaBanco extends javax.swing.JFrame {
             }
         });
     }
+
+	@Override
+	public void engadirTarxeta(int cdgtarxeta) {
+		banco.engadirTarxeta(cdgtarxeta);
+		this.actualizarTarxetas();
+	}
+
+	@Override
+	public void engadirContaAsociada(int cdgtarxeta, int cdgconta) {
+		banco.engadirContaAsociada(cdgtarxeta, cdgconta);
+		this.actualizarContasAsociadas();
+	}
+
 }

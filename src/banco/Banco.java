@@ -83,6 +83,15 @@ public class Banco {
     	return this.nombre;
     }
 
+	public void establecerValoresPorDefecto() {
+		bd.valoresPorDefecto();
+	}
+
+	public void cerrarSesion() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 	
 }
