@@ -13,7 +13,8 @@ import java.awt.event.ActionListener;
  */
 public class DialogoAbrirSesion extends javax.swing.JDialog {
 
-    private javax.swing.JButton jButton1;
+	private static final long serialVersionUID = -4053755230286020256L;
+	private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

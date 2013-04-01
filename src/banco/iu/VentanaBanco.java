@@ -4,14 +4,17 @@
  */
 package banco.iu;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
@@ -41,22 +44,34 @@ IniciarSesionListener {
     private javax.swing.JSeparator jSeparator1,jSeparator2,jSeparator3;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JList<String> listacontasasociadas,listatarxetas;
-    private JTable tablacanles,movementos,tablacontas;
+    private JTable tablacanles,movementos,tablacontas,tablamsgenviados,tablamsgrecibidos;
     private javax.swing.JTextArea textlog;
     private Banco banco;
 	private boolean sesionabierta = false;
 	private boolean traficoactivo;
+	private JLabel jLabel7;
+	private JLabel jLabel8;
+	private JTabbedPane jTabbedPane10;
 	
     /**
      * Creates new form VentanaBanco
+     * @param nombre 
      */
-    public VentanaBanco(Banco b) {
+    public VentanaBanco(Banco b, String nombre) {
     	this.banco = b;
         initComponents();
-        this.setTitle("Ventana Banco \"" + b.getName() + "\"" + " - ACS 2012/2013");
+        this.setTitle("Ventana Banco \"" + nombre + "\"" + " - ACS 2012/2013");
         this.actualizarContas();
         this.actualizarTarxetas();
-        b.setIU(this);
+        
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                System.exit(0);
+            }
+        });
+        
+        this.setIconImage(new ImageIcon("/home/ch01/Dropbox/UNI_Fedora/ACS/RepositorioPractica/res/iconobanco.png").getImage());
     }
 
 	private void initComponents() {
@@ -96,6 +111,10 @@ IniciarSesionListener {
         jSeparator3 = new javax.swing.JSeparator();
         botonengadircontaasociada = new JButton();
         botoneliminarcontaasociada = new JButton();
+        tablamsgenviados = new JTable();
+        tablamsgrecibidos = new JTable();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -111,6 +130,7 @@ IniciarSesionListener {
     			actualizarMovementos();
     		}
     	});
+    	
     	
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -367,11 +387,23 @@ IniciarSesionListener {
 
         textlog.setColumns(20);
         textlog.setRows(5);
+        textlog.setEditable(false);
         jScrollPane4.setViewportView(textlog);
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Log");
-
+        
+        jLabel7.setText("Mensaxes Recibidas");
+        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        
+        jLabel8.setText("Mensaxes Enviadas");
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        
+        JScrollPane jScrollPane7 = new JScrollPane();
+		jScrollPane7.setViewportView(tablamsgrecibidos);
+        JScrollPane jScrollPane8 = new JScrollPane();;
+		jScrollPane8.setViewportView(tablamsgenviados);
+        
         javax.swing.GroupLayout monYcontrolTabLayout = new javax.swing.GroupLayout(monYcontrolTab);
         monYcontrolTab.setLayout(monYcontrolTabLayout);
         monYcontrolTabLayout.setHorizontalGroup(
@@ -393,6 +425,10 @@ IniciarSesionListener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(monYcontrolTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                    .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                    .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -415,7 +451,15 @@ IniciarSesionListener {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, monYcontrolTabLayout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane4)))
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -585,7 +629,7 @@ IniciarSesionListener {
         ));
     }
     
-    private void engadirLinhaLog(String s){
+    public void engadirLinhaLog(String s){
     	this.textlog.append(s);
     }
     

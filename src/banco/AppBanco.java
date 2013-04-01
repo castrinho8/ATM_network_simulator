@@ -34,9 +34,6 @@ public class AppBanco {
 			System.out.println("Cargando Banco por defecto...");
 			b = new Banco("Santander","jdbc:mysql://localhost/acs?user=acsuser&password=password", 1234);			
 		}
-		
-		VentanaBanco iu = new VentanaBanco(b);
-		iu.setVisible(true);
 	}
 
 }

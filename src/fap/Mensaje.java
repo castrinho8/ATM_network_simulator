@@ -1,6 +1,6 @@
 package fap;
 
-public abstract class Mensaje implements java.io.Serializable {
+public class Mensaje implements java.io.Serializable {
 
 	private String origen;
 	private String destino;
@@ -13,6 +13,10 @@ public abstract class Mensaje implements java.io.Serializable {
 		this.tipoMensaje = tipoMensaje;
 		this.origen = origen;
 		this.destino = destino;
+	}
+
+	public Mensaje() {
+		// TODO Auto-generated constructor stub
 	}
 
 	public String getOrigen() {
@@ -42,5 +46,29 @@ public abstract class Mensaje implements java.io.Serializable {
 
 	protected String printCabecera() {
 		return String.format("%8s%8s%2i", origen,destino,this.tipoMensaje.getNum());
+	}
+
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public byte[] getBytes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static Mensaje parse(byte[] bs) throws MensajeNoValidoException {
+		Mensaje m = new Mensaje();
+		m.destino = bs.toString().substring(9, 16);
+		m.origen = bs.toString().substring(0, 8);
+		
+		try {
+			m.tipoMensaje = CodigosMensajes.parse(bs.toString().substring(16, 18));
+		} catch (CodigoNoValidoException e) {
+			throw new MensajeNoValidoException();
+		}
+		
+		return null;
 	}
 }

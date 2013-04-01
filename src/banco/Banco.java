@@ -7,14 +7,19 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import fap.CodigosMensajes;
+import fap.Mensaje;
+import fap.MensajeNoValidoException;
+
+import banco.csconsorcio.AnalizadorMensajes;
+import banco.csconsorcio.ClienteServidorConsorcio;
 import banco.iu.VentanaBanco;
 
-public class Banco {
+public class Banco implements AnalizadorMensajes{
 	
-	private String nombre;
 	private ClienteBDBanco bd;
 	private VentanaBanco iu;
-	private int puerto;
+	private ClienteServidorConsorcio cs;
 	
 	public Banco(String configfile){
 		Properties prop = new Properties();
@@ -29,22 +34,33 @@ public class Banco {
 			e.printStackTrace();
 		}
 		
-		this.nombre = prop.getProperty("banco.name");
-		this.puerto = new Integer(prop.getProperty("banco.port"));
 		String bdname = prop.getProperty("bd.name");
 		String bdadd = prop.getProperty("bd.add");
 		String bduser = prop.getProperty("bd.user");
 		String bdpass = prop.getProperty("bd.pass");
 		this.bd = new ClienteBDBanco("jdbc:mysql://" + bdadd + "/" + bdname + "?user=" + bduser + "&password=" + bdpass);
+		
+		int puerto = new Integer(prop.getProperty("banco.port"));
+		this.cs = new ClienteServidorConsorcio(puerto, this);
+		this.cs.start();
+		
+		this.iu = new VentanaBanco(this,prop.getProperty("banco.name"));
+		this.iu.setVisible(true);
+
 	}
 	
-	
-	public Banco(String name,String urlbd,int puerto) {
-		this.nombre = name;
-		this.bd = new ClienteBDBanco(urlbd);
-		this.puerto = puerto;
+	public Banco(String nombre, String bdurl, int puerto) {
+		
+		this.bd = new ClienteBDBanco(bdurl);
+		
+		this.cs = new ClienteServidorConsorcio(puerto, this);
+		this.cs.start();
+		
+		this.iu = new VentanaBanco(this, nombre);
+		this.iu.setVisible(true);
+		
 	}
-	
+
 	public void setIU(VentanaBanco iu){
 		this.iu = iu;
 	}
@@ -109,10 +125,6 @@ public class Banco {
 		return this.getMovementosConta(c.getNumero());
 	}
 
-    public String getName() {
-    	return this.nombre;
-    }
-
 	public void establecerValoresPorDefecto() {
 		bd.valoresPorDefecto();
 	}
@@ -126,6 +138,45 @@ public class Banco {
 	public void iniciarSesion(int numCanles) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void analizarMensaje(byte[] bs) {
+		this.iu.engadirLinhaLog("MensaxeRecibida!!\n");
+		CodigosMensajes cod;
+		
+		Mensaje msx;
+		try {
+			msx = Mensaje.parse(bs);
+			cod = msx.getTipoMensaje();
+		} catch (MensajeNoValidoException e) {
+			cod = null;
+		}
+		switch(cod){
+		case SOLTRAFICOREC:
+			break;
+		case SOLFINTRADICOREC:
+			break;
+		case ABRIRSESION:
+			break;
+		case DETENERTRAFICO:
+			break;
+		case REANUDARTRAFICO:
+			break;
+		case CIERRESESION:
+			break;
+		case CONSULTARSALDO:
+			break;
+		case CONSULTARMOVIMIENTOS:
+			break;
+		case REINTEGRO:
+			break;
+		case ABONO:
+			break;
+		case TRASPASO:
+			break;
+		default:
+		}
 	}
 
 	

@@ -15,4 +15,14 @@ public enum CodigosMensajes {
 	public int getNum(){
 		return this.numero;
 	}
+
+	public static CodigosMensajes parse(String s) throws CodigoNoValidoException {
+		int numero = new Integer(s);
+		for(CodigosMensajes c : CodigosMensajes.values()){
+			if(c.numero == numero){
+				return c;
+			}
+		}
+		throw new CodigoNoValidoException(s);
+	}
 }
