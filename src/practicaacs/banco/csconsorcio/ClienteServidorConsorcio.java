@@ -18,10 +18,14 @@ public class ClienteServidorConsorcio extends Thread {
 	private AnalizadorMensajes analizador;
 	private DatagramSocket socketServidor;
 	private InetAddress direccionIP;
+	private String hostConsorcio;
+	private int puertoConsorcio;
 	
-	public ClienteServidorConsorcio(int puerto, AnalizadorMensajes analizador){
+	public ClienteServidorConsorcio(int puerto, String hostconsorcio, int puertoconsorcio, AnalizadorMensajes analizador){
 		this.puerto = puerto;
 		this.analizador = analizador;
+		this.hostConsorcio = hostconsorcio;
+		this.puertoConsorcio = puertoconsorcio;
 		this.mensajesAEnviar = new  LinkedBlockingQueue<Mensaje>();
 		
 		try {

@@ -45,7 +45,9 @@ public class Banco implements AnalizadorMensajes{
 		this.bd = new ClienteBDBanco("jdbc:mysql://" + bdadd + "/" + bdname + "?user=" + bduser + "&password=" + bdpass);
 		
 		int puerto = new Integer(prop.getProperty("banco.port"));
-		this.cs = new ClienteServidorConsorcio(puerto, this);
+		int puertoconsorcio = new Integer(prop.getProperty("consorcio.port"));
+		String hostconsorcio = prop.getProperty("consorcio.host");
+		this.cs = new ClienteServidorConsorcio(puerto, hostconsorcio, puertoconsorcio, this);
 		this.cs.start();
 		
 		this.iu = new VentanaBanco(this,prop.getProperty("banco.name"));
@@ -53,11 +55,11 @@ public class Banco implements AnalizadorMensajes{
 
 	}
 	
-	public Banco(String nombre, String bdurl, int puerto) {
+	public Banco(String nombre, String bdurl, int puerto,String hostconsorcio, int portconsorcio) {
 		
 		this.bd = new ClienteBDBanco(bdurl);
 		
-		this.cs = new ClienteServidorConsorcio(puerto, this);
+		this.cs = new ClienteServidorConsorcio(puerto, hostconsorcio, portconsorcio, this);
 		this.cs.start();
 		
 		this.iu = new VentanaBanco(this, nombre);
