@@ -2,14 +2,10 @@ package practicaacs.banco;
 
 public class Tarxeta {
 
-	private int codigo;
+	public String codigo;
 	
-	public Tarxeta(int codigo){
-		this.codigo = codigo;
-	}
-	
-	public int getCodigo() {
-		return this.codigo;
+	public Tarxeta(String string){
+		this.codigo = string;
 	}
 
 }

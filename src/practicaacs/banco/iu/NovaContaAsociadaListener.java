@@ -2,6 +2,6 @@ package practicaacs.banco.iu;
 
 public interface NovaContaAsociadaListener {
 
-	void engadirContaAsociada(int cdgtarxeta, int cdgconta);
+	void engadirContaAsociada(String cdgtarxeta, int numconta, int cdgconta);
 
 }

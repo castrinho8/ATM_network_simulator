@@ -1,5 +1,5 @@
 CREATE TABLE Tarxeta(
-	tcod INTEGER,
+	tcod CHAR(11),
 	CONSTRAINT t_pk PRIMARY KEY (tcod)
 );
 
@@ -10,11 +10,13 @@ CREATE TABLE Conta(
 );
 
 CREATE TABLE ContaTarxeta(
+	tcod CHAR(11),
+	cnum INTEGER,
 	ccod INTEGER,
-	tcod INTEGER,
 	CONSTRAINT ct_ccod_fk FOREIGN KEY (ccod) REFERENCES Conta(ccod) ON DELETE CASCADE,
 	CONSTRAINT ct_tcod_fk FOREIGN KEY (tcod) REFERENCES Tarxeta(tcod) ON DELETE CASCADE,
-	CONSTRAINT ct_pk PRIMARY KEY (ccod,tcod)
+	CONSTRAINT ct_cnum_check CHECK (cnum IN (1,3)),
+	CONSTRAINT ct_pk PRIMARY KEY (tcod,cnum)
 );
 
 CREATE TABLE TipoMovemento(
@@ -36,35 +38,35 @@ CREATE TABLE Movemento(
 
 -- Valores iniciales das contas do banco.
 
-INSERT INTO Tarxeta VALUES (1);
-INSERT INTO Tarxeta VALUES (2);
-INSERT INTO Tarxeta VALUES (3);
-INSERT INTO Tarxeta VALUES (4);
-INSERT INTO Tarxeta VALUES (5);
+INSERT INTO Tarxeta VALUES ('pastor42 01');
+INSERT INTO Tarxeta VALUES ('pastor42 02');
+INSERT INTO Tarxeta VALUES ('pastor42 03');
+INSERT INTO Tarxeta VALUES ('pastor42 04');
+INSERT INTO Tarxeta VALUES ('pastor42 05');
 
-INSERT INTO Conta VALUES (0,0000);
-INSERT INTO Conta VALUES (1,1000);
-INSERT INTO Conta VALUES (2,2000);
-INSERT INTO Conta VALUES (3,3000);
-INSERT INTO Conta VALUES (4,4000);
-INSERT INTO Conta VALUES (5,5000);
-INSERT INTO Conta VALUES (6,6000);
-INSERT INTO Conta VALUES (7,7000);
-INSERT INTO Conta VALUES (8,8000);
-INSERT INTO Conta VALUES (9,9000);
+INSERT INTO Conta(ccod,saldo) VALUES (0,0000);
+INSERT INTO Conta(ccod,saldo) VALUES (1,1000);
+INSERT INTO Conta(ccod,saldo) VALUES (2,2000);
+INSERT INTO Conta(ccod,saldo) VALUES (3,3000);
+INSERT INTO Conta(ccod,saldo) VALUES (4,4000);
+INSERT INTO Conta(ccod,saldo) VALUES (5,5000);
+INSERT INTO Conta(ccod,saldo) VALUES (6,6000);
+INSERT INTO Conta(ccod,saldo) VALUES (7,7000);
+INSERT INTO Conta(ccod,saldo) VALUES (8,8000);
+INSERT INTO Conta(ccod,saldo) VALUES (9,9000);
 
-INSERT INTO ContaTarxeta VALUES(1,1);
-INSERT INTO ContaTarxeta VALUES(2,1);
-INSERT INTO ContaTarxeta VALUES(3,1);
-INSERT INTO ContaTarxeta VALUES(1,2);
-INSERT INTO ContaTarxeta VALUES(3,2);
-INSERT INTO ContaTarxeta VALUES(4,3);
-INSERT INTO ContaTarxeta VALUES(5,3);
-INSERT INTO ContaTarxeta VALUES(6,3);
-INSERT INTO ContaTarxeta VALUES(7,4);
-INSERT INTO ContaTarxeta VALUES(8,4);
-INSERT INTO ContaTarxeta VALUES(0,5);
-INSERT INTO ContaTarxeta VALUES(9,5);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',1,1);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',2,2);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',3,3);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',1,1);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',2,3);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',1,4);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',2,5);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',3,6);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',1,7);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',2,8);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',1,0);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',3,9);
 
 
 -- Tipos de movimento.
