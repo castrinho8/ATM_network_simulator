@@ -18,7 +18,7 @@ public class ServidorConsorcio_Bancos {
 	private int port;
 	private Consorcio consorcio;
 	
-	private Hashtable<String,ConexionConsorcio_Bancos> bancos;
+	private Hashtable<String,ConexionConsorcio_Bancos> conexiones; //id_banco:String - Conexion:Thread
 	private EstadoSesion estado_serv_bancos;
 	
 	/**
@@ -28,7 +28,7 @@ public class ServidorConsorcio_Bancos {
 		super();
 		this.port = puerto;
 		this.consorcio = cons;
-		this.bancos = new Hashtable<String,ConexionConsorcio_Bancos>();
+		this.conexiones = new Hashtable<String,ConexionConsorcio_Bancos>();
 		this.estado_serv_bancos = EstadoSesion.ACTIVA;
 	}
 	
@@ -43,22 +43,21 @@ public class ServidorConsorcio_Bancos {
 	 * Funcion que comprueba si el banco pasado por parametro tiene sesion iniciada.
 	 */
 	public boolean hasSesion(String id_banco){
-		return this.bancos.containsKey(id_banco);
+		return this.conexiones.containsKey(id_banco);
 	}
 	
 	/**
-	 * Consulta si el banco para la tarjeta indicada se encuentra activo.
+	 * Consulta si el banco indicado se encuentra activo.
 	 */
-	public boolean consultar_protocolo(String tarjeta){
-		String banco = tarjeta.substring(0,8);
-		return bancos.get(banco).consultar_protocolo();
+	public boolean consultar_protocolo(String banco){
+		return conexiones.get(banco).consultar_protocolo();
 	}
 	
 	/**
 	 * Detiene el trafico del banco indicado
 	 */
 	public void detener_trafico(String banco){
-    	this.bancos.get(banco).detener_trafico(recibido)
+    	this.conexiones.get(banco).detener_trafico();
 	}
 	
 	/**
@@ -87,7 +86,7 @@ public class ServidorConsorcio_Bancos {
     public void cierra_servidorBancos(){
     	this.estado_serv_bancos = EstadoSesion.CERRADA;
     	//cerrar todas las conexiones con los bancos
-    	for(Object banco : this.bancos.values()){
+    	for(Object banco : this.conexiones.values()){
     		banco
     	}
     }
@@ -96,7 +95,7 @@ public class ServidorConsorcio_Bancos {
      * Recupera los mensajes del banco
      */
     public void realiza_recuperacion(String banco){
-    	for(Object message : this.bancos.get(banco).){
+    	for(Object message : this.conexiones.get(banco).){
     		this.consorcio.getBancos_client().send_message((Mensaje) message);
     	}
     }
