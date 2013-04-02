@@ -1,7 +1,11 @@
-package banco;
+package banco.bd;
 
 import java.sql.*;
 import java.util.ArrayList;
+
+import banco.Conta;
+import banco.Movemento;
+import banco.Tarxeta;
 
 public class ClienteBDBanco {
 	private Connection con;

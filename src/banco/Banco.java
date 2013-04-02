@@ -11,8 +11,11 @@ import fap.CodigosMensajes;
 import fap.Mensaje;
 import fap.MensajeNoValidoException;
 
+import banco.bd.ClienteBDBanco;
 import banco.csconsorcio.AnalizadorMensajes;
 import banco.csconsorcio.ClienteServidorConsorcio;
+import banco.estados.EstadoSesion;
+import banco.estados.SesAberta;
 import banco.iu.VentanaBanco;
 
 public class Banco implements AnalizadorMensajes{
@@ -20,6 +23,7 @@ public class Banco implements AnalizadorMensajes{
 	private ClienteBDBanco bd;
 	private VentanaBanco iu;
 	private ClienteServidorConsorcio cs;
+	private EstadoSesion estado;
 	
 	public Banco(String configfile){
 		Properties prop = new Properties();
@@ -143,40 +147,22 @@ public class Banco implements AnalizadorMensajes{
 	@Override
 	public void analizarMensaje(byte[] bs) {
 		this.iu.engadirLinhaLog("MensaxeRecibida!!\n");
-		CodigosMensajes cod;
 		
 		Mensaje msx;
 		try {
 			msx = Mensaje.parse(bs);
-			cod = msx.getTipoMensaje();
-		} catch (MensajeNoValidoException e) {
-			cod = null;
+			this.estado.analizarMensaje(msx,this);
+		} catch (MensajeNoValidoException e){ 
+			this.estado.analizarMensaje(null,this);
 		}
-		switch(cod){
-		case SOLTRAFICOREC:
-			break;
-		case SOLFINTRADICOREC:
-			break;
-		case ABRIRSESION:
-			break;
-		case DETENERTRAFICO:
-			break;
-		case REANUDARTRAFICO:
-			break;
-		case CIERRESESION:
-			break;
-		case CONSULTARSALDO:
-			break;
-		case CONSULTARMOVIMIENTOS:
-			break;
-		case REINTEGRO:
-			break;
-		case ABONO:
-			break;
-		case TRASPASO:
-			break;
-		default:
-		}
+	}
+
+	public void cambEstado(EstadoSesion nuevoEstado) {
+		this.estado = nuevoEstado;
+	}
+
+	public void abrirSesionAceptada() {
+		this.cambEstado(SesAberta.instance());
 	}
 
 	
