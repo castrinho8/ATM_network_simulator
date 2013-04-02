@@ -1,5 +1,6 @@
 package practicaACS.consorcio;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import fap.*;
@@ -56,8 +57,42 @@ public class Database_lib {
 		
 	}
 	
-	//---------------ENVIOS----------------
-	private Hashtable<banco,canal,Mensaje,conestado?> ultimos_envios;
+	//----------------SESIONES BANCOS / CANALES--------------
+	private String id_banco;
+	private EstadoSesion estado_conexion_banco;
+	private int num_canales;
+	
+	public boolean hasSesion(String id_banco){
+		
+	}
+		
+	public EstadoSesion getEstado_conexion_banco(String id_banco){
+		
+	}
+	
+	public void setEstado_conexion_banco(String id_banco,EstadoSesion estado){
+		
+	}
+	
+	public int getNum_canales(String id_banco){
+		
+	}
+	
+	public void setNum_canales(String id_banco,int canales){
+		
+	}
+	
+	public ArrayList<Integer> getCanales_ocupados(String id_banco){
+		return null;
+	}
+	
+	
+	//---------------ULTIMOS ENVIOS----------------
+	
+	//private int id_banco;
+	private int canal;
+	private Mensaje mensaje;
+	private boolean conestado;
 
 	/**
 	 * Cambia el ultimo envio del canal indicado por el pasado por parametro

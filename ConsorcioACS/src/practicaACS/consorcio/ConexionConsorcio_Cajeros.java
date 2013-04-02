@@ -56,8 +56,32 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	}
 	
 	
-	
 	public RespSaldo consultar_saldo(ConsultaSaldo recibido){
+		
+		//cabecera
+		String origen = Integer.toString(this.consorcio.getId_consorcio());
+		String destino = recibido.getOrigen();
+		//subcabecera
+		int numcanal = 0;
+		int nmsg = 0;
+		boolean codonline = this.consorcio.getBancos_server().consultar_protocolo(destino);
+		//cuerpo
+		CodigosRespuesta cod_resp = 
+				this.consorcio.getDatabase().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
+		int saldo = this.consorcio.getDatabase().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
+		boolean signo = (saldo>=0);
+				
+		RespSaldo respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo);
+		
+		if(!procesa_datos(recibido,respuesta,codonline)) //Si la peticion debe ser rechazada
+			respuesta = new RespSaldo(origen,destino,numcanal,nmsg,false,CodigosRespuesta.CONSDEN,true,0);
+
+		return respuesta;
+	}
+	
+			
+	
+	public RespConsMovimientos consultar_movimientos(ConsultaMovimientos recibido){
 
 		//cabecera
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -65,47 +89,23 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//subcabecera
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = this.consorcio;
+		boolean codonline = this.consorcio.getBancos_server().consultar_protocolo(destino);
 		//cuerpo
-		CodigosRespuesta cod_resp = this.consorcio.getDatabase().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
-		boolean signo = true;
-		int saldo = this.consorcio.getDatabase().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
-		
-    	if(!this.consorcio.getBancos_server().consultar_protocolo()){
-    		//almacenar en la base de datos
-    		this.consorcio.getDatabase().almacenar_envio(recibido);
-    	}else{
-    		if(recibido.es_consulta()){
-    			//rechazar peticion
-    			cod_resp = CodigosRespuesta.CONSDEN;
-    		}
-    		else{
-    			//reenviar al banco
-    			this.consorcio.getBancos_client().send_message(recibido);
-    		}
-    	}
-    	return new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo);
-	}
-	
-			
-	
-	public Mensaje consultar_movimientos(Mensaje recibido){
-		Mensaje respuesta = null;
-		
-		String origen = "";
-		String destino = "";
-		int numcanal;
-		int nmsg;
-		boolean codonline;
-		CodigosRespuesta cod_resp;
+		CodigosRespuesta cod_resp = 
+				this.consorcio.getDatabase().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
 		int nmovimientos;
 		TiposMovimiento tipo_mov;
 		boolean signo;
 		int importe;
 		Date fecha;		
 		
-	//	respuesta = new RespConsMovimientos(origen,destino,numcanal, nmsg,codonline,cod_resp,
-	//			nmovimientos,tipo_mov,signo,importe,fecha);
+		RespConsMovimientos respuesta = new RespConsMovimientos(origen,destino,numcanal, nmsg,codonline,cod_resp,
+				nmovimientos,tipo_mov,signo,importe,fecha);
+		
+		if(!procesa_datos(recibido,respuesta,codonline)) //Si la peticion debe ser rechazada
+			respuesta = new RespConsMovimientos(origen,destino,numcanal,nmsg,false,CodigosRespuesta.CONSDEN,
+					nmovimientos,tipo_mov,signo,importe,fecha);
+
 		return respuesta;
 	}
 	
@@ -178,10 +178,27 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				System.out.println("Error: Tipo de mensaje no reconocido.");
 				break;
 		}
-						
 		return respuesta;
 	}
 	
-
+	/**
+	 * En funcion del estado del protocolo, reenvia los datos al banco, los almacena en la BD o rechaza la peticion.
+	 * Devuelve False si se rechaza la peticion y True en el resto de casos.
+	 */
+	private boolean procesa_datos(Mensaje recibido,Mensaje respuesta,boolean protocolo){
+		if(!protocolo){
+			if(respuesta.es_consulta()){
+				//rechazar peticion
+				return false;
+			}else{
+				//almacenar en la base de datos
+				this.consorcio.getDatabase().almacenar_envio(recibido);
+			}
+		}else{
+			//reenviar al banco
+			this.consorcio.getBancos_client().send_message(recibido);
+		}
+		return true;
+	}
 	
 }
