@@ -71,7 +71,7 @@ public class ServidorConsorcio_Bancos {
 
 		while (this.estado_serv_bancos == EstadoSesion.ACTIVA) {
 			Socket incoming = servidor.accept();
-			
+
 			Thread t = new ConexionConsorcio_Bancos(this.consorcio,this,incoming);
 		    t.start();
 		}

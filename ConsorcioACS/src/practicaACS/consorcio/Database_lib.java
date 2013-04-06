@@ -74,6 +74,10 @@ public class Database_lib {
 		
 	}
 	
+	public int getNext_canal(String id_banco){
+		
+	}
+	
 	public int getNum_canales(String id_banco){
 		
 	}

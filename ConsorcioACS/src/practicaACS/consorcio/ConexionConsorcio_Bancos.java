@@ -21,7 +21,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 	
 	static private int num_next_message = 0;
-	static private int next_channel = 0;
 	
 	private Consorcio consorcio;
 	private ServidorConsorcio_Bancos servidor;
@@ -47,6 +46,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 		return this.consorcio.getDatabase().getEstado_conexion_banco(id_banco);
 	}			
 	
+	private int getNext_canal(String id_banco){
+		return this.consorcio.getDatabase().getNext_canal(id_banco);
+	}
+	
 	private int getNum_canales(String id_banco){
 		return this.consorcio.getDatabase().getNum_canales(id_banco);
 	}
@@ -57,6 +60,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	private ArrayList<Integer> getCanales_ocupados(String id_banco){
 		return this.consorcio.getDatabase().getCanales_ocupados(id_banco);
+	}
+	
+	private void anahdir_ultimo_envio(Mensaje respuesta) {
+		this.consorcio.getDatabase().anhadir_ultimo_envio(this.siguiente_canal(respuesta.getDestino()), respuesta);
 	}
 	//-----------------------------
 	
@@ -77,7 +84,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * Devuelve el siguiente canal disponible
 	 */
 	private int siguiente_canal(String id_banco){
-		return (this.next_channel++) % this.getNum_canales(id_banco);
+		return (this.getNext_canal(id_banco)) % this.getNum_canales(id_banco);
 	}
 
 	/**
@@ -116,8 +123,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 			if(respuesta != null){
 				System.out.printf(respuesta.toString());
-				this.consorcio.getDatabase().anhadir_ultimo_envio(siguiente_canal(), respuesta);
-				
+				anahdir_ultimo_envio(respuesta);
+
 				//Enviamos el mensaje
 				o_buffer.writeObject(respuesta);
 				o_buffer.flush();
@@ -131,17 +138,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 	    // manipular las excepciones
 		}
 	}
-		
+	
 	
 	/**
 	 * Comprueba si no hay errores y devuelve el CodigosError adecuado	
 	 */
 	private CodigosError comprobar_errores(Mensaje m,int canal){
-		String id_banco = ; 
+		String id_banco = m.getOrigen(); //el banco de donde ha llegado el mensaje
 				
 		//Solicitar ABRIR SESION y ya hay SESION ABIERTA
 		if((m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)) 
-				&& (this.servidor.hasSesion(m.getOrigen())))
+				&& (this.servidor.hasSesion(id_banco)))
 			return CodigosError.YAABIERTA;
 		//
 	//	if()
@@ -152,17 +159,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Solicitar REANUDAR TRAFICO y no esta TRAFICO DETENIDO
 		if((m.getTipoMensaje().equals(CodigosMensajes.SOLREANUDARTRAFICO))
-				&& (!this.getEstado_conexion_banco().equals(EstadoSesion.TRAFICO_DETENIDO)))
+				&& (!this.getEstado_conexion_banco(id_banco).equals(EstadoSesion.TRAFICO_DETENIDO)))
 			return CodigosError.TRAFNODET;
 		
 		//Solicitar FIN RECUPERACION y no esta en RECUPERACION
 		if((m.getTipoMensaje().equals(CodigosMensajes.SOLFINTRADICOREC))
-				&& (!this.getEstado_conexion_banco().equals(EstadoSesion.RECUPERACION)))
+				&& (!this.getEstado_conexion_banco(id_banco).equals(EstadoSesion.RECUPERACION)))
 			return CodigosError.NORECUPERACION;
 	
 		//Solicitar OPERACION!=ABRIR SESION y no hay SESION ABIERTA
 		if(!(m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)) 
-				&& (!this.servidor.hasSesion(m.getOrigen())))
+				&& (!this.servidor.hasSesion(id_banco)))
 			return CodigosError.NOSESION;
 	
 		//	return CodigosError.OTRASCAUSAS;
@@ -257,53 +264,55 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * Abre la sesion con el banco
 	 */
 	private void abrir_sesion(SolAperturaSesion recibido){
+		String id_banco = recibido.getOrigen(); //el banco del que viene la solicitud
+		
     	Calendar time = Calendar.getInstance();
     	System.out.println("APERTURA: Sesion servidor Banco: "+ recibido.getOrigen() +" comenzada a las " + time.getTime());
  
-    	this.setEstado_conexion_banco(EstadoSesion.ACTIVA);
-    	this.setNum_canales(recibido.getNcanales());
+    	this.setEstado_conexion_banco(id_banco,EstadoSesion.ACTIVA);
+    	this.setNum_canales(id_banco,recibido.getNcanales());
     	this.send_port = Integer.getInteger(recibido.getPuerto());
 	}
 	
 	/**
 	 * Cierra la sesion con el banco
 	 */
-	private void cerrar_sesion(SolCierreSesion recibido){
+	private void cerrar_sesion(String id_banco){
     	Calendar time = Calendar.getInstance();
-    	System.out.println("CIERRE: Sesion servidor Banco: "+ recibido.getOrigen() +" finalizado a las " + time.getTime());
+    	System.out.println("CIERRE: Sesion servidor Banco: "+ id_banco +" finalizado a las " + time.getTime());
 
     	while(/*aun queden mensajes*/){
     		//consultar ultimos envios en BD
     	}
-		this.setEstado_conexion_banco(EstadoSesion.CERRADA);
+		this.setEstado_conexion_banco(id_banco,EstadoSesion.CERRADA);
 		//comprobar total de reintegros, abonos y traspasos
 	}
 	
 	/**
 	 * Detiene el trafico con el banco
 	 */
-	public void detener_trafico(){
+	public void detener_trafico(String id_banco){
 		Calendar time = Calendar.getInstance();
-    	System.out.println("TRAFICO DETENIDO: Sesion servidor Banco: "+ this.id_banco +" comenzado a las " + time.getTime());
+    	System.out.println("TRAFICO DETENIDO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
    
-    	this.setEstado_conexion_banco(EstadoSesion.TRAFICO_DETENIDO);
+    	this.setEstado_conexion_banco(id_banco,EstadoSesion.TRAFICO_DETENIDO);
 	}
 	
 	/**
 	 * Reanuda el trafico con el banco
 	 */
-	private void reanudar_trafico(SolReanTrafico recibido){
+	private void reanudar_trafico(String id_banco){
 		Calendar time = Calendar.getInstance();
-    	System.out.println("TRAFICO REANUDADO: Sesion servidor Banco: "+ recibido.getOrigen() +" comenzado a las " + time.getTime());
+    	System.out.println("TRAFICO REANUDADO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
     	
-    	this.setEstado_conexion_banco(EstadoSesion.ACTIVA);
+    	this.setEstado_conexion_banco(id_banco,EstadoSesion.ACTIVA);
 	}
 	
 	/**
 	 * Inicia el proceso de recuperacion
 	 */
-	private Mensaje iniciar_recuperacion(RespIniTraficoRecuperacion recibido){
-		this.setEstado_conexion_banco(EstadoSesion.RECUPERACION);
+	private Mensaje iniciar_recuperacion(String id_banco){
+		this.setEstado_conexion_banco(id_banco,EstadoSesion.RECUPERACION);
 		//consultar ultimos envios en la BD y reenviarlos
 		return null;
 		// enviar SOLFINTRADICOREC (solicitud fin de trafico en recuperacion)
@@ -312,8 +321,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 	/**
 	 * Termina el proceso de recuperacion
 	 */
-	private Mensaje finalizar_recuperacion(RespFinTraficoRec recibido){
-		this.setEstado_conexion_banco(EstadoSesion.ACTIVA);
+	private Mensaje finalizar_recuperacion(String id_banco){
+		this.setEstado_conexion_banco(id_banco,EstadoSesion.ACTIVA);
 		return null;		
 	}
 	
@@ -322,16 +331,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * LLama a abrir sesion y crea un mensaje respuesta para ello
 	 */
 	private RespAperturaSesion manejar_abrir_sesion(SolAperturaSesion recibido){
-		//Ejecuta las tareas necesarias
-		this.abrir_sesion(recibido);
-
+		
 		//cabecera
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
 		String destino = recibido.getOrigen();
 		//cuerpo
 		CodigosRespuesta cod_resp = CodigosRespuesta.CONSACEPTADA;
-		CodigosError cod_error = comprobar_errores(recibido,0);
-	
+		CodigosError cod_error = comprobar_errores(recibido,0); //Comprueba si hay errores
+
+		if(cod_error.equals(CodigosError.CORRECTO))
+			this.abrir_sesion(recibido); //Ejecuta las tareas necesarias
+
 		return new RespAperturaSesion(origen,destino,cod_resp,cod_error);
 	}
 	
@@ -340,9 +350,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * LLama a cerrar sesion y crea un mensaje respuesta para ello
 	 */	
 	private RespCierreSesion manejar_cerrar_sesion(SolCierreSesion recibido){
-		//Ejecuta las tareas necesarias
-		this.cerrar_sesion(recibido);
-
+		
 		//cabecera
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
 		String destino = recibido.getOrigen();
@@ -350,6 +358,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 		CodigosRespuesta cod_resp = CodigosRespuesta.CONSACEPTADA;
 		CodigosError cod_error =  comprobar_errores(recibido,0);
 		
+		if(cod_error.equals(CodigosError.CORRECTO))
+			this.cerrar_sesion(recibido.getOrigen()); //Ejecuta las tareas necesarias
+
     	return new RespCierreSesion(origen,destino,cod_resp,cod_error);
 	}
 	
@@ -357,8 +368,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * LLama a detener trafico y crea un mensaje respuesta para ello
 	 */	
 	private RespDetTrafico manejar_detener_trafico(SolDetTrafico recibido){
-		//Ejecuta las tareas necesarias
-		this.detener_trafico(recibido);
 
 		//cabecera
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -367,6 +376,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 		CodigosRespuesta cod_resp = CodigosRespuesta.CONSACEPTADA;
 		CodigosError cod_error =  comprobar_errores(recibido,0);
 		
+		if(cod_error.equals(CodigosError.CORRECTO))
+			this.detener_trafico(recibido.getOrigen()); //Ejecuta las tareas necesarias
+
 		return new RespDetTrafico(origen,destino,cod_resp,cod_error);
 	}	
 	
@@ -375,9 +387,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * LLama a reanudar trafico y crea un mensaje respuesta para ello
 	 */
 	private RespReanTrafico manejar_reanudar_trafico(SolReanTrafico recibido){
-
-		//Ejecuta las tareas necesarias
-		this.reanudar_trafico(recibido);
 		
     	//cabecera
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -385,6 +394,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 		//cuerpo
 		CodigosRespuesta cod_resp = CodigosRespuesta.CONSACEPTADA;
 		CodigosError cod_error =  comprobar_errores(recibido,0);
+		
+		if(cod_error.equals(CodigosError.CORRECTO))
+			this.reanudar_trafico(recibido.getOrigen());//Ejecuta las tareas necesarias
 		
     	return new RespReanTrafico(origen,destino,cod_resp,cod_error);
 	}
