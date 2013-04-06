@@ -49,9 +49,20 @@ public class DialogoAbrirSesion extends javax.swing.JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int numcanles = new Integer(DialogoAbrirSesion.this.jTextField1.getText());
-				l.iniciarSesion(numcanles);
-				DialogoAbrirSesion.this.setVisible(false);
+				int numcanles;
+				try{
+					numcanles = new Integer(DialogoAbrirSesion.this.jTextField1.getText());
+				}catch(NumberFormatException e1){
+					numcanles = 100;
+				}
+				
+				if(numcanles > 0 && numcanles < 100){
+					l.solicitarAbrirSesion(numcanles);
+					DialogoAbrirSesion.this.setVisible(false);
+				}else{
+					new DialogoError("Introduza un numero entre 1 e 99.").setVisible(true);
+					DialogoAbrirSesion.this.jTextField1.setText("");
+				}
 			}
         	
         });

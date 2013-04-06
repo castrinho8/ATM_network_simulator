@@ -39,8 +39,7 @@ public class DialogoNovaTarxeta extends javax.swing.JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				int cdgtarxeta = new Integer(DialogoNovaTarxeta.this.jTextField1.getText());
-				l.engadirTarxeta(cdgtarxeta);
+				l.engadirTarxeta(DialogoNovaTarxeta.this.jTextField1.getText());
 				DialogoNovaTarxeta.this.setVisible(false);
 			}
         	

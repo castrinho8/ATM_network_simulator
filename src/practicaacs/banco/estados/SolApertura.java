@@ -6,13 +6,23 @@ import practicaacs.fap.Mensaje;
 
 public class SolApertura extends EstadoSesion {
 
+	private static SolApertura instance;
+	
+	private SolApertura(){}
+	
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
 		
 		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.ABRIRSESION)){
-				b.abrirSesionAceptada();
+				b.establecerSesionAceptada();
 				return;
 		}
+	}
+
+	public static EstadoSesion instance() {
+		if (instance == null)
+			instance = new SolApertura();
+		return instance;
 	}
 
 }

@@ -42,10 +42,18 @@ public class DialogoNovaConta extends javax.swing.JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				int num_conta = new Integer(DialogoNovaConta.this.jTextField1.getText());
-				float saldo = new Float(DialogoNovaConta.this.jTextField2.getText());
-				a.engadirConta(num_conta, saldo);
-				DialogoNovaConta.this.setVisible(false);
+				try{
+					int num_conta = new Integer(DialogoNovaConta.this.jTextField1.getText());
+					float saldo = new Float(DialogoNovaConta.this.jTextField2.getText());
+					a.engadirConta(num_conta, saldo);
+					DialogoNovaConta.this.setVisible(false);
+				}catch( NumberFormatException es){
+					new DialogoError("Introduza un numeros de conta e saldo válidos.").setVisible(true);
+					DialogoNovaConta.this.jTextField1.setText("");
+					DialogoNovaConta.this.jTextField2.setText("");
+				}
+					
+				
 			}
         });
         

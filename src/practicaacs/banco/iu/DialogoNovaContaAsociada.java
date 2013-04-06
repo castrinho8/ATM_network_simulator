@@ -28,7 +28,7 @@ public class DialogoNovaContaAsociada extends javax.swing.JDialog {
         initComponents();
     }
     
-    public DialogoNovaContaAsociada(final NovaContaAsociadaListener l,final int cdgtarxeta, Integer[] contas){
+    public DialogoNovaContaAsociada(final NovaContaAsociadaListener l,final String cdgtarxeta, final int numconta, Integer[] contas){
     	this(new javax.swing.JFrame(), true);
         
     	this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -55,11 +55,13 @@ public class DialogoNovaContaAsociada extends javax.swing.JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int cdgconta = (Integer) DialogoNovaContaAsociada.this.jComboBox1.getModel().getSelectedItem();
-				l.engadirContaAsociada(cdgtarxeta,cdgconta);
+				l.engadirContaAsociada(cdgtarxeta,numconta,cdgconta);
 				DialogoNovaContaAsociada.this.setVisible(false);
 			}
         	
         });
+        
+        jLabel2.setText("Selecione o numero de conta a asociar a tarxeta con codigo " + cdgtarxeta + " no slot numero " + numconta + ".");
         
     }
 
@@ -78,8 +80,6 @@ public class DialogoNovaContaAsociada extends javax.swing.JDialog {
         jButton2.setText("Aceptar");
 
         jLabel1.setText("Numero de Conta");
-
-        jLabel2.setText("Selecione o numero de conta a asociar a tarxeta de numero 3.");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

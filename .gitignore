@@ -2,4 +2,5 @@ bin/
 /nbproject/
 /build/
 manifest.mf
+.class
 

@@ -2,6 +2,7 @@ package practicaacs.banco.bd;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import practicaacs.banco.Conta;
 import practicaacs.banco.Movemento;
@@ -26,7 +27,7 @@ public class ClienteBDBanco {
 		}	
 	}
 	
-	public void engadirTarxeta(int codigo) {
+	public void engadirTarxeta(String codigo) {
 		try {
 			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (" + codigo + ")");
 		} catch (SQLException e) {
@@ -34,9 +35,9 @@ public class ClienteBDBanco {
 		}
 	}
 	
-	public void eliminarTarxeta(int codigo) {
+	public void eliminarTarxeta(String codigo) {
 		try {
-			this.statement.executeUpdate("DELETE FROM Tarxeta WHERE tcod = " + codigo);
+			this.statement.executeUpdate("DELETE FROM Tarxeta WHERE tcod = '" + codigo + "'");
 		} catch (SQLException e) {
 			System.err.print(e);
 		}
@@ -58,17 +59,17 @@ public class ClienteBDBanco {
 		}
 	}
 
-	public void engadirContaAsociada(int cdgtarxeta, int cdgconta) {
+	public void engadirContaAsociada(String cdgtarxeta, int numconta, int cdgconta) {
 		try {
-			this.statement.executeUpdate("insert into ContaTarxeta(ccod,tcod) values (" + cdgconta + "," + cdgtarxeta + ")");
+			this.statement.executeUpdate("insert into ContaTarxeta(tcod,cnum,ccod) values ('" + cdgtarxeta + "' ," + numconta + "," + cdgconta + ")");
 		} catch (SQLException e) {
 			System.err.print(e);
 		}		
 	}
 
-	public void eliminarContaAsociada(int cdgtarxeta, int cdgconta) {
+	public void eliminarContaAsociada(String cdgtarxeta, int numconta) {
 		try {
-			this.statement.executeUpdate("delete from ContaTarxeta where ccod = " + cdgconta + " AND tcod = " + cdgtarxeta);
+			this.statement.executeUpdate("delete from ContaTarxeta where cnum = " + numconta + " AND tcod = '" + cdgtarxeta + "'");
 		} catch (SQLException e) {
 			System.err.print(e);
 		}
@@ -100,7 +101,7 @@ public class ClienteBDBanco {
 			ArrayList<Tarxeta> res = new ArrayList<Tarxeta>();
 			
 			while(resultSet.next()){
-				res.add(new Tarxeta(resultSet.getInt(1)));
+				res.add(new Tarxeta(resultSet.getString(1)));
 			}
 			
 			return res;
@@ -110,20 +111,23 @@ public class ClienteBDBanco {
 		}
 	}
 
-	public ArrayList<Conta> getContasAsociadas(int cdgtar) {
+	public HashMap<Integer,Conta> getContasAsociadas(String ntarxeta) {
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT ccod,saldo FROM ContaTarxeta JOIN Conta USING (ccod) WHERE tcod = " + cdgtar);
+			resultSet = this.statement.executeQuery("SELECT cnum,ccod,saldo FROM ContaTarxeta JOIN Conta" +
+					" USING (ccod) WHERE tcod = '" + ntarxeta + "' order by cnum");
 			
-			ArrayList<Conta> res = new ArrayList<Conta>();
+			HashMap<Integer,Conta> res = new HashMap<Integer,Conta>(3);
 			
 			while(resultSet.next()){
-				res.add(new Conta(resultSet.getInt(1),resultSet.getFloat(2)));
+				res.put(resultSet.getInt(1),new Conta(resultSet.getInt(2),resultSet.getFloat(3)));
 			}
 			
 			return res;
 		} catch (SQLException e) {
 			System.err.println(e);
+			System.err.println("A consulta foi" + "SELECT cnum,ccod,saldo FROM ContaTarxeta JOIN Conta" +
+					" USING (ccod) WHERE tcod = " + ntarxeta + " order by cnum");
 			return null;
 		}
 	}
@@ -132,7 +136,8 @@ public class ClienteBDBanco {
 		ResultSet resultSet;
 		try {
 			//TODO
-			resultSet = this.statement.executeQuery("SELECT mcod,tmnome,importe,data FROM Movemento JOIN TipoMovemento USING (tmcod) WHERE ccod = " + numeroconta);
+			resultSet = this.statement.executeQuery("SELECT mcod,tmnome,importe,data FROM Movemento JOIN" +
+					" TipoMovemento USING (tmcod) WHERE ccod = " + numeroconta);
 			
 			ArrayList<Movemento> res = new ArrayList<Movemento>();
 			
@@ -146,16 +151,29 @@ public class ClienteBDBanco {
 			return null;
 		}
 	}
+	
+	public Conta getConta(String numtarx, int numConta) {
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT ccod,saldo FROM ContaTarxeta JOIN Conta" +
+					" USING (ccod) where tcod = " + numtarx + " AND " + " cnum = " + numConta);
+			resultSet.next();
+			return new Conta(resultSet.getInt(1),resultSet.getInt(2));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	public void valoresPorDefecto() {
 		try {
 			this.statement.executeUpdate("delete from Conta where true");
 			this.statement.executeUpdate("delete from Tarxeta where true");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (1)");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (2)");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (3)");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (4)");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES (5)");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 01')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 02')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 03')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 04')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 05')");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (0,0000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (1,1000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (2,2000)");
@@ -166,18 +184,18 @@ public class ClienteBDBanco {
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (7,7000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (8,8000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (9,9000)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(1,1)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(2,1)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(3,1)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(1,2)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(3,2)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(4,3)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(5,3)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(6,3)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(7,4)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(8,4)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(0,5)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta VALUES(9,5)");	
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',1,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',2,2)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',3,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',1,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',2,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',1,4)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',2,5)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',3,6)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',1,7)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',2,8)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',1,0)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',3,9)");	
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

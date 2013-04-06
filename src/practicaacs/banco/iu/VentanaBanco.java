@@ -7,12 +7,16 @@ package practicaacs.banco.iu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
@@ -28,34 +32,32 @@ import practicaacs.banco.Tarxeta;
  *
  * @author ch01
  */
-public class VentanaBanco extends javax.swing.JFrame implements NovaContaListener, NovaTarxetaListener, NovaContaAsociadaListener,
-IniciarSesionListener {
+public class VentanaBanco extends javax.swing.JFrame{
 
 	private static final long serialVersionUID = 5641750155014378657L;
 	private JButton botonabrirsesion,botondetenertrafico,botoneliminarconta,botoneliminartarxeta, botonestablecervalorespordefecto;
     private JButton botonengadirconta, botonengadirtarxeta, botonengadircontaasociada, botoneliminarcontaasociada;
     private JToggleButton botonforzarrecuperacion;
     private JPanel contasTab,monYcontrolTab,tarxTab;
-    private JLabel jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6;
+    private JLabel jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6,jLabel7,jLabel8;
     private JScrollPane jScrollPane1, jScrollPane2, jScrollPane3;
     private JScrollPane jScrollPane4, jScrollPane5, jScrollPane6;
-    private javax.swing.JSeparator jSeparator1,jSeparator2,jSeparator3;
-    private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JList<String> listacontasasociadas,listatarxetas;
+    private JSeparator jSeparator1,jSeparator2,jSeparator3;
+    private JTabbedPane jTabbedPane1;
+    private JList<String> listacontasasociadas,listatarxetas;
     private JTable tablacanles,movementos,tablacontas,tablamsgenviados,tablamsgrecibidos;
     private javax.swing.JTextArea textlog;
     private Banco banco;
 	private boolean sesionabierta = false;
 	private boolean traficoactivo;
-	private JLabel jLabel7;
-	private JLabel jLabel8;
 	
-    /**
-     * Creates new form VentanaBanco
-     * @param nombre 
-     */
-    public VentanaBanco(Banco b, String nombre) {
-    	this.banco = b;
+	/**
+	 * Contructor da interface de usuario do banco.
+	 * @param banco Instancia do banco.
+	 * @param nombre Nome do banco.
+	 */
+    public VentanaBanco(Banco banco, String nombre) {
+    	this.banco = banco;
         initComponents();
         this.setTitle("Ventana Banco \"" + nombre + "\"" + " - ACS 2012/2013");
         this.actualizarContas();
@@ -71,6 +73,50 @@ IniciarSesionListener {
         this.setIconImage(new ImageIcon("/home/ch01/Dropbox/UNI_Fedora/ACS/RepositorioPractica/res/iconobanco.png").getImage());
     }
 
+	public void actualizarContasAsociadas(){
+ 		int selrow = listatarxetas.getSelectedIndex();
+ 		HashMap<Integer, Conta> res;
+ 		
+ 		if(selrow != -1){
+ 			String ntarxeta = (String) listatarxetas.getModel().getElementAt(selrow);
+ 			res = banco.getContasAsociadas(ntarxeta);
+ 		}else{
+ 			res = new HashMap<Integer,Conta>();
+ 		}
+		setListaContasAsociadas(formatListContas(res));
+	}
+	
+	public void actualizarContas(){
+		setTablaContas(this.formatTaboaContas(banco.getContas()));
+	}
+	
+	public void actualizarMovementos(){
+		int selrow = tablacontas.getSelectedRow();
+		ArrayList<Movemento> res;
+		if(selrow != -1){
+			Integer nconta = (Integer) tablacontas.getModel().getValueAt(tablacontas.getSelectedRow(), 0);
+			res = banco.getMovementosConta(nconta);
+		}else{
+			res = new ArrayList<Movemento>();
+		}
+		setMovementos(formatTaboaMovementos(res));
+	}
+	
+	public void actualizarTarxetas(){
+        setListaTarxetas(this.formatListTarxetas(banco.getTarxetas()));
+        this.actualizarContasAsociadas();
+	}
+	
+    public void engadirLinhaLog(String s){
+    	this.textlog.append(s);
+    }
+    
+    public void baleirarLog(){
+    	this.textlog.setText("");
+    }
+	
+    
+    //METODOS PRIVADOS  
 	private void initComponents() {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -482,8 +528,11 @@ IniciarSesionListener {
 
         pack();
     }
+	
+	
 
-	protected void establecerValoresDefecto() {
+
+	private void establecerValoresDefecto() {
 		new DialogoSiNon("Estas seguro de que queres establecer os valores por defecto?",new Runnable(){
 
 					@Override
@@ -498,76 +547,94 @@ IniciarSesionListener {
 		}).setVisible(true);
 	}
 
-	protected void eliminarcontaasociada() {
+	private void eliminarcontaasociada() {
 		int selectedindex = this.listatarxetas.getSelectedIndex();
-		if(selectedindex == -1) return;
-		final int cdgtarxeta = new Integer( (String) this.listatarxetas.getModel().getElementAt(selectedindex));
+		if(selectedindex == -1){
+			new DialogoError("Selecione unha tarxeta.").setVisible(true);
+		}
+		final String cdgtarxeta = this.listatarxetas.getModel().getElementAt(selectedindex);
 		
-		selectedindex = this.listacontasasociadas.getSelectedIndex();
-		String aux = (String) this.listacontasasociadas.getModel().getElementAt(selectedindex);
-		final int cdgconta = new Integer(aux.substring(0,aux.indexOf('(')));
+		final int numconta = this.listacontasasociadas.getSelectedIndex();
+		String aux = this.listacontasasociadas.getModel().getElementAt(numconta);
+		System.out.println("Eliminar conta num. " + new Integer(numconta) + "--> " + aux);
 		
-		new DialogoSiNon("Estas seguro de que queres desasociar a tarxeta " +
-				cdgtarxeta + "e a conta " + cdgconta + "?",new Runnable(){
-
-					@Override
-					public void run() {
-						banco.eliminarContaAsociada(cdgtarxeta, cdgconta);
-						VentanaBanco.this.actualizarContasAsociadas();
-					}
-			
-		}).setVisible(true);
+		if(aux.equals("---")){
+			new DialogoError("Selecione unha conta ou unha diferente").setVisible(true);
+		}else{
+			new DialogoSiNon("Estas seguro de que queres desasociar a tarxeta " +
+					cdgtarxeta + "e a conta " + aux + "?",new Runnable(){
+				
+						@Override
+						public void run() {
+							banco.eliminarContaAsociada(cdgtarxeta, numconta+1);
+							VentanaBanco.this.actualizarContasAsociadas();
+						}
+				
+			}).setVisible(true);			
+		}
 	}
 	
-	protected void engadircontaasociada() {
+	
+	private void engadircontaasociada() {
+		String aux = null;
 		int selectedindex = this.listatarxetas.getSelectedIndex();
-		if(selectedindex == -1) return;
-		final int cdgtarxeta = new Integer( (String) this.listatarxetas.getModel().getElementAt(selectedindex));
-		
-		ArrayList<Conta> arraycontas = banco.getContas();
-		
-		Integer[] contas = new Integer[arraycontas.size()];
-		int i = 0;
-		for(Conta c : arraycontas){
-			contas[i++] = c.getNumero();
+		if(selectedindex == -1){
+			new DialogoError("Selecione unha tarxeta").setVisible(true);
 		}
+		final String cdgtarxeta = this.listatarxetas.getModel().getElementAt(selectedindex);
 		
-		new DialogoNovaContaAsociada(this, cdgtarxeta, contas).setVisible(true);
+		final int numconta = this.listacontasasociadas.getSelectedIndex();
+		if(numconta != -1)
+			aux = this.listacontasasociadas.getModel().getElementAt(numconta);
 		
+		if("---".equals(aux)){
+			ArrayList<Conta> arraycontas = banco.getContas();
+			
+			Integer[] contas = new Integer[arraycontas.size()];
+			int i = 0;
+			for(Conta c : arraycontas)
+				contas[i++] = c.getNumero();
+			
+			new DialogoNovaContaAsociada(this.banco, cdgtarxeta,numconta+1, contas).setVisible(true);
+		}else{
+			new DialogoError("Selecione un oco libre.").setVisible(true);
+		}
 		
 	}
 
-	protected void reanudarTrafico() {
+	private void reanudarTrafico() {
 		// TODO Auto-generated method stub
 		this.botondetenertrafico.setText("Detener Tráfico");
 		this.traficoactivo = true;
 	}
 
-	protected void detenerTrafico() {
+	private void detenerTrafico() {
 		// TODO Auto-generated method stub
 		this.botondetenertrafico.setText("Reanudar Tráfico");
 		this.traficoactivo = false;
 	}
 
-	protected void forzarRecuperacion() {
+	private void forzarRecuperacion() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	protected void abrirSesion() {
-		new DialogoAbrirSesion(this).setVisible(true);
+	
+	private void abrirSesion() {
+		new DialogoAbrirSesion(this.banco).setVisible(true);
+		//TODO
 		this.botondetenertrafico.setEnabled(true);
 		this.botonabrirsesion.setText("Cerrar Sesión");
 		this.sesionabierta = true;
 	}
 	
-	protected void cerrarSesion() {
+	private void cerrarSesion() {
 		this.reanudarTrafico();
 		new DialogoSiNon("Esta seguro de que desexa cerrar a sesión?", new Runnable(){
 
 			@Override
 			public void run() {
-				banco.cerrarSesion();
+				banco.solicitarPecheSesion();
 			}
 			
 		}).setVisible(true);
@@ -576,31 +643,38 @@ IniciarSesionListener {
 		this.sesionabierta = false;
 	}
 
-	protected void eliminarTarxeta() {
+	
+	private void eliminarTarxeta() {
 		int selrow = this.listatarxetas.getSelectedIndex();
-		if (selrow == -1) return;
-		final int cdgtarxeta = new Integer((String) listatarxetas.getModel().getElementAt(selrow));
+		if (selrow == -1){
+			new DialogoError("Selecione unha tarxeta.").setVisible(true);
+			return;
+		}
+		final String cdgtarxeta = listatarxetas.getModel().getElementAt(selrow);
 		
 		new DialogoSiNon("Esta seguro de que queres eliminar a tarxeta número " + cdgtarxeta + "?",new Runnable(){
 
 			@Override
 			public void run() {
 				banco.eliminarTarxeta(cdgtarxeta);
-				VentanaBanco.this.actualizarTarxetas();
-				VentanaBanco.this.actualizarContasAsociadas();
 			}
 			
 		}).setVisible(true);
 	}
 
-	protected void engadirTarxeta() {
-		new DialogoNovaTarxeta(this).setVisible(true);
+	
+	private void engadirTarxeta() {
+		new DialogoNovaTarxeta(this.banco).setVisible(true);
 	}
 
-	protected void eliminarConta() {
+	
+	private void eliminarConta() {
 		
 		int selrow = this.tablacontas.getSelectedRow();
-		if (selrow == -1) return;
+		if (selrow == -1){
+			new DialogoError("Selecione unha conta.").setVisible(true);
+			return;
+		}
 		final int cdgConta = (Integer) tablacontas.getModel().getValueAt(selrow, 0);
 		
 		new DialogoSiNon("Esta seguro de que queres eliminar a conta número " + cdgConta + "?",new Runnable(){
@@ -615,23 +689,17 @@ IniciarSesionListener {
 		}).setVisible(true);
 	}
 
-	protected void engadirConta() {
-		new DialogoNovaConta(this).setVisible(true);
+	
+	private void engadirConta() {
+		new DialogoNovaConta(this.banco).setVisible(true);
 	}
 
+	
 	private void setMovementos(Object[][] data){
 		movementos.setModel(new javax.swing.table.DefaultTableModel(
                 data,
                 new String [] {"#Movemento", "Tipo","Importe","Data"}
         ));
-    }
-    
-    public void engadirLinhaLog(String s){
-    	this.textlog.append(s);
-    }
-    
-    private void baleirarLog(){
-    	this.textlog.setText("");
     }
     
     private void setTablaContas(Object[][] data){
@@ -658,6 +726,7 @@ IniciarSesionListener {
         });
     }
     
+    
     private void setListaContasAsociadas(final String[] list){
     	listacontasasociadas.setModel(new javax.swing.AbstractListModel<String>() {
 			private static final long serialVersionUID = -5475210877168039186L;
@@ -666,7 +735,7 @@ IniciarSesionListener {
         });
     }
     
-    protected Object[][] formatTaboaMovementos(ArrayList<Movemento> movementos) {
+    private Object[][] formatTaboaMovementos(ArrayList<Movemento> movementos) {
     	int i=0;
  		Object[][] res = new Object[movementos.size()][2];
  		for(Movemento m : movementos){
@@ -679,11 +748,16 @@ IniciarSesionListener {
  		return res;
 	}
     
-    private String[] formatListContas(ArrayList<Conta> contas) {
-    	int i=0;
-     	String[] res = new String[contas.size()];
-     	for(Conta c : contas){
-     		res[i++] = new Integer(c.getNumero()).toString() + "(" + c.getSaldo() + ")";
+    private String[] formatListContas(HashMap<Integer, Conta> res2) {
+    	int i;
+     	String[] res = new String[3];
+     	for(i=1;i<=3;i++){
+     		if(res2.containsKey(i)){
+     			Conta c = res2.get(i);
+         		res[i-1] = new Integer(c.getNumero()).toString() + "(" + c.getSaldo() + ")";
+     		}else{
+     			res[i-1] = "---";
+     		}
      	}
      	return res;
     }
@@ -703,64 +777,10 @@ IniciarSesionListener {
  		int i=0;
  		String[] res = new String[tarxetas.size()];
  		for(Tarxeta t : tarxetas){
- 			res[i++] = new Integer(t.getCodigo()).toString();
+ 			res[i++] = t.codigo;
  		}
  		return res;
 	}
  	
- 	protected void actualizarContasAsociadas(){
- 		int selrow = listatarxetas.getSelectedIndex();
- 		ArrayList<Conta> res;
- 		
- 		if(selrow != -1){
- 			String ntarxeta = (String) listatarxetas.getModel().getElementAt(selrow);
- 			res = banco.getContasAsociadas(new Integer(ntarxeta));
- 		}else{
- 			res = new ArrayList<Conta>();
- 		}
-		setListaContasAsociadas(formatListContas(res));
-	}
-	
-	protected void actualizarContas(){
-		setTablaContas(this.formatTaboaContas(banco.getContas()));
-	}
-	
-	protected void actualizarMovementos(){
-		int selrow = tablacontas.getSelectedRow();
-		ArrayList<Movemento> res;
-		if(selrow != -1){
-			Integer nconta = (Integer) tablacontas.getModel().getValueAt(tablacontas.getSelectedRow(), 0);
-			res = banco.getMovementosConta(nconta);
-		}else{
-			res = new ArrayList<Movemento>();
-		}
-		setMovementos(formatTaboaMovementos(res));
-	}
-	
-	protected void actualizarTarxetas(){
-        setListaTarxetas(this.formatListTarxetas(banco.getTarxetas()));
-	}
-
-	@Override
-	public void engadirConta(int num, float saldo) {
-		banco.engadirConta(new Conta(num,saldo));
-		this.actualizarContas();
-	}
-
-	@Override
-	public void engadirTarxeta(int cdgtarxeta) {
-		banco.engadirTarxeta(cdgtarxeta);
-		this.actualizarTarxetas();
-	}
-
-	@Override
-	public void engadirContaAsociada(int cdgtarxeta, int cdgconta) {
-		banco.engadirContaAsociada(cdgtarxeta, cdgconta);
-		this.actualizarContasAsociadas();
-	}
-
-	public void iniciarSesion(int numCanles){
-		banco.iniciarSesion(numCanles);
-	}
 
 }
