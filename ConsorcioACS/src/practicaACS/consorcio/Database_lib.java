@@ -203,6 +203,14 @@ public class Database_lib {
 		return null;
 	}
 	
+	/**
+	 * Devuelve los ultimos mensajes enviados hacia el banco introducido
+	 * por parámetro, por todos los canales.
+	 */
+	public ArrayList<Mensaje> recupera_mensajes(String id_banco){
+		return null;
+	}
+	
 	
 	//---------------ULTIMOS ENVIOS----------------
 	

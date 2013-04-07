@@ -72,7 +72,7 @@ public class ServidorConsorcio_Bancos {
      * Recupera los mensajes del banco
      */
     public void realiza_recuperacion(String banco){
-    	for(Object message : this.conexiones.get(banco).){
+    	for(Object message : this.conexiones.get(banco)){
     		this.consorcio.getBancos_client().send_message((Mensaje) message);
     	}
     }

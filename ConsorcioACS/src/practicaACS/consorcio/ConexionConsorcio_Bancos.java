@@ -202,11 +202,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 				System.out.printf("ERROR: Mensaje -" + recibido.getTipoMensaje().toString() + "- no reconocido.");
 				break;
 		}
+		
 		//En caso de que no haya sesion activa y el mensaje recibido no sea una consulta, se almacena para enviar futuramente.
 		if((!Database_lib.getInstance().hasSesion(recibido.getOrigen())) && (!recibido.es_consulta())){
 				//almacenar en DB con marca offline el mensaje a enviar
 		}
-			
 		return respuesta;
 	}
 	
@@ -220,8 +220,6 @@ public class ConexionConsorcio_Bancos extends Thread {
     	System.out.println("APERTURA: Enviada a las " + recibido.getTime());
     	System.out.println("APERTURA: Sesion servidor Banco: "+ recibido.getOrigen() +" comenzada a las " + time.getTime());
 
-		Database_lib.getInstance().setNum_canales(id_banco,recibido.getNcanales());
-		
 		//Guardamos los datos en la base de datos
 		Database_lib.getInstance().insertar_sesion(id_banco,recibido.getPuerto(),recibido.getNcanales(),EstadoSesion.ACTIVA);
 	}
@@ -233,12 +231,14 @@ public class ConexionConsorcio_Bancos extends Thread {
     	Calendar time = Calendar.getInstance();
     	System.out.println("CIERRE: Sesion servidor Banco: "+ id_banco +" finalizado a las " + time.getTime());
 
-    	while(/*aun queden mensajes*/){
+    	//while(/*aun queden mensajes*/){
     		//consultar ultimos envios en BD
-    	}
+    	//}
+    	
+    	//Seteamos el estado de la conexion a cerrada
     	Database_lib.getInstance().setEstado_conexion_banco(id_banco,EstadoSesion.CERRADA);
 
-    	//comprobar total de reintegros, abonos y traspasos
+    	//Comprobar total de reintegros, abonos y traspasos
     	return Database_lib.getInstance().comprueba_cuentas(id_banco,reintegros,abonos,traspasos);
 	}
 	
@@ -265,17 +265,24 @@ public class ConexionConsorcio_Bancos extends Thread {
 	/**
 	 * Inicia el proceso de recuperacion
 	 */
-	private Mensaje iniciar_recuperacion(String id_banco){
+	private void iniciar_recuperacion(RespIniTraficoRecuperacion recibido){
+		String id_banco = recibido.getOrigen();
+		
 		Database_lib.getInstance().setEstado_conexion_banco(id_banco,EstadoSesion.RECUPERACION);
+
 		//consultar ultimos envios en la BD y reenviarlos
-		return null;
+		for(Mensaje m : Database_lib.getInstance().recupera_mensajes(id_banco)){
+			this.consorcio.getBancos_client().send_message(m);
+		}
 		// enviar SOLFINTRADICOREC (solicitud fin de trafico en recuperacion)
 	}
 	
 	/**
 	 * Termina el proceso de recuperacion
 	 */
-	private Mensaje finalizar_recuperacion(String id_banco){
+	private Mensaje finalizar_recuperacion(RespFinTraficoRec recibido){
+		String id_banco = recibido.getOrigen();
+
 		Database_lib.getInstance().setEstado_conexion_banco(id_banco,EstadoSesion.ACTIVA);
 		return null;		
 	}
