@@ -18,7 +18,6 @@ public class ServidorConsorcio_Bancos {
 	private int port;
 	private Consorcio consorcio;
 	
-	private Hashtable<String,ConexionConsorcio_Bancos> conexiones; //id_banco:String - Conexion:Thread
 	private EstadoSesion estado_serv_bancos;
 	
 	/**
@@ -28,7 +27,6 @@ public class ServidorConsorcio_Bancos {
 		super();
 		this.port = puerto;
 		this.consorcio = cons;
-		this.conexiones = new Hashtable<String,ConexionConsorcio_Bancos>();
 		this.estado_serv_bancos = EstadoSesion.ACTIVA;
 	}
 	
@@ -38,27 +36,6 @@ public class ServidorConsorcio_Bancos {
 	}
 	
 	//-------END GETTERS & SETTERS-------
-	
-	/**
-	 * Funcion que comprueba si el banco pasado por parametro tiene sesion iniciada.
-	 */
-	public boolean hasSesion(String id_banco){
-		return this.conexiones.containsKey(id_banco);
-	}
-	
-	/**
-	 * Consulta si el banco indicado se encuentra activo.
-	 */
-	public boolean consultar_protocolo(String banco){
-		return conexiones.get(banco).consultar_protocolo();
-	}
-	
-	/**
-	 * Detiene el trafico del banco indicado
-	 */
-	public void detener_trafico(String banco){
-    	this.conexiones.get(banco).detener_trafico();
-	}
 	
 	/**
      * Levanta el servidorBancos
@@ -86,8 +63,8 @@ public class ServidorConsorcio_Bancos {
     public void cierra_servidorBancos(){
     	this.estado_serv_bancos = EstadoSesion.CERRADA;
     	//cerrar todas las conexiones con los bancos
-    	for(Object banco : this.conexiones.values()){
-    		banco
+    	for(Object sesion : Database_lib.getInstance().getSesiones()){
+
     	}
     }
 

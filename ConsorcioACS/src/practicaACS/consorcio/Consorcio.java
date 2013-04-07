@@ -21,8 +21,6 @@ public class Consorcio {
 	private ServidorConsorcio_Bancos bancos_server;
 	private ClienteConsorcio_Bancos bancos_client;
 	
-	private Database_lib database;
-
 	/**
 	 * Constructor de la clase Consorcio
 	 * @throws IOException 
@@ -38,15 +36,10 @@ public class Consorcio {
 		this.cajeros_server = new ServidorConsorcio_Cajeros(this,puerto_cajeros);
 		this.bancos_server = new ServidorConsorcio_Bancos(this,puerto_bancos);
 		this.bancos_client = new ClienteConsorcio_Bancos();
-		
-		this.database = new Database_lib();
 	}
 
 
 	// GETTERS SETTERS
-    public Database_lib getDatabase() {
-		return database;
-	}
 
 	//-----END GETTERS SETTERS
 	

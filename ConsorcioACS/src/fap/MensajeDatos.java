@@ -26,5 +26,17 @@ public abstract class MensajeDatos extends Mensaje {
 		return super.printCabecera() + 
 				String.format("%2i%5i%1i", numcanal, nmsg, codonline ? 1 : 0);
 	}
+
+	public int getNumcanal() {
+		return numcanal;
+	}
+
+	public int getNmsg() {
+		return nmsg;
+	}
+
+	public boolean isCodonline() {
+		return codonline;
+	}
 	
 }

@@ -37,4 +37,16 @@ public class SolCierreSesion extends Mensaje {
 				this.traspasos);
 	}
 
+	public long getTotal_reintegros() {
+		return total_reintegros;
+	}
+
+	public long getAbonos() {
+		return abonos;
+	}
+
+	public long getTraspasos() {
+		return traspasos;
+	}
+
 }
