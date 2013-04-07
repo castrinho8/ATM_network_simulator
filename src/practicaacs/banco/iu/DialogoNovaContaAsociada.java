@@ -7,6 +7,8 @@ package practicaacs.banco.iu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import practicaacs.banco.Banco;
+
 /**
  *
  * @author ch01
@@ -28,7 +30,7 @@ public class DialogoNovaContaAsociada extends javax.swing.JDialog {
         initComponents();
     }
     
-    public DialogoNovaContaAsociada(final NovaContaAsociadaListener l,final String cdgtarxeta, final int numconta, Integer[] contas){
+    public DialogoNovaContaAsociada(final Banco l,final String cdgtarxeta, final int numconta, Integer[] contas){
     	this(new javax.swing.JFrame(), true);
         
     	this.addWindowListener(new java.awt.event.WindowAdapter() {

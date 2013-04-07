@@ -7,6 +7,8 @@ package practicaacs.banco.iu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import practicaacs.banco.Banco;
+
 /**
  *
  * @author ch01
@@ -28,7 +30,7 @@ public class DialogoAbrirSesion extends javax.swing.JDialog {
         initComponents();
     }
     
-    public DialogoAbrirSesion(final IniciarSesionListener l){
+    public DialogoAbrirSesion(final Banco l){
     	this(new javax.swing.JFrame(), true);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override

@@ -20,17 +20,16 @@ import practicaacs.banco.csconsorcio.AnalizadorMensajes;
 import practicaacs.banco.csconsorcio.ClienteServidorConsorcio;
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.banco.estados.SesAberta;
+import practicaacs.banco.estados.SesDetida;
+import practicaacs.banco.estados.SesNonAberta;
+import practicaacs.banco.estados.SesRecuperacion;
 import practicaacs.banco.estados.SolApertura;
 import practicaacs.banco.estados.SolDeter;
 import practicaacs.banco.estados.SolPechar;
 import practicaacs.banco.estados.SolReanudar;
-import practicaacs.banco.iu.IniciarSesionListener;
-import practicaacs.banco.iu.NovaContaAsociadaListener;
-import practicaacs.banco.iu.NovaContaListener;
-import practicaacs.banco.iu.NovaTarxetaListener;
 import practicaacs.banco.iu.VentanaBanco;
 
-public class Banco implements AnalizadorMensajes,IniciarSesionListener, NovaContaAsociadaListener, NovaContaListener, NovaTarxetaListener{
+public class Banco implements AnalizadorMensajes{
 	
 	private ClienteBDBanco bd;
 	private VentanaBanco iu;
@@ -68,7 +67,6 @@ public class Banco implements AnalizadorMensajes,IniciarSesionListener, NovaCont
 		
 		this.iu = new VentanaBanco(this,prop.getProperty("banco.name"));
 		this.iu.setVisible(true);
-
 	}
 	
 	/**
@@ -278,7 +276,7 @@ public class Banco implements AnalizadorMensajes,IniciarSesionListener, NovaCont
 	}
 	
 	/**
-	 * Metodo que establece a apertura da sesion.
+	 * Método que establece a apertura da sesion.
 	 */
 	public void establecerSesionAceptada() {
 		this.cambEstado(SesAberta.instance());
@@ -286,17 +284,37 @@ public class Banco implements AnalizadorMensajes,IniciarSesionListener, NovaCont
 	}
 	
 	/**
+	 * Método que establece o peche da sesión.
+	 */
+	public void establecerSesionPechada() {
+		this.cambEstado(SesNonAberta.instance());
+		this.iu.engadirLinhaLog("Sesión pechada.\n");
+	}
+	
+	public void establecerSesionDetida() {
+		this.cambEstado(SesDetida.instance());
+		this.iu.engadirLinhaLog("Tráfico de sesión detido.\n");
+	}
+	
+	public void establecerSesionReanudada() {
+		this.cambEstado(SesAberta.instance());
+		this.iu.engadirLinhaLog("Tráfico de sesión reanudado\n");
+	}
+	
+	/**
 	 * Método que establece trafico en recuperación.
 	 */
 	public void establecerTraficoRecuperacion(){
-		
+		this.cambEstado(SesRecuperacion.instance());
+		this.iu.engadirLinhaLog("Entrando en modo recuperación.\n");
 	}
 
 	/**
 	 * Método que establece o fin do trafico en recuperación.
 	 */
 	public void establecerFinTraficoRecuperacion(){
-		
+		this.cambEstado(SesAberta.instance());
+		this.iu.engadirLinhaLog("Saindo de modo recuperación.\n");
 	}
 	
 	/**
@@ -366,4 +384,9 @@ public class Banco implements AnalizadorMensajes,IniciarSesionListener, NovaCont
 	private void cambEstado(EstadoSesion nuevoEstado) {
 		this.estado = nuevoEstado;
 	}
+
+
+
+
+
 }

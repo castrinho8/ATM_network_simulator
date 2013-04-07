@@ -529,7 +529,6 @@ public class VentanaBanco extends javax.swing.JFrame{
         pack();
     }
 	
-	
 
 
 	private void establecerValoresDefecto() {

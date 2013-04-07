@@ -7,6 +7,8 @@ package practicaacs.banco.iu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import practicaacs.banco.Banco;
+
 /**
  *
  * @author ch01
@@ -27,7 +29,7 @@ public class DialogoNovaTarxeta extends javax.swing.JDialog {
         initComponents();
     }
     
-    public DialogoNovaTarxeta(final NovaTarxetaListener l){
+    public DialogoNovaTarxeta(final Banco l){
     	this(new javax.swing.JFrame(), true);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override

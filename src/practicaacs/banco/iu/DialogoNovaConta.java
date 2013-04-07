@@ -6,6 +6,8 @@ package practicaacs.banco.iu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import practicaacs.banco.Banco;
 /**
  *
  * @author ch01
@@ -29,7 +31,7 @@ public class DialogoNovaConta extends javax.swing.JDialog {
         initComponents();
     }
     
-    public DialogoNovaConta(final NovaContaListener a){
+    public DialogoNovaConta(final Banco a){
     	this(new javax.swing.JFrame(), true);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
