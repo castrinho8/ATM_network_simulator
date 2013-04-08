@@ -11,7 +11,7 @@ public class SolPechar extends EstadoSesion {
 	
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
-		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.CIERRESESION)){
+		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.SOLCIERRESESION)){
 			b.establecerSesionPechada();
 			return;
 		}

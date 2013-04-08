@@ -1,7 +1,6 @@
 package practicaacs.banco.estados;
 
 import practicaacs.banco.Banco;
-import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
 
 public class SesNonAberta extends EstadoSesion {

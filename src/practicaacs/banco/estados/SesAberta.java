@@ -1,13 +1,7 @@
 package practicaacs.banco.estados;
 
 import practicaacs.banco.Banco;
-import practicaacs.fap.ConsultaMovimientos;
-import practicaacs.fap.ConsultaSaldo;
-import practicaacs.fap.Mensaje;
-import practicaacs.fap.SolicitudAbono;
-import practicaacs.fap.SolicitudReintegro;
-import practicaacs.fap.SolicitudTraspaso;
-
+import practicaacs.fap.*;
 public class SesAberta extends EstadoSesion {
 
 	private static SesAberta instance = null;
@@ -18,51 +12,51 @@ public class SesAberta extends EstadoSesion {
 	public void analizarMensaje(Mensaje m, Banco b) {
 		if(m != null)
 			switch(m.getTipoMensaje()){
-			case CONSULTARSALDO:
-				b.facerConsultaSaldo(	((ConsultaSaldo) m).getNumcanal(),
-										((ConsultaSaldo) m).getNmsg(),
-										((ConsultaSaldo) m).isCodonline(),
-										((ConsultaSaldo) m).getNum_tarjeta(),
-										((ConsultaSaldo) m).getNum_cuenta()
+			case SOLSALDO:
+				b.facerConsultaSaldo(	((SolSaldo) m).getNumcanal(),
+										((SolSaldo) m).getNmsg(),
+										((SolSaldo) m).isCodonline(),
+										((SolSaldo) m).getNum_tarjeta(),
+										((SolSaldo) m).getNum_cuenta()
 									);
 				return;
-			case CONSULTARMOVIMIENTOS:
-				b.facerConsultaMovementos(	((ConsultaMovimientos) m).getNumcanal(),
-											((ConsultaMovimientos) m).getNmsg(),
-											((ConsultaMovimientos) m).isCodonline(),
-											((ConsultaMovimientos) m).getNum_tarjeta(),
-											((ConsultaMovimientos) m).getNum_cuenta()
+			case SOLMOVIMIENTOS:
+				b.facerConsultaMovementos(	((SolMovimientos) m).getNumcanal(),
+											((SolMovimientos) m).getNmsg(),
+											((SolMovimientos) m).isCodonline(),
+											((SolMovimientos) m).getNum_tarjeta(),
+											((SolMovimientos) m).getNum_cuenta()
 										);
 				return;
-			case SOLTRAFICOREC:
+			case SOLINIREC:
 				b.establecerTraficoRecuperacion();
 				return;
-			case REINTEGRO:
-				b.facerReintegro(	((SolicitudReintegro) m).getNumcanal(),
-									((SolicitudReintegro) m).getNmsg(), 
-									((SolicitudReintegro) m).isCodonline(), 
-									((SolicitudReintegro) m).getNum_tarjeta(), 
-									((SolicitudReintegro) m).getNum_cuenta(), 
-									((SolicitudReintegro) m).getImporte()
+			case SOLREINTEGRO:
+				b.facerReintegro(	((SolReintegro) m).getNumcanal(),
+									((SolReintegro) m).getNmsg(), 
+									((SolReintegro) m).isCodonline(), 
+									((SolReintegro) m).getNum_tarjeta(), 
+									((SolReintegro) m).getNum_cuenta(), 
+									((SolReintegro) m).getImporte()
 								);
 				return;
-			case ABONO:
-				b.facerAbono(	((SolicitudAbono) m).getNumcanal(),
-								((SolicitudAbono) m).getNmsg(),
-								((SolicitudAbono) m).isCodonline(),
-								((SolicitudAbono) m).getNum_tarjeta(),
-								((SolicitudAbono) m).getNum_cuenta(),
-								((SolicitudAbono) m).getImporte()
+			case SOLABONO:
+				b.facerAbono(	((SolAbono) m).getNumcanal(),
+								((SolAbono) m).getNmsg(),
+								((SolAbono) m).isCodonline(),
+								((SolAbono) m).getNum_tarjeta(),
+								((SolAbono) m).getNum_cuenta(),
+								((SolAbono) m).getImporte()
 							);
 				return;
-			case TRASPASO:
-				b.facerTranspaso(	((SolicitudTraspaso) m).getNumcanal(),
-									((SolicitudTraspaso) m).getNmsg(), 
-									((SolicitudTraspaso) m).isCodonline(), 
-									((SolicitudTraspaso) m).getNum_tarjeta(), 
-									((SolicitudTraspaso) m).getNum_cuenta_origen(), 
-									((SolicitudTraspaso) m).getNum_cuenta_destino(), 
-									((SolicitudTraspaso) m).getImporte()
+			case SOLTRASPASO:
+				b.facerTranspaso(	((SolTraspaso) m).getNumcanal(),
+									((SolTraspaso) m).getNmsg(), 
+									((SolTraspaso) m).isCodonline(), 
+									((SolTraspaso) m).getNum_tarjeta(), 
+									((SolTraspaso) m).getNum_cuenta_origen(), 
+									((SolTraspaso) m).getNum_cuenta_destino(), 
+									((SolTraspaso) m).getImporte()
 								);
 				return;
 			default:

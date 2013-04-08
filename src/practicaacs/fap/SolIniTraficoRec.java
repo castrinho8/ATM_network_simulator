@@ -1,6 +1,6 @@
 package practicaacs.fap;
 
-public class SolIniTraficoRecuperacion extends Mensaje {
+public class SolIniTraficoRec extends Mensaje {
 
 	private static final long serialVersionUID = -2305078832641352933L;
 
@@ -9,7 +9,7 @@ public class SolIniTraficoRecuperacion extends Mensaje {
 	 * @param origen Origen del mensaje.
 	 * @param destino Destino del mensaje.
 	 */
-	public SolIniTraficoRecuperacion(String origen, String destino) {
+	public SolIniTraficoRec(String origen, String destino) {
 		super(origen, destino,CodigosMensajes.SOLINIREC);
 	}
 

@@ -17,7 +17,7 @@ public class SolReanudar extends EstadoSesion {
 	
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
-		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.REANUDARTRAFICO)){
+		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.SOLREANUDARTRAFICO)){
 			b.establecerSesionAceptada();
 			return;
 		}

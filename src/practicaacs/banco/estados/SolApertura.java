@@ -13,7 +13,7 @@ public class SolApertura extends EstadoSesion {
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
 		
-		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.ABRIRSESION)){
+		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)){
 				b.establecerSesionAceptada();
 				return;
 		}

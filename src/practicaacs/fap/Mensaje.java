@@ -18,7 +18,7 @@ public abstract class Mensaje implements java.io.Serializable {
 		this.origen = origen;
 		this.destino = destino;
 				
-		codigo_clase.put(CodigosMensajes.SOLINIREC,SolIniTraficoRecuperacion.class);
+		codigo_clase.put(CodigosMensajes.SOLINIREC,SolIniTraficoRec.class);
 		codigo_clase.put(CodigosMensajes.SOLFINREC,SolFinTraficoRec.class);
 		codigo_clase.put(CodigosMensajes.SOLABRIRSESION, SolAperturaSesion.class );
 		codigo_clase.put(CodigosMensajes.SOLDETENERTRAFICO,  SolDetTrafico.class);
