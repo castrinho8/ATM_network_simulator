@@ -3,4 +3,4 @@ bin/
 /build/
 manifest.mf
 .class
-
+ nbbuild.xml
