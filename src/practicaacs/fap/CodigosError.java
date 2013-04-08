@@ -28,4 +28,16 @@ public enum CodigosError {
 		return (new Integer(this.valor)).toString();
 		
 	}
+	
+	public static CodigosError parse(String s) throws CodigoNoValidoException {
+		try{
+			int numero = new Integer(s);
+			for(CodigosError c : CodigosError.values()){
+				if(c.valor == numero){
+					return c;
+				}
+			}
+		}catch(NumberFormatException e){}
+		throw new CodigoNoValidoException();
+	}	
 }

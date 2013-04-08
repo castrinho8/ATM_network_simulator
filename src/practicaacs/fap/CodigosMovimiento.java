@@ -1,16 +1,16 @@
 package practicaacs.fap;
 
-public enum TiposMovimiento {
+public enum CodigosMovimiento {
 	
 	REINTEGRO(10), TRANSEMITIDO(11), TRANSRECIB(12), PAGORECIB(13), ABONO(50), COBROCHEQUE(51),OTRO(99);
 	
 	private int numero;
 
-	private TiposMovimiento(int numero){
+	private CodigosMovimiento(int numero){
 		this.numero = numero;
 	}
 	
-	public static TiposMovimiento getTipoMovimiento(int valor){
+	public static CodigosMovimiento getTipoMovimiento(int valor) throws CodigoNoValidoException{
 		switch(valor){
 		case 10:
 			return REINTEGRO;
@@ -27,7 +27,7 @@ public enum TiposMovimiento {
 		case 99:
 			return OTRO;
 		default:
-			throw new IllegalArgumentException();
+			throw new CodigoNoValidoException();
 		}
 	}
 }

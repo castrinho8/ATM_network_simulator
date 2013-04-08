@@ -1,7 +1,8 @@
 package practicaacs.fap;
 
-public class ConsultaSaldo extends MensajeDatos {
+public class SolSaldo extends MensajeDatos {
 
+	private static final long serialVersionUID = 8506678630346699119L;
 	private String num_tarjeta;
 	private int num_cuenta;
 	
@@ -15,10 +16,10 @@ public class ConsultaSaldo extends MensajeDatos {
 	 * @param num_tarjeta Numero de Tarjeta.
 	 * @param num_cuenta Numero de Cuenta.
 	 */
-	public ConsultaSaldo(String origen, String destino, int numcanal, int nmsg,
+	public SolSaldo(String origen, String destino, int numcanal, int nmsg,
 			boolean codonline, String num_tarjeta, int num_cuenta) {
 		
-		super(origen, destino, CodigosMensajes.CONSULTARSALDO, numcanal, nmsg, codonline);
+		super(origen, destino, CodigosMensajes.SOLSALDO, numcanal, nmsg, codonline);
 		
 		assert(num_tarjeta.length() <= 11);
 		assert(num_cuenta >= 0);
@@ -39,5 +40,22 @@ public class ConsultaSaldo extends MensajeDatos {
 	@Override
 	protected String printCuerpo() {
 		return String.format("%11s%1i", this.num_cuenta,this.num_tarjeta);
+	}
+
+	@Override
+	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+		
+		super.parseComp(bs);
+
+		try{
+			if(bs.toString().length() == 37){
+				this.num_cuenta = new Integer(bs.toString().charAt(37));
+				this.num_tarjeta = bs.toString().substring(26,36);
+				return;
+			}
+		}catch(NumberFormatException e){}
+		
+		throw new MensajeNoValidoException();	
+		
 	}
 }

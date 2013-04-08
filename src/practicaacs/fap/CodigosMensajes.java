@@ -1,11 +1,11 @@
 package practicaacs.fap;
 
 public enum CodigosMensajes {
-	SOLTRAFICOREC(01), SOLFINTRADICOREC(02),ABRIRSESION(11),DETENERTRAFICO(13),
-	REANUDARTRAFICO(14),CIERRESESION(12),CONSULTARSALDO(31),CONSULTARMOVIMIENTOS(32),
-	REINTEGRO(33),ABONO(34),TRASPASO(35),TRAFICOREC(91),FINREC(92),SOLABRIRSESION(81),
-	SOLDETENERTRAFICO(83),SOLREANUDARTRAFICO(84),SOLCIERRESESION(82),RESCONSULTARSALDO(61),
-	RESCONSULTAMOV(62),RESREINTEGRO(63),RESABONO(64),RESTRASPASO(65);
+	SOLINIREC(01), SOLFINREC(02),RESABRIRSESION(11),RESDETENERTRAFICO(13),
+	RESREANUDARTRAFICO(14),RESCIERRESESION(12),SOLSALDO(31),SOLMOVIMIENTOS(32),
+	SOLREINTEGRO(33),SOLABONO(34),SOLTRASPASO(35),RESINIREC(91),RESFINREC(92),SOLABRIRSESION(81),
+	SOLDETENERTRAFICO(83),SOLREANUDARTRAFICO(84),SOLCIERRESESION(82),RESSALDO(61),
+	RESMOVIMIENTOS(62),RESREINTEGRO(63),RESABONO(64),RESTRASPASO(65);
 	private int numero;
 
 	private CodigosMensajes(int numero){
@@ -17,12 +17,15 @@ public enum CodigosMensajes {
 	}
 
 	public static CodigosMensajes parse(String s) throws CodigoNoValidoException {
-		int numero = new Integer(s);
-		for(CodigosMensajes c : CodigosMensajes.values()){
-			if(c.numero == numero){
-				return c;
+		try{
+			int numero = new Integer(s);
+			for(CodigosMensajes c : CodigosMensajes.values()){
+				if(c.numero == numero){
+					return c;
+				}
 			}
-		}
-		throw new CodigoNoValidoException(s);
+		}catch(NumberFormatException e){}
+		
+		throw new CodigoNoValidoException();
 	}
 }

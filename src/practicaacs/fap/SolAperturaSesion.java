@@ -3,12 +3,14 @@
  */
 package practicaacs.fap;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
 public class SolAperturaSesion extends Mensaje {
 
+	private static final long serialVersionUID = 5685993518176437136L;
 	private int ncanales;
 	private Date time;
 	private String puerto;
@@ -46,8 +48,22 @@ public class SolAperturaSesion extends Mensaje {
 	protected String printCuerpo(){
 		return String.format("%2i%10s%8s%20s",
 				this.ncanales, 
-				new SimpleDateFormat("dd/MM/yy").format(this.time),
+				new SimpleDateFormat("dd/MM/yyyy").format(this.time),
 				new SimpleDateFormat("hh:mm:ss").format(this.time),
 				puerto);
+	}
+
+	@Override
+	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+		super.parseComp(bs);
+		try {
+			if(bs.toString().length() == 59){
+				this.ncanales = new Integer(bs.toString().substring(19, 20));
+				this.time = new SimpleDateFormat("dd/MM/yyyyhh:mm:ss").parse(bs.toString().substring(21, 38));
+				this.puerto = bs.toString().substring(39,58);
+				return;
+			}
+		} catch (ParseException e) {}
+		throw new MensajeNoValidoException();
 	}
 }

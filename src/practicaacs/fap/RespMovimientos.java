@@ -3,9 +3,11 @@ package practicaacs.fap;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class RespConsMovimientos extends MensajeRespDatos {
+public class RespMovimientos extends MensajeRespDatos {
+	
+	private static final long serialVersionUID = -6409226798666821301L;
 	private int nmovimientos;
-	private TiposMovimiento tipo_mov;
+	private CodigosMovimiento tipo_mov;
 	private boolean signo;
 	private int importe;
 	private Date fecha;
@@ -24,11 +26,11 @@ public class RespConsMovimientos extends MensajeRespDatos {
 	 * @param importe Importe
 	 * @param fecha Fecha de la operación.
 	 */
-	public RespConsMovimientos(String origen, String destino,
+	public RespMovimientos(String origen, String destino,
 			int numcanal, int nmsg, boolean codonline, CodigosRespuesta cod_resp,
-			int nmovimientos, TiposMovimiento tipo_mov, boolean signo, int importe,
+			int nmovimientos, CodigosMovimiento tipo_mov, boolean signo, int importe,
 			Date fecha) {
-		super(origen, destino, CodigosMensajes.RESCONSULTAMOV, numcanal, nmsg, codonline, cod_resp);
+		super(origen, destino, CodigosMensajes.RESMOVIMIENTOS, numcanal, nmsg, codonline, cod_resp);
 		
 		assert(nmovimientos <= 20);
 		
@@ -48,5 +50,11 @@ public class RespConsMovimientos extends MensajeRespDatos {
 				importe,
 				new SimpleDateFormat("dd/MM/yy").format(this.fecha),
 				new SimpleDateFormat("hh:mm:ss").format(this.fecha));
+	}
+
+	@Override
+	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+		// TODO Auto-generated method stub
+		return;
 	}
 }

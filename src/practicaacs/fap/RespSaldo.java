@@ -2,6 +2,7 @@ package practicaacs.fap;
 
 public class RespSaldo extends MensajeRespDatos {
 
+	private static final long serialVersionUID = -3030494096556041127L;
 	private boolean signo;
 	private int saldo;
 	
@@ -19,7 +20,7 @@ public class RespSaldo extends MensajeRespDatos {
 	public RespSaldo(String origen, String destino, int numcanal, int nmsg,
 			boolean codonline, CodigosRespuesta cod_resp, boolean signo,
 			int saldo) {
-		super(origen, destino,CodigosMensajes.RESCONSULTARSALDO , numcanal, nmsg, codonline, cod_resp);
+		super(origen, destino,CodigosMensajes.RESREANUDARTRAFICO , numcanal, nmsg, codonline, cod_resp);
 		this.signo = signo;
 		this.saldo = saldo;
 	}
@@ -27,6 +28,20 @@ public class RespSaldo extends MensajeRespDatos {
 	@Override
 	protected String printCuerpo() {
 		return String.format("%1i%10i",this.signo ? 1 : 0, this.saldo);
+	}
+	
+	
+	@Override
+	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+		super.parseComp(bs);
+		try{
+			if(bs.toString().length() == 39 && ( bs.toString().charAt(28) == '+' || bs.toString().charAt(28) == '-')){
+				this.signo = bs.toString().charAt(28) == '+';
+				this.saldo = new Integer(bs.toString().substring(29, 38));
+			}
+		}catch(NumberFormatException e){}
+		
+		throw new MensajeNoValidoException();
 	}
 	
 }

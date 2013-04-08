@@ -2,8 +2,9 @@ package practicaacs.fap;
 
 public class RespReintegro extends MensajeRespDatos {
 
+	private static final long serialVersionUID = 2560629111000703341L;
 	private boolean signo;
-	private long saldo;
+	private int saldo;
 	
 	/**
 	 * Constructor mensaje Respesta Reintegro.
@@ -18,7 +19,7 @@ public class RespReintegro extends MensajeRespDatos {
 	 */
 	public RespReintegro(String origen, String destino, int numcanal, int nmsg,
 			boolean codonline, CodigosRespuesta cod_resp, boolean signo,
-			long saldo) {
+			int saldo) {
 		super(origen, destino, CodigosMensajes.RESREINTEGRO, numcanal, nmsg, codonline, cod_resp);
 		
 		assert(saldo >= 0);
@@ -31,5 +32,20 @@ public class RespReintegro extends MensajeRespDatos {
 	protected String printCuerpo() {
 		return String.format("%1i%10i",this.signo ? 1 : 0, this.saldo);
 	}
+
+	@Override
+	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+		super.parseComp(bs);
+		try{
+			if(bs.toString().length() == 39 && ( bs.toString().charAt(28) == '+' || bs.toString().charAt(28) == '-')){
+				this.signo = bs.toString().charAt(28) == '+';
+				this.saldo = new Integer(bs.toString().substring(29, 38));
+			}
+		}catch(NumberFormatException e){}
+		
+		throw new MensajeNoValidoException();
+	}
+	
+	
 	
 }

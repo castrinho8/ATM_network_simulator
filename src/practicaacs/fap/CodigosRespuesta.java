@@ -30,5 +30,17 @@ public enum CodigosRespuesta {
 		return (new Integer(this.valor)).toString();
 		
 	}
+
+	public static CodigosRespuesta parse(String string) throws CodigoNoValidoException {
+		try{
+			int cod = new Integer(string);
+			for(CodigosRespuesta c : CodigosRespuesta.values()){
+				if(cod == c.valor)
+					return c;
+			}
+		}catch(NumberFormatException e){}
+		
+		throw new CodigoNoValidoException();
+	}
 	
 }

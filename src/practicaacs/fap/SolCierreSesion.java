@@ -2,6 +2,7 @@ package practicaacs.fap;
 
 public class SolCierreSesion extends Mensaje {
 
+	private static final long serialVersionUID = 8905474980740931695L;
 	private long total_reintegros;
 	private long abonos;
 	private long traspasos;
@@ -29,6 +30,18 @@ public class SolCierreSesion extends Mensaje {
 		this.traspasos = traspasos;
 	}
 
+	public long getTotal_reintegros() {
+		return total_reintegros;
+	}
+
+	public long getAbonos() {
+		return abonos;
+	}
+
+	public long getTraspasos() {
+		return traspasos;
+	}
+
 	@Override
 	protected String printCuerpo() {
 		return String.format("%10i%10i%10i",
@@ -37,4 +50,17 @@ public class SolCierreSesion extends Mensaje {
 				this.traspasos);
 	}
 
+	@Override
+	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+		super.parseComp(bs);
+		try{
+			if(bs.toString().length() == 59){
+				this.total_reintegros = new Integer(bs.toString().substring(29, 38));
+				this.abonos = new Integer(bs.toString().substring(39, 48));
+				this.traspasos = new Integer(bs.toString().substring(49, 58));
+			}
+		}catch(NumberFormatException e){}
+		
+		throw new MensajeNoValidoException();
+	}
 }
