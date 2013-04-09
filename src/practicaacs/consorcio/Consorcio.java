@@ -1,4 +1,4 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
 import java.io.*;
 import java.net.*;
@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.logging.*;
 
-import fap.EstadoSesion;
-import fap.Mensaje;
+import practicaacs.fap.*;
 
 public class Consorcio {
 

@@ -1,4 +1,4 @@
-package cajeros;
+package practicaacs.cajeros;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,8 +10,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import fap.*;
-
+import practicaacs.fap.*;
 
 public class Cajero{
 

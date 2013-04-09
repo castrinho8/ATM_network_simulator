@@ -1,54 +1,61 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Socket;
 import java.util.Date;
 
-import fap.*;
+import practicaacs.fap.*;
 
 public class ConexionConsorcio_Cajeros extends Thread{
 	
 	static private int num_next_message = 0;
 	
-	private Socket socket;
+	private DatagramPacket input_packet;
+	private DatagramSocket output_socket;
+	
 	private Consorcio consorcio;
+	private ServidorConsorcio_Cajeros servidor;
 
-	public ConexionConsorcio_Cajeros(Consorcio cons,Socket socket) {
+	public ConexionConsorcio_Cajeros(DatagramPacket paquete,Consorcio cons,ServidorConsorcio_Cajeros server,DatagramSocket socket) {
 		super();
-		this.socket = socket;
+		this.input_packet = paquete;
 		this.consorcio = cons;
+		this.servidor = server;
+		
+		this.output_socket = ;
+
 	}
 	
 	public void run() {
 		try {
-			Mensaje respuesta = null;
-			Mensaje recibido = null;
 			
-			//Creamos los buffers
-			OutputStream os = this.socket.getOutputStream();  
-			ObjectOutputStream o_buffer = new ObjectOutputStream(os);  
-			InputStream is = this.socket.getInputStream();  
-			ObjectInputStream i_buffer = new ObjectInputStream(is);  
+			//Creamos el mensaje correspondiente al recibido
+			Mensaje recibido = analizarMensaje(this.input_packet.getData());
 			
-			//Recibimos el mensaje
-			recibido = (Mensaje) i_buffer.readObject();
-
 			System.out.printf(recibido.toString());
 			
 			//Creamos la respuesta
-			respuesta = generar_respuesta(recibido);
+			Mensaje respuesta = generar_respuesta(recibido);
 			
 			System.out.printf(respuesta.toString());
 
 			//Enviamos el mensaje
-			o_buffer.writeObject(respuesta);
-			
-			os.close();
-			o_buffer.close();
-			this.socket.close();
+			while ((msgEnviar = mensajesAEnviar.poll()) != null){
+				DatagramPacket enviarPaquete = new DatagramPacket(msgEnviar.getBytes(), msgEnviar.size(), this.direccionIP, this.puerto);
+	
+				try{
+					socketServidor.send(enviarPaquete);
+				}catch (IOException e) {
+					System.out.println("Error al enviar");
+					System.exit ( 0 );
+				}
+			}
 		}
 		catch (Exception e) {
 	    // manipular las excepciones
@@ -56,7 +63,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	}
 	
 	
-	public RespSaldo consultar_saldo(ConsultaSaldo recibido){
+	public RespSaldo consultar_saldo(SolSaldo recibido){
 		
 		//cabecera
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -64,11 +71,11 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//subcabecera
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = this.consorcio.getBancos_server().consultar_protocolo(destino);
+		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		//cuerpo
 		CodigosRespuesta cod_resp = 
-				this.consorcio.getDatabase().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
-		int saldo = this.consorcio.getDatabase().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
+		int saldo = Database_lib.getInstance().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
 		boolean signo = (saldo>=0);
 				
 		RespSaldo respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo);
@@ -81,7 +88,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	
 			
 	
-	public RespConsMovimientos consultar_movimientos(ConsultaMovimientos recibido){
+	public RespMovimientos consultar_movimientos(SolMovimientos recibido){
 
 		//cabecera
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -89,21 +96,22 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//subcabecera
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = this.consorcio.getBancos_server().consultar_protocolo(destino);
+		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		//cuerpo
 		CodigosRespuesta cod_resp = 
-				this.consorcio.getDatabase().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
 		int nmovimientos;
-		TiposMovimiento tipo_mov;
+		CodigosMovimiento tipo_mov;
 		boolean signo;
 		int importe;
 		Date fecha;		
 		
-		RespConsMovimientos respuesta = new RespConsMovimientos(origen,destino,numcanal, nmsg,codonline,cod_resp,
+					
+		RespMovimientos respuesta = new RespMovimientos(origen,destino,numcanal, nmsg,codonline,cod_resp,
 				nmovimientos,tipo_mov,signo,importe,fecha);
 		
 		if(!procesa_datos(recibido,respuesta,codonline)) //Si la peticion debe ser rechazada
-			respuesta = new RespConsMovimientos(origen,destino,numcanal,nmsg,false,CodigosRespuesta.CONSDEN,
+			respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,false,CodigosRespuesta.CONSDEN,
 					nmovimientos,tipo_mov,signo,importe,fecha);
 
 		return respuesta;
@@ -159,19 +167,19 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		Mensaje respuesta = null;
 
 		switch(recibido.getTipoMensaje()){
-			case CONSULTARSALDO:
-				respuesta = consultar_saldo((ConsultaSaldo) recibido);
+			case SOLSALDO:
+				respuesta = consultar_saldo((SolSaldo) recibido);
 				break;
-			case CONSULTARMOVIMIENTOS:
-				respuesta = consultar_movimientos(recibido);
+			case SOLMOVIMIENTOS:
+				respuesta = consultar_movimientos((SolMovimientos) recibido);
 				break;
-			case REINTEGRO:
+			case SOLREINTEGRO:
 				respuesta = realizar_reintegro(recibido);
 				break;
-			case ABONO:
+			case SOLABONO:
 				respuesta = realizar_abono(recibido);
 				break;
-			case TRASPASO:
+			case SOLTRASPASO:
 				respuesta = realizar_traspaso(recibido);
 				break;
 			default:
@@ -192,7 +200,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				return false;
 			}else{
 				//almacenar en la base de datos
-				this.consorcio.getDatabase().almacenar_envio(recibido);
+				Database_lib.getInstance().almacenar_envio(recibido);
 			}
 		}else{
 			//reenviar al banco

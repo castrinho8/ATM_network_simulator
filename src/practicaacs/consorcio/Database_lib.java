@@ -1,9 +1,10 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import fap.*;
+import practicaacs.banco.estados.EstadoSesion;
+import practicaacs.fap.*;
 
 //Libreria de acceso a la base de datos
 public class Database_lib {
@@ -101,7 +102,14 @@ public class Database_lib {
 	public boolean hasSesion(String id_banco){
 		return false;
 	}
-		
+	
+	/**
+	 * Comprueba si la SESION admite envios o no.
+	 * True si los admite y False en caso contrario
+	 */
+	public boolean consultar_protocolo(String id_banco){
+		return false;
+	}
 	/**
 	 * Getter en SESION del estado de la conexion
 	 */

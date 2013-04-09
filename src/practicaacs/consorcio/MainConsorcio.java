@@ -1,4 +1,4 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
 import java.io.IOException;
 import java.util.ArrayList;

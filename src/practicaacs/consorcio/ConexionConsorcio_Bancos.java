@@ -1,4 +1,4 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -11,7 +11,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 
-import fap.*;
+import practicaacs.banco.estados.EstadoSesion;
+import practicaacs.fap.*;
 
 /**
  * Representa cada sesion establecida entre BANCO-CONSORCIO
@@ -118,7 +119,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			return CodigosError.TRAFNODET;
 		
 		//Solicitar FIN RECUPERACION y no esta en RECUPERACION
-		if((m.getTipoMensaje().equals(CodigosMensajes.SOLFINTRADICOREC))
+		if((m.getTipoMensaje().equals(CodigosMensajes.SOLFINREC))
 				&& (!Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(EstadoSesion.RECUPERACION)))
 			return CodigosError.NORECUPERACION;
 	
@@ -142,9 +143,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		switch(recibido.getTipoMensaje()){
 			//MENSAJES DE CONTROL
-			case SOLTRAFICOREC: //SOLICITAR recuperacion trafico (consorcio->banco)
+			case SOLINIREC: //SOLICITAR recuperacion trafico (consorcio->banco)
 				break;
-			case SOLFINTRADICOREC: //SOLICITAR fin recuperacion trafico (consorcio->banco)
+			case SOLFINREC: //SOLICITAR fin recuperacion trafico (consorcio->banco)
 				break;
 			case SOLABRIRSESION: //SOLICITAR abrir sesion (banco->consorcio)
 				respuesta = manejar_abrir_sesion((SolAperturaSesion) recibido);
@@ -158,35 +159,35 @@ public class ConexionConsorcio_Bancos extends Thread {
 			case SOLCIERRESESION: // SOLICITAR cerrar sesion (banco->consorcio)
 				respuesta = manejar_cerrar_sesion((SolCierreSesion) recibido);
 				break;
-			case TRAFICOREC: //recuperacion trafico (banco->consorcio)
+			case RESINIREC: //recuperacion trafico (banco->consorcio)
 				respuesta = iniciar_recuperacion((RespIniTraficoRecuperacion) recibido);
 				break;
-			case FINREC: //fin recuperacion trafico (banco->consorcio)
+			case RESFINREC: //fin recuperacion trafico (banco->consorcio)
 				respuesta = finalizar_recuperacion((RespFinTraficoRec) recibido);
 				break;
-			case ABRIRSESION: //abrir sesion (consorcio->banco)
+			case RESABRIRSESION: //abrir sesion (consorcio->banco)
 				break;
-			case DETENERTRAFICO: //detener trafico (consorcio->banco)
+			case RESDETENERTRAFICO: //detener trafico (consorcio->banco)
 				break;
-			case REANUDARTRAFICO: //reaundar trafico (consorcio->banco)
+			case RESREANUDARTRAFICO: //reaundar trafico (consorcio->banco)
 				break;
-			case CIERRESESION: //cierre sesion (consorcio->banco)
+			case RESCIERRESESION: //cierre sesion (consorcio->banco)
 				break;
 				//MENSAJES DE DATOS
-			case CONSULTARSALDO: //consultarsaldo (consorcio->banco)
+			case SOLSALDO: //consultarsaldo (consorcio->banco)
 				break;
-			case CONSULTARMOVIMIENTOS://consultar movimientos (consorcio->banco)
+			case SOLMOVIMIENTOS://consultar movimientos (consorcio->banco)
 				break;
-			case REINTEGRO: //reintegro (consorcio->banco)
+			case SOLREINTEGRO: //reintegro (consorcio->banco)
 				break;
-			case ABONO: //abono (consorcio->banco)
+			case SOLABONO: //abono (consorcio->banco)
 				break;
-			case TRASPASO: //traspaso (consorcio->banco)
+			case SOLTRASPASO: //traspaso (consorcio->banco)
 				break;
-			case RESCONSULTARSALDO: //respuesta consultar saldo (banco->consorcio)
+			case RESSALDO: //respuesta consultar saldo (banco->consorcio)
 				//	procesar_consulta_saldo();
 				break;
-			case RESCONSULTAMOV: //respuesta consultar movimientos (banco->consorcio)
+			case RESMOVIMIENTOS: //respuesta consultar movimientos (banco->consorcio)
 				//	procesar_consultar_movimiento();
 				break;
 			case RESREINTEGRO: //respuesta reintegro (banco->consorcio)
@@ -265,7 +266,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	/**
 	 * Inicia el proceso de recuperacion
 	 */
-	private void iniciar_recuperacion(RespIniTraficoRecuperacion recibido){
+	private void iniciar_recuperacion(RespIniTraficoRec recibido){
 		String id_banco = recibido.getOrigen();
 		
 		Database_lib.getInstance().setEstado_conexion_banco(id_banco,EstadoSesion.RECUPERACION);

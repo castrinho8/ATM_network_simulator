@@ -1,4 +1,4 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +10,8 @@ import java.net.Socket;
 import java.util.Calendar;
 import java.util.Hashtable;
 
-import fap.*;
+import practicaacs.banco.estados.EstadoSesion;
+import practicaacs.fap.*;
 
 
 public class ServidorConsorcio_Bancos {
