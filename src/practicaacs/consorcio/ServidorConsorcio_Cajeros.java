@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.logging.*;
 
 import practicaacs.banco.estados.EstadoSesion;
@@ -14,46 +15,40 @@ public class ServidorConsorcio_Cajeros {
 
 	private int port;
 	private Consorcio consorcio;
-	private EstadoSesion estado_serv_cajeros;
+	
+	private boolean abierto_serv_cajeros;
 	private DatagramSocket socketServidor;
 
 	/**
 	 * Constructor de la clase ServidorConsorcio_Cajeros
 	 */
 	public ServidorConsorcio_Cajeros(Consorcio cons,int puerto) throws IOException{
-		super();
-		this.port = puerto;
 		this.consorcio = cons;
-		this.estado_serv_cajeros = EstadoSesion.ACTIVA;
+		this.port = puerto;
+		this.abierto_serv_cajeros = false;
 		
 		try {
-			 socketServidor = new DatagramSocket(puerto);
+			 socketServidor = new DatagramSocket(this.port);
 		 }catch (IOException e) {
 			 System.out.println("Error al crear el objeto socket servidor");
 			 System.exit(-1);
 		 }
-		
-		try {
+		try { //Establece un timeout
 			socketServidor.setSoTimeout(1000);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	
 	//-------GETTERS & SETTERS-------
 	public int getPuerto() {
 		return port;
 	}
 	
-    public EstadoSesion getEstado() {
-		return estado_serv_cajeros;
+    public boolean isOnline() {
+		return abierto_serv_cajeros;
 	}
-
-	public void setEstado(EstadoSesion estado) {
-		this.estado_serv_cajeros = estado;
-	}
-
-	
 	//-------END GETTERS & SETTERS-------
 
 	/**
@@ -66,19 +61,21 @@ public class ServidorConsorcio_Cajeros {
 		
     	Calendar time = Calendar.getInstance();
     	System.out.println("APERTURA: Sesion Servidor de Cajeros comenzada a las " + time.getTime());
-    	this.estado_serv_cajeros = EstadoSesion.ACTIVA;
+    	this.abierto_serv_cajeros = true;
 
-		while(true){
-		
+		while(this.abierto_serv_cajeros){
+			//Crea el Datagrama en donde recibir los datos
 			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
-
 			try{
+				//Recibe datos
 				socketServidor.receive(inputPacket);
 				
 				//this.analizarMensaje(recibirPaquete.getData());
-	    	    Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this,this.socketServidor);
+				
+				//Crea un thread para tratar el Datagrama recibido
+				Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this,this.socketServidor);
 	    	    t.start();
-	    	     
+	    	    
 			}catch (SocketTimeoutException e){
 			
 			}catch (IOException e) {
@@ -94,7 +91,7 @@ public class ServidorConsorcio_Cajeros {
      * Cierra el servidorCajeros
      */
     public void cierra_servidorCajeros(){
-    	this.estado_serv_cajeros = EstadoSesion.CERRADA;
+    	this.abierto_serv_cajeros = false;
     }
     
     

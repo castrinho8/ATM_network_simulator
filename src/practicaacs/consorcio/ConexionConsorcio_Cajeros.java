@@ -14,8 +14,6 @@ import practicaacs.fap.*;
 
 public class ConexionConsorcio_Cajeros extends Thread{
 	
-	static private int num_next_message = 0;
-	
 	private DatagramPacket input_packet;
 	private DatagramSocket output_socket;
 	
@@ -27,34 +25,27 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		this.input_packet = paquete;
 		this.consorcio = cons;
 		this.servidor = server;
-		
-		this.output_socket = ;
-
+		this.output_socket = socket;
 	}
 	
 	public void run() {
 		try {
-			
 			//Creamos el mensaje correspondiente al recibido
 			Mensaje recibido = analizarMensaje(this.input_packet.getData());
-			
 			System.out.printf(recibido.toString());
 			
 			//Creamos la respuesta
 			Mensaje respuesta = generar_respuesta(recibido);
-			
 			System.out.printf(respuesta.toString());
 
-			//Enviamos el mensaje
-			while ((msgEnviar = mensajesAEnviar.poll()) != null){
-				DatagramPacket enviarPaquete = new DatagramPacket(msgEnviar.getBytes(), msgEnviar.size(), this.direccionIP, this.puerto);
-	
-				try{
-					socketServidor.send(enviarPaquete);
-				}catch (IOException e) {
-					System.out.println("Error al enviar");
-					System.exit ( 0 );
-				}
+			//Creamos el datagrama
+			DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),this.output_socket.getInetAddress(), this.output_socket.getPort());
+			try{
+				//Enviamos el mensaje
+				this.output_socket.send(enviarPaquete);
+			}catch (IOException e) {
+				System.out.println("Error al enviar");
+				System.exit ( 0 );
 			}
 		}
 		catch (Exception e) {

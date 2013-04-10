@@ -5,8 +5,10 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Calendar;
 import java.util.Hashtable;
 
@@ -19,16 +21,29 @@ public class ServidorConsorcio_Bancos {
 	private int port;
 	private Consorcio consorcio;
 	
-	private EstadoSesion estado_serv_bancos;
-	
+	private boolean abierto_serv_bancos;
+	private DatagramSocket socketServidor;
+
 	/**
 	 * Constructor de la clase ServidorConsorcio_Cajeros
 	 */
 	public ServidorConsorcio_Bancos(Consorcio cons,int puerto) throws IOException{
-		super();
-		this.port = puerto;
 		this.consorcio = cons;
-		this.estado_serv_bancos = EstadoSesion.ACTIVA;
+		this.port = puerto;
+
+		this.abierto_serv_bancos = false;
+		
+		try {
+			 socketServidor = new DatagramSocket(this.port);
+		 }catch (IOException e) {
+			 System.out.println("Error al crear el objeto socket servidor");
+			 System.exit(-1);
+		 }
+		try { //Establece un timeout
+			socketServidor.setSoTimeout(1000);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	//-------GETTERS & SETTERS-------
@@ -36,8 +51,13 @@ public class ServidorConsorcio_Bancos {
 		return port;
 	}
 	
+	public boolean isOnline() {
+		return abierto_serv_bancos;
+	}
 	//-------END GETTERS & SETTERS-------
 	
+
+
 	/**
      * Levanta el servidorBancos
      */
@@ -47,7 +67,7 @@ public class ServidorConsorcio_Bancos {
     	Calendar time = Calendar.getInstance();
     	System.out.println("APERTURA: Sesion Servidor de Bancos comenzada a las " + time.getTime());
 
-		while (this.estado_serv_bancos == EstadoSesion.ACTIVA) {
+		while (this.abierto_serv_bancos) {
 			Socket incoming = servidor.accept();
 
 			Thread t = new ConexionConsorcio_Bancos(this.consorcio,this,incoming);
@@ -62,7 +82,7 @@ public class ServidorConsorcio_Bancos {
      * Cierra el servidorBancos
      */
     public void cierra_servidorBancos(){
-    	this.estado_serv_bancos = EstadoSesion.CERRADA;
+    	this.abierto_serv_bancos = false;
     	//cerrar todas las conexiones con los bancos
     	for(Object sesion : Database_lib.getInstance().getSesiones()){
 

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class MainConsorcio {
 	
 	public static void main(String[] args) throws IOException {
-		Consorcio cons = new Consorcio();
+		Consorcio cons = new Consorcio(args[0]);
 		cons.getCajeros_server().levantar_servidorCajeros();
 		
 		
