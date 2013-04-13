@@ -70,12 +70,10 @@ public class ServidorConsorcio_Cajeros {
 				//Recibe datos
 				socketServidor.receive(inputPacket);
 				
-				//this.analizarMensaje(recibirPaquete.getData());
-				
 				//Crea un thread para tratar el Datagrama recibido
 				Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this,this.socketServidor);
-	    	    t.start();
-	    	    
+				t.start();
+
 			}catch (SocketTimeoutException e){
 			
 			}catch (IOException e) {
@@ -94,5 +92,5 @@ public class ServidorConsorcio_Cajeros {
     	this.abierto_serv_cajeros = false;
     }
     
-    
 }
+

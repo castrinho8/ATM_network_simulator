@@ -14,6 +14,4 @@ public class Movemento {
 		this.tipo = tipo;
 	}
 	
-	
-	
 }

@@ -65,7 +65,6 @@ public abstract class Mensaje implements java.io.Serializable {
 	public boolean es_consulta(){
 		return ((tipoMensaje == CodigosMensajes.SOLSALDO) | (tipoMensaje == CodigosMensajes.SOLMOVIMIENTOS));
 	}
-
 	
 	@Override
 	public String toString(){

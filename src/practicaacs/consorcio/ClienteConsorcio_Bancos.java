@@ -3,7 +3,6 @@ package practicaacs.consorcio;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Hashtable;
 
 import practicaacs.fap.*;
 
