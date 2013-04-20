@@ -1,16 +1,10 @@
 package practicaacs.consorcio;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Date;
 
 import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.fap.*;
@@ -18,20 +12,18 @@ import practicaacs.fap.*;
 public class ConexionConsorcio_Cajeros extends Thread{
 	
 	private Consorcio consorcio;
-	private ServidorConsorcio_Cajeros servidor;
 	
 	private DatagramPacket input_packet;
 	private DatagramSocket output_socket;
 	
 	/**
-	 * Constructor de la clase.
+	 * Constructor de la clase ConexionConsorcio_Cajeros.
 	 * @param paquete El paquete a enviar.
-	 * @param cons El consorcio
-	 * @param socket
+	 * @param cons El consorcio correspondiente.
+	 * @param socket El socket para la conexión creada.
 	 */
-	public ConexionConsorcio_Cajeros(DatagramPacket paquete,Consorcio cons,ServidorConsorcio_Cajeros s, DatagramSocket socket) {
+	public ConexionConsorcio_Cajeros(DatagramPacket paquete,Consorcio cons, DatagramSocket socket) {
 		super();
-		this.servidor = s;
 		this.consorcio = cons;
 		
 		this.input_packet = paquete;
@@ -72,6 +64,63 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		}catch (IOException e) {
 			System.out.println("Error al enviar");
 			System.exit ( 0 );
+		}
+	}
+	
+	/**
+	 * Función que selecciona la accion a realizar en funcion del tipo de mensaje recibido.
+	 * @param recibido El mensaje que recibimos.
+	 */
+	private void analizar_mensaje(Mensaje recibido){
+		switch(recibido.getTipoMensaje()){
+			case SOLSALDO:{
+				consultar_saldo((SolSaldo) recibido);
+				break;
+			}
+			case SOLMOVIMIENTOS:{
+				consultar_movimientos((SolMovimientos) recibido);
+				break;
+			}
+			case SOLREINTEGRO:{
+				realizar_reintegro((SolReintegro) recibido);
+				break;
+			}
+			case SOLABONO:{
+				realizar_abono((SolAbono) recibido);
+				break;
+			}
+			case SOLTRASPASO:{
+				realizar_traspaso((SolTraspaso) recibido);
+				break;
+			}
+			default:{
+				System.out.println("Error: Tipo de mensaje no reconocido.");
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * Función que analiza si se rechaza la petición, se almacena para enviar (en caso de que no se pueda enviar
+	 * en el momento o si se reenvia directamente al banco.
+	 * @param recibido El mensaje a analizar.
+	 * @param protocolo Indica True si esta levantada la sesion y False en caso contrario.
+	 * @param cod_resp El código que indica si la consulta ha sido aceptada o no.
+	 * @return El EstadoEnvio correspondiente al caso.
+	 */
+	private EstadoEnvio obtiene_tipo_envio(Mensaje recibido,boolean protocolo,CodigosRespuesta cod_resp){
+		
+		if(!cod_resp.equals(CodigosRespuesta.CONSACEPTADA))
+			return EstadoEnvio.RECHAZAR_PETICION;
+		
+		if(!protocolo){
+			if(recibido.es_consulta()){
+				return EstadoEnvio.RECHAZAR_PETICION;
+			}else{
+				return EstadoEnvio.ALMACENAMIENTO;
+			}
+		}else{
+			return EstadoEnvio.ENVIO_CORRECTO;
 		}
 	}
 	
@@ -123,7 +172,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	}
 	
 			
-	
+	/**
+	 * Función que implementa el comportamiento de la consulta de movimientos.
+	 * @param recibido El mensaje de consulta de movimientos recibido
+	 */
 	public void consultar_movimientos(SolMovimientos recibido){
 
 		//cabecera
@@ -311,51 +363,5 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		}
 	}
 	
-	
-	private void analizar_mensaje(Mensaje recibido){
-		switch(recibido.getTipoMensaje()){
-			case SOLSALDO:
-				consultar_saldo((SolSaldo) recibido);
-				break;
-			case SOLMOVIMIENTOS:
-				consultar_movimientos((SolMovimientos) recibido);
-				break;
-			case SOLREINTEGRO:
-				realizar_reintegro((SolReintegro) recibido);
-				break;
-			case SOLABONO:
-				realizar_abono((SolAbono) recibido);
-				break;
-			case SOLTRASPASO:
-				realizar_traspaso((SolTraspaso) recibido);
-				break;
-			default:
-				System.out.println("Error: Tipo de mensaje no reconocido.");
-				break;
-		}
-	}
-	
-	/**
-	 * En funcion del estado del protocolo, reenvia los datos al banco, los almacena en la BD o rechaza la peticion.
-	 * Devuelve False si se rechaza la peticion y True en el resto de casos.
-	 */
-	private EstadoEnvio obtiene_tipo_envio(Mensaje recibido,boolean protocolo,CodigosRespuesta cod_resp){
-		
-		if(!cod_resp.equals(CodigosRespuesta.CONSACEPTADA))
-			return EstadoEnvio.RECHAZAR_PETICION;
-		
-		if(!protocolo){
-			if(recibido.es_consulta()){
-				//rechazar peticion
-				return EstadoEnvio.RECHAZAR_PETICION;
-			}else{
-				//almacenar en la base de datos
-				return EstadoEnvio.ALMACENAMIENTO;
-			}
-		}else{
-			//reenviar al banco
-			return EstadoEnvio.ENVIO_CORRECTO;
-		}
-	}
 	
 }

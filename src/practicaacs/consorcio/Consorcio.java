@@ -23,6 +23,7 @@ public class Consorcio {
 	
 	/**
 	 * Constructor de la clase Consorcio
+	 * @param file El path al archivo de propiedades.
 	 * @throws IOException 
 	 */
     public Consorcio(String file) throws IOException{
@@ -40,9 +41,9 @@ public class Consorcio {
 		}
 		
     	//leer datos de ficheros
-		this.address = InetAddress.getByName(prop.getProperty("addres"));
-		int puerto_cajeros = new Integer(prop.getProperty("cash_port"));
-		int puerto_bancos = new Integer(prop.getProperty("bank_port"));
+		this.address = InetAddress.getByName(prop.getProperty("consorcio.address"));
+		int puerto_cajeros = new Integer(prop.getProperty("consorcio.cash_server.port"));
+		int puerto_bancos = new Integer(prop.getProperty("consorcio.bank_server.port"));
 		
 		this.id_consorcio = next_id_consorcio++;
 		this.cajeros_server = new ServidorConsorcio_Cajeros(this,puerto_cajeros);

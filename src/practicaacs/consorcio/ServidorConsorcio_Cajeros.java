@@ -3,12 +3,6 @@ package practicaacs.consorcio;
 import java.io.*;
 import java.net.*;
 import java.util.Calendar;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.logging.*;
-
-import practicaacs.banco.estados.EstadoSesion;
-import practicaacs.fap.*;
 
 
 public class ServidorConsorcio_Cajeros {
@@ -21,6 +15,8 @@ public class ServidorConsorcio_Cajeros {
 
 	/**
 	 * Constructor de la clase ServidorConsorcio_Cajeros
+	 * @param cons Consorcio asociado.
+	 * @param puerto El puerto en el que se va a establecer el servidor.
 	 */
 	public ServidorConsorcio_Cajeros(Consorcio cons,int puerto) throws IOException{
 		this.consorcio = cons;
@@ -34,7 +30,7 @@ public class ServidorConsorcio_Cajeros {
 			 System.exit(-1);
 		 }
 		try { //Establece un timeout
-			socketServidor.setSoTimeout(1000);
+			socketServidor.setSoTimeout(10000);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
@@ -56,7 +52,6 @@ public class ServidorConsorcio_Cajeros {
      */
     public void levantar_servidorCajeros() throws IOException{
     	
-		Mensaje msgEnviar;
 		byte [] recibirDatos = new byte[1024];
 		
     	Calendar time = Calendar.getInstance();
@@ -71,11 +66,11 @@ public class ServidorConsorcio_Cajeros {
 				socketServidor.receive(inputPacket);
 				
 				//Crea un thread para tratar el Datagrama recibido
-				Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this,this.socketServidor);
+				Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this.socketServidor);
 				t.start();
 
 			}catch (SocketTimeoutException e){
-			
+				cierra_servidorCajeros();
 			}catch (IOException e) {
 				System.out.println("Error al recibir");
 				System.exit ( 0 );

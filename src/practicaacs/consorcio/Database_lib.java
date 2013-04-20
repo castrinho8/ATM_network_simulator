@@ -25,7 +25,7 @@ public class Database_lib {
 	}
 	
 	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino){
-		return null;
+		return CodigosRespuesta.CONSACEPTADA;
 	}
 	
 	public int consultar_saldo(String tarjeta, int cuenta){
@@ -98,7 +98,7 @@ public class Database_lib {
 	 * Comprueba en SESION si el banco introducido por parámetro tiene sesión.
 	 */
 	public boolean hasSesion(String id_banco){
-		return false;
+		return true;
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class Database_lib {
 	 * True si los admite y False en caso contrario
 	 */
 	public boolean consultar_protocolo(String id_banco){
-		return false;
+		return true;
 	}
 	
 	/**

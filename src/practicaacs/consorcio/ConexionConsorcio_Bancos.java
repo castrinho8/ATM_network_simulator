@@ -54,7 +54,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			//Creamos la respuesta
 			Mensaje respuesta = generar_respuesta(recibido);
 			System.out.printf(respuesta.toString());
-
+			
 			//Creamos el datagrama
 			DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),this.output_socket.getInetAddress(), this.output_socket.getPort());
 			try{
