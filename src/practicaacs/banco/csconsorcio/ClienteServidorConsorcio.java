@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -13,23 +14,23 @@ import practicaacs.fap.Mensaje;
 
 public class ClienteServidorConsorcio extends Thread {
 
-	int puerto;
 	private BlockingQueue<Mensaje> mensajesAEnviar;
 	private AnalizadorMensajes analizador;
 	private DatagramSocket socketServidor;
-	private InetAddress direccionIP;
+	private String hostBanco;
+	private int puertoBanco;
 	private String hostConsorcio;
 	private int puertoConsorcio;
 	
-	public ClienteServidorConsorcio(int puerto, String hostconsorcio, int puertoconsorcio, AnalizadorMensajes analizador){
-		this.puerto = puerto;
+	public ClienteServidorConsorcio(int puertobanco, String hostconsorcio, int puertoconsorcio, AnalizadorMensajes analizador){
+		this.puertoBanco = puertobanco;
 		this.analizador = analizador;
 		this.hostConsorcio = hostconsorcio;
 		this.puertoConsorcio = puertoconsorcio;
 		this.mensajesAEnviar = new  LinkedBlockingQueue<Mensaje>();
 		
 		try {
-			 socketServidor = new DatagramSocket(puerto);
+			 socketServidor = new DatagramSocket(puertoBanco);
 		 }catch (IOException e) {
 			 System.out.println("Error al crear el objeto socket servidor");
 			 System.exit(-1);
@@ -55,6 +56,13 @@ public class ClienteServidorConsorcio extends Thread {
 	public void run() {
 		Mensaje msgEnviar;
 		byte [] recibirDatos = new byte[1024];
+		InetAddress ipconsorcio;
+		try {
+			ipconsorcio = InetAddress.getByName(this.hostConsorcio);
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+			return;
+		}
 		
 		while(true){
 		
@@ -71,7 +79,7 @@ public class ClienteServidorConsorcio extends Thread {
 			}
 			 
 			while ((msgEnviar = mensajesAEnviar.poll()) != null){
-				DatagramPacket enviarPaquete = new DatagramPacket(msgEnviar.getBytes(), msgEnviar.size(), this.direccionIP, this.puerto);
+				DatagramPacket enviarPaquete = new DatagramPacket(msgEnviar.getBytes(), msgEnviar.size(), ipconsorcio, this.puertoConsorcio);
 	
 				try{
 					socketServidor.send(enviarPaquete);

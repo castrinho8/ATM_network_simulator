@@ -24,9 +24,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import practicaacs.banco.Banco;
-import practicaacs.banco.Conta;
-import practicaacs.banco.Movemento;
-import practicaacs.banco.Tarxeta;
+import practicaacs.banco.bd.Conta;
+import practicaacs.banco.bd.Movemento;
+import practicaacs.banco.bd.Tarxeta;
 
 /**
  *

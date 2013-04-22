@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -16,6 +17,9 @@ import practicaacs.fap.SolDetTrafico;
 import practicaacs.fap.SolReanTrafico;
 
 import practicaacs.banco.bd.ClienteBDBanco;
+import practicaacs.banco.bd.Conta;
+import practicaacs.banco.bd.Movemento;
+import practicaacs.banco.bd.Tarxeta;
 import practicaacs.banco.csconsorcio.AnalizadorMensajes;
 import practicaacs.banco.csconsorcio.ClienteServidorConsorcio;
 import practicaacs.banco.estados.EstadoSesion;
@@ -35,6 +39,10 @@ public class Banco implements AnalizadorMensajes{
 	private VentanaBanco iu;
 	private ClienteServidorConsorcio cs;
 	private EstadoSesion estado;
+	private String idconsorcio;
+	private String idbanco;
+	private String portBanco;
+	private int idSesion;
 	
 	/**
 	 * Constructor do banco a partir dun ficheiro de configuración.
@@ -53,17 +61,23 @@ public class Banco implements AnalizadorMensajes{
 			e.printStackTrace();
 		}
 		
-		String bdname = prop.getProperty("bd.name");
-		String bdadd = prop.getProperty("bd.add");
-		String bduser = prop.getProperty("bd.user");
-		String bdpass = prop.getProperty("bd.pass");
+		this.idbanco = prop.getProperty("banco.id");
+		this.idconsorcio = prop.getProperty("consorcio.id");
+		
+		String bdname = prop.getProperty("banco.bd.name");
+		String bdadd = prop.getProperty("banco.bd.add");
+		String bduser = prop.getProperty("banco.bd.user");
+		String bdpass = prop.getProperty("banco.bd.pass");
 		this.bd = new ClienteBDBanco("jdbc:mysql://" + bdadd + "/" + bdname + "?user=" + bduser + "&password=" + bdpass);
 		
 		int puerto = new Integer(prop.getProperty("banco.port"));
 		int puertoconsorcio = new Integer(prop.getProperty("consorcio.port"));
-		String hostconsorcio = prop.getProperty("consorcio.host");
+		String hostconsorcio = prop.getProperty("consorcio.add");
 		this.cs = new ClienteServidorConsorcio(puerto, hostconsorcio, puertoconsorcio, this);
 		this.cs.start();
+		
+		this.portBanco = prop.getProperty("banco.add") + "/" + prop.getProperty("banco.port");
+
 		
 		this.iu = new VentanaBanco(this,prop.getProperty("banco.name"));
 		this.iu.setVisible(true);
@@ -77,9 +91,13 @@ public class Banco implements AnalizadorMensajes{
 	 * @param hostconsorcio Host do consorcio.
 	 * @param portconsorcio Porto do consorcio.
 	 */
-	public Banco(String nombre, String bdurl, int puerto,String hostconsorcio, int portconsorcio) {
+	public Banco(String nombre, String idbanco, String idconsorcio, String portBanco, String bdurl, int puerto,String hostconsorcio, int portconsorcio) {
 		
 		this.bd = new ClienteBDBanco(bdurl);
+		
+		this.idbanco = idbanco;
+		this.idconsorcio = idconsorcio;
+		this.portBanco = portBanco;
 		
 		this.cs = new ClienteServidorConsorcio(puerto, hostconsorcio, portconsorcio, this);
 		this.cs.start();
@@ -199,7 +217,8 @@ public class Banco implements AnalizadorMensajes{
 	}
 
 	/**
-	 * Metodo que analiza unha mensaxe recibida.
+	 * Método que analiza unha mensaxe recibida.
+	 * @param bs mensaxe recibido
 	 */
 	@Override
 	public void analizarMensaje(byte[] bs) {
@@ -219,7 +238,7 @@ public class Banco implements AnalizadorMensajes{
 	 * @param canales Canles cas que se abre a sesion.
 	 */
 	public void solicitarAbrirSesion(int canales){
-		Mensaje m = new SolAperturaSesion(null, null, canales, null, null); //TODO
+		Mensaje m = new SolAperturaSesion(this.idbanco,this.idconsorcio, canales, new Date(), this.portBanco); //TODO
 		try {
 			this.cs.enviarMensaje(m);
 		} catch (InterruptedException e) {
@@ -234,7 +253,7 @@ public class Banco implements AnalizadorMensajes{
 	 * Metodo que solicita a reanudacion do tráfico que se atopa detido.
 	 */
 	public void solicitarReanudarTrafico(){
-		Mensaje m = new SolReanTrafico(null, null);//TODO
+		Mensaje m = new SolReanTrafico(this.idbanco, this.idconsorcio);
 		try {
 			this.cs.enviarMensaje(m);
 		} catch (InterruptedException e) {
@@ -249,7 +268,7 @@ public class Banco implements AnalizadorMensajes{
 	 * Metodo que solicita a detencion do trafico.
 	 */
 	public void solicitarDeterTrafico(){
-		Mensaje m = new SolDetTrafico(null, null);//TODO
+		Mensaje m = new SolDetTrafico(this.idbanco,this.idconsorcio);
 		try {
 			this.cs.enviarMensaje(m);
 		} catch (InterruptedException e) {
@@ -264,7 +283,11 @@ public class Banco implements AnalizadorMensajes{
 	 * Metodo que solicita o peche da sesion.
 	 */
 	public void solicitarPecheSesion(){
-		Mensaje m = new SolCierreSesion(null, null, 0, 0, 0);
+		int total_reintegros = this.bd.getTotalReintegrosSesion(this.idSesion);
+		int total_abonos = this.bd.getTotalAbonosSesion(this.idSesion);
+		int total_traspasos = this.bd.getTotalTraspasosSesion(this.idSesion);
+
+		Mensaje m = new SolCierreSesion(this.idbanco, this.idconsorcio, total_reintegros, total_abonos, total_traspasos);
 		try {
 			this.cs.enviarMensaje(m);
 		} catch (InterruptedException e) {
@@ -327,6 +350,7 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void facerConsultaSaldo(int ncanal,int nmsg, boolean online,String numtarx,int numConta){
 		bd.getConta(numtarx, numConta);
+	
 	}
 	
 	/**

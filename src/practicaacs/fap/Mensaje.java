@@ -17,31 +17,33 @@ public abstract class Mensaje implements java.io.Serializable {
 		this.tipoMensaje = tipoMensaje;
 		this.origen = origen;
 		this.destino = destino;
-				
-		codigo_clase.put(CodigosMensajes.SOLINIREC,SolIniTraficoRec.class);
-		codigo_clase.put(CodigosMensajes.SOLFINREC,SolFinTraficoRec.class);
-		codigo_clase.put(CodigosMensajes.SOLABRIRSESION, SolAperturaSesion.class );
-		codigo_clase.put(CodigosMensajes.SOLDETENERTRAFICO,  SolDetTrafico.class);
-		codigo_clase.put(CodigosMensajes.SOLREANUDARTRAFICO, SolReanTrafico.class);
-		codigo_clase.put(CodigosMensajes.SOLCIERRESESION, SolCierreSesion.class);
-		codigo_clase.put(CodigosMensajes.SOLSALDO, SolSaldo.class);
-		codigo_clase.put(CodigosMensajes.SOLMOVIMIENTOS, SolMovimientos.class);
-		codigo_clase.put(CodigosMensajes.SOLREINTEGRO, SolReintegro.class);
-		codigo_clase.put(CodigosMensajes.SOLABONO,  SolAbono.class);
-		codigo_clase.put(CodigosMensajes.SOLTRASPASO, SolTraspaso.class);
 		
-		codigo_clase.put(CodigosMensajes.RESINIREC, RespIniTraficoRec.class);
-		codigo_clase.put(CodigosMensajes.RESFINREC, RespFinTraficoRec.class);
-		codigo_clase.put(CodigosMensajes.RESABRIRSESION, RespAperturaSesion.class);
-		codigo_clase.put(CodigosMensajes.RESCIERRESESION, RespCierreSesion.class);
-		codigo_clase.put(CodigosMensajes.RESDETENERTRAFICO, RespDetTrafico.class);
-		codigo_clase.put(CodigosMensajes.RESREANUDARTRAFICO, RespReanTrafico.class);
-		codigo_clase.put(CodigosMensajes.RESSALDO, RespSaldo.class);
-		codigo_clase.put(CodigosMensajes.RESMOVIMIENTOS, RespMovimientos.class);
-		codigo_clase.put(CodigosMensajes.RESREINTEGRO, RespReintegro.class);
-		codigo_clase.put(CodigosMensajes.RESABONO, RespAbono.class);
-		codigo_clase.put(CodigosMensajes.RESTRASPASO, RespTraspaso.class);
-
+		if(codigo_clase == null){
+			codigo_clase = new HashMap<CodigosMensajes,Class<? extends Mensaje>>();
+			codigo_clase.put(CodigosMensajes.SOLINIREC,SolIniTraficoRec.class);
+			codigo_clase.put(CodigosMensajes.SOLFINREC,SolFinTraficoRec.class);
+			codigo_clase.put(CodigosMensajes.SOLABRIRSESION, SolAperturaSesion.class );
+			codigo_clase.put(CodigosMensajes.SOLDETENERTRAFICO,  SolDetTrafico.class);
+			codigo_clase.put(CodigosMensajes.SOLREANUDARTRAFICO, SolReanTrafico.class);
+			codigo_clase.put(CodigosMensajes.SOLCIERRESESION, SolCierreSesion.class);
+			codigo_clase.put(CodigosMensajes.SOLSALDO, SolSaldo.class);
+			codigo_clase.put(CodigosMensajes.SOLMOVIMIENTOS, SolMovimientos.class);
+			codigo_clase.put(CodigosMensajes.SOLREINTEGRO, SolReintegro.class);
+			codigo_clase.put(CodigosMensajes.SOLABONO,  SolAbono.class);
+			codigo_clase.put(CodigosMensajes.SOLTRASPASO, SolTraspaso.class);
+			
+			codigo_clase.put(CodigosMensajes.RESINIREC, RespIniTraficoRec.class);
+			codigo_clase.put(CodigosMensajes.RESFINREC, RespFinTraficoRec.class);
+			codigo_clase.put(CodigosMensajes.RESABRIRSESION, RespAperturaSesion.class);
+			codigo_clase.put(CodigosMensajes.RESCIERRESESION, RespCierreSesion.class);
+			codigo_clase.put(CodigosMensajes.RESDETENERTRAFICO, RespDetTrafico.class);
+			codigo_clase.put(CodigosMensajes.RESREANUDARTRAFICO, RespReanTrafico.class);
+			codigo_clase.put(CodigosMensajes.RESSALDO, RespSaldo.class);
+			codigo_clase.put(CodigosMensajes.RESMOVIMIENTOS, RespMovimientos.class);
+			codigo_clase.put(CodigosMensajes.RESREINTEGRO, RespReintegro.class);
+			codigo_clase.put(CodigosMensajes.RESABONO, RespAbono.class);
+			codigo_clase.put(CodigosMensajes.RESTRASPASO, RespTraspaso.class);
+		}
 		
 	}
 
@@ -77,7 +79,7 @@ public abstract class Mensaje implements java.io.Serializable {
 	}
 
 	protected String printCabecera() {
-		return String.format("%8s%8s%2i", origen,destino,this.tipoMensaje.getNum());
+		return String.format("%8s%8s%2d", origen,destino,this.tipoMensaje.getNum());
 	}
 	
 	public int size() {

@@ -4,9 +4,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import practicaacs.banco.Conta;
-import practicaacs.banco.Movemento;
-import practicaacs.banco.Tarxeta;
 
 public class ClienteBDBanco {
 	private Connection con;
@@ -200,6 +197,21 @@ public class ClienteBDBanco {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public int getTotalReintegrosSesion(int idSesion) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public int getTotalAbonosSesion(int idSesion) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public int getTotalTraspasosSesion(int idSesion) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 }
