@@ -7,5 +7,6 @@
 			<attribute name="javadoc_location" value="file:/home/ch01/Dropbox/UNI_Fedora/ACS/RepositorioPractica/lib/mysql-connector-java/docs/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="forms-1.3.0.jar" sourcepath="forms-1.3.0-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

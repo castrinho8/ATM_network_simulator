@@ -1,9 +1,11 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import fap.*;
+import practicaacs.banco.estados.EstadoSesion;
+import practicaacs.consorcio.aux.Movimiento;
+import practicaacs.fap.*;
 
 //Libreria de acceso a la base de datos
 public class Database_lib {
@@ -22,16 +24,16 @@ public class Database_lib {
 		return instancia;
 	}
 	
-	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta){
-		return null;
+	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino){
+		return CodigosRespuesta.CONSACEPTADA;
 	}
 	
 	public int consultar_saldo(String tarjeta, int cuenta){
 		return 0;
 	}
 
-	public String consultar_movimientos(int tarjeta){
-		return "";
+	public ArrayList<Movimiento> consultar_movimientos(String tarjeta,int cuenta){
+		return null;
 	}
 
 	/**
@@ -39,18 +41,8 @@ public class Database_lib {
 		En general se aplica al pago o devolución de lo que se debe.
 		En el contexto de cuentas bancarias se aplica a una disposición de efectivo. 
 	*/
-	public void realizar_reintegro(){
-		
-	}
-	
-	/**
-	 *  Abono en cuenta
-		Asiento o anotación en el haber de una cuenta, que aumenta el saldo de la misma.
-		Los cheques con la mención "para abonar en cuenta" o expresión similar en el anverso sólo se podrán hacer
-		efectivos si previamente se realiza su ingreso en una cuenta corriente, nunca directamente en ventanilla. 
-	 */
-	public void realizar_abono(){
-		
+	public int realizar_reintegro(String tarjeta,int cuenta,int importe){
+		return 0; //devuelve el nuevo saldo
 	}
 	
 	/**
@@ -60,12 +52,19 @@ public class Database_lib {
 		para que esta la transmita a aquella de la que proceden los fondos. 
 		El importe máximo de la orden de traspaso será de 150.000€ por cuenta de cargo y día. 
 	 */
-	public void realizar_traspaso(){
-		
+	public int realizar_traspaso(String tarjeta,int cuenta_origen,int cuenta_destino,int importe){
+		return 0; //Devuelve el nuevo saldo del destino
 	}
-	
 
-	
+	/**
+	 *  Abono en cuenta
+		Asiento o anotación en el haber de una cuenta, que aumenta el saldo de la misma.
+		Los cheques con la mención "para abonar en cuenta" o expresión similar en el anverso sólo se podrán hacer
+		efectivos si previamente se realiza su ingreso en una cuenta corriente, nunca directamente en ventanilla. 
+	 */
+	public int realizar_abono(String tarjeta, int cuenta,int importe){
+		return 0;
+	}
 	
 	public void almacenar_envio(Mensaje message){
 		
@@ -99,9 +98,17 @@ public class Database_lib {
 	 * Comprueba en SESION si el banco introducido por parámetro tiene sesión.
 	 */
 	public boolean hasSesion(String id_banco){
-		return false;
+		return true;
 	}
-		
+	
+	/**
+	 * Comprueba si la SESION admite envios o no.
+	 * True si los admite y False en caso contrario
+	 */
+	public boolean consultar_protocolo(String id_banco){
+		return true;
+	}
+	
 	/**
 	 * Getter en SESION del estado de la conexion
 	 */

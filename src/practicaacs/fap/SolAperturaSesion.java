@@ -44,6 +44,10 @@ public class SolAperturaSesion extends Mensaje {
 		return puerto;
 	}
 	
+	public Date getTime() {
+		return time;
+	}
+
 	@Override
 	protected String printCuerpo(){
 		return String.format("%2s%10s%8s%20s",

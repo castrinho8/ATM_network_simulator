@@ -1,13 +1,13 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.logging.*;
 
-import fap.EstadoSesion;
-import fap.Mensaje;
+import practicaacs.fap.*;
 
 public class Consorcio {
 
@@ -23,14 +23,27 @@ public class Consorcio {
 	
 	/**
 	 * Constructor de la clase Consorcio
+	 * @param file El path al archivo de propiedades.
 	 * @throws IOException 
 	 */
-    public Consorcio() throws IOException{
-		super();
-		//leer datos de ficheros
-		this.address = InetAddress.getByName("127.0.0.1");
-		int puerto_cajeros = 2002;
-		int puerto_bancos = 2001;
+    public Consorcio(String file) throws IOException{
+    	//Obtenemos los datos del fichero properties
+		Properties prop = new Properties();
+		InputStream is;
+		try {
+			is = new FileInputStream(file);
+		    prop.load(is);
+		} catch (FileNotFoundException e) {
+			System.err.println("Non se encontrou arquivo de configuracion " + file + ".");
+			System.exit(-1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+    	//leer datos de ficheros
+		this.address = InetAddress.getByName(prop.getProperty("consorcio.address"));
+		int puerto_cajeros = new Integer(prop.getProperty("consorcio.cash_server.port"));
+		int puerto_bancos = new Integer(prop.getProperty("consorcio.bank_server.port"));
 		
 		this.id_consorcio = next_id_consorcio++;
 		this.cajeros_server = new ServidorConsorcio_Cajeros(this,puerto_cajeros);
@@ -38,12 +51,6 @@ public class Consorcio {
 		this.bancos_client = new ClienteConsorcio_Bancos();
 	}
 
-
-	// GETTERS SETTERS
-
-	//-----END GETTERS SETTERS
-	
-    
     //CONSORCIO - CAJEROS
     
 	public ServidorConsorcio_Cajeros getCajeros_server() {
@@ -68,8 +75,6 @@ public class Consorcio {
 		return bancos_client;
 	}
 
-    
-    //imprimir lo que se envia y recibe
     //solicitar reanudacion
     
 }

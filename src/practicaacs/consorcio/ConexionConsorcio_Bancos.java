@@ -1,9 +1,12 @@
-package practicaACS.consorcio;
+package practicaacs.consorcio;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -11,7 +14,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 
-import fap.*;
+import practicaacs.banco.estados.EstadoSesion;
+import practicaacs.banco.estados.SesAberta;
+import practicaacs.fap.*;
 
 /**
  * Representa cada sesion establecida entre BANCO-CONSORCIO
@@ -22,31 +27,19 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	private Consorcio consorcio;
 	private ServidorConsorcio_Bancos servidor;
-
-	private Socket socket; //Socket de conexion con el servidor
-	private int send_port; //Puerto al que enviar los mensajes
-
 	
-	public ConexionConsorcio_Bancos(Consorcio cons,ServidorConsorcio_Bancos s,Socket socket) {
+	private DatagramSocket output_socket;
+	private DatagramPacket input_packet;
+
+	public ConexionConsorcio_Bancos(DatagramPacket paquete,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
 		this.consorcio = cons;
 		this.servidor = s;
-		this.socket = socket;
-		this.send_port = socket.getPort();
+		
+		this.input_packet = paquete;
+		this.output_socket =  socket;
 	}
 
-	/**
-	 * Devuelve True si la conexion esta ACTIVA y False en caso contrario
-	 */
-	public boolean consultar_protocolo(String id_banco){
-		return Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(EstadoSesion.ACTIVA);
-	}
-	/**
-	 * Devuelve True si la conexion esta CERRADA y False en caso contrario
-	 */
-	public boolean isClosed(String id_banco){
-		return  Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(EstadoSesion.CERRADA);
-	}
 	
 	/**
 	 * Funcion que ejecuta la conexión, comprueba que el primer mensaje es de inicio de sesión
@@ -54,38 +47,23 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 */
 	public void run() {
 		try {
-			Mensaje respuesta = null;
-			Mensaje recibido = null;
-			OutputStream os;
-			ObjectOutputStream o_buffer;
-			InputStream is;
-			ObjectInputStream i_buffer;
-			
-			os = this.socket.getOutputStream();  
-			o_buffer = new ObjectOutputStream(os);  
-			is = this.socket.getInputStream();  
-			i_buffer = new ObjectInputStream(is);  
-			
-			//Recibimos el mensaje
-			recibido = (Mensaje) i_buffer.readObject();
-
+			//Creamos el mensaje correspondiente al recibido
+			Mensaje recibido = Mensaje.parse(this.input_packet.getData());
 			System.out.printf(recibido.toString());
 			
 			//Creamos la respuesta
-			respuesta = generar_respuesta(recibido);
-
-			if(respuesta != null){
-				System.out.printf(respuesta.toString());
-				Database_lib.getInstance().anhadir_ultimo_envio(respuesta.getDestino(), respuesta);
-
+			Mensaje respuesta = generar_respuesta(recibido);
+			System.out.printf(respuesta.toString());
+			
+			//Creamos el datagrama
+			DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),this.output_socket.getInetAddress(), this.output_socket.getPort());
+			try{
 				//Enviamos el mensaje
-				o_buffer.writeObject(respuesta);
-				o_buffer.flush();
+				this.output_socket.send(enviarPaquete);
+			}catch (IOException e) {
+				System.out.println("Error al enviar");
+				System.exit ( 0 );
 			}
-
-			os.close();
-			o_buffer.close();
-			this.socket.close();
 		}
 		catch (Exception e) {
 	    // manipular las excepciones
@@ -118,7 +96,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			return CodigosError.TRAFNODET;
 		
 		//Solicitar FIN RECUPERACION y no esta en RECUPERACION
-		if((m.getTipoMensaje().equals(CodigosMensajes.SOLFINTRADICOREC))
+		if((m.getTipoMensaje().equals(CodigosMensajes.SOLFINREC))
 				&& (!Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(EstadoSesion.RECUPERACION)))
 			return CodigosError.NORECUPERACION;
 	
@@ -138,13 +116,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 */
 	private Mensaje generar_respuesta(Mensaje recibido){
 		Mensaje respuesta = null;
-		EstadoSesion estado = null;
 		
 		switch(recibido.getTipoMensaje()){
 			//MENSAJES DE CONTROL
-			case SOLTRAFICOREC: //SOLICITAR recuperacion trafico (consorcio->banco)
+			case SOLINIREC: //SOLICITAR recuperacion trafico (consorcio->banco)
 				break;
-			case SOLFINTRADICOREC: //SOLICITAR fin recuperacion trafico (consorcio->banco)
+			case SOLFINREC: //SOLICITAR fin recuperacion trafico (consorcio->banco)
 				break;
 			case SOLABRIRSESION: //SOLICITAR abrir sesion (banco->consorcio)
 				respuesta = manejar_abrir_sesion((SolAperturaSesion) recibido);
@@ -158,35 +135,35 @@ public class ConexionConsorcio_Bancos extends Thread {
 			case SOLCIERRESESION: // SOLICITAR cerrar sesion (banco->consorcio)
 				respuesta = manejar_cerrar_sesion((SolCierreSesion) recibido);
 				break;
-			case TRAFICOREC: //recuperacion trafico (banco->consorcio)
+			case RESINIREC: //recuperacion trafico (banco->consorcio)
 				respuesta = iniciar_recuperacion((RespIniTraficoRecuperacion) recibido);
 				break;
-			case FINREC: //fin recuperacion trafico (banco->consorcio)
+			case RESFINREC: //fin recuperacion trafico (banco->consorcio)
 				respuesta = finalizar_recuperacion((RespFinTraficoRec) recibido);
 				break;
-			case ABRIRSESION: //abrir sesion (consorcio->banco)
+			case RESABRIRSESION: //abrir sesion (consorcio->banco)
 				break;
-			case DETENERTRAFICO: //detener trafico (consorcio->banco)
+			case RESDETENERTRAFICO: //detener trafico (consorcio->banco)
 				break;
-			case REANUDARTRAFICO: //reaundar trafico (consorcio->banco)
+			case RESREANUDARTRAFICO: //reaundar trafico (consorcio->banco)
 				break;
-			case CIERRESESION: //cierre sesion (consorcio->banco)
+			case RESCIERRESESION: //cierre sesion (consorcio->banco)
 				break;
 				//MENSAJES DE DATOS
-			case CONSULTARSALDO: //consultarsaldo (consorcio->banco)
+			case SOLSALDO: //consultarsaldo (consorcio->banco)
 				break;
-			case CONSULTARMOVIMIENTOS://consultar movimientos (consorcio->banco)
+			case SOLMOVIMIENTOS://consultar movimientos (consorcio->banco)
 				break;
-			case REINTEGRO: //reintegro (consorcio->banco)
+			case SOLREINTEGRO: //reintegro (consorcio->banco)
 				break;
-			case ABONO: //abono (consorcio->banco)
+			case SOLABONO: //abono (consorcio->banco)
 				break;
-			case TRASPASO: //traspaso (consorcio->banco)
+			case SOLTRASPASO: //traspaso (consorcio->banco)
 				break;
-			case RESCONSULTARSALDO: //respuesta consultar saldo (banco->consorcio)
+			case RESSALDO: //respuesta consultar saldo (banco->consorcio)
 				//	procesar_consulta_saldo();
 				break;
-			case RESCONSULTAMOV: //respuesta consultar movimientos (banco->consorcio)
+			case RESMOVIMIENTOS: //respuesta consultar movimientos (banco->consorcio)
 				//	procesar_consultar_movimiento();
 				break;
 			case RESREINTEGRO: //respuesta reintegro (banco->consorcio)
@@ -201,11 +178,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 			default:
 				System.out.printf("ERROR: Mensaje -" + recibido.getTipoMensaje().toString() + "- no reconocido.");
 				break;
-		}
-		
-		//En caso de que no haya sesion activa y el mensaje recibido no sea una consulta, se almacena para enviar futuramente.
-		if((!Database_lib.getInstance().hasSesion(recibido.getOrigen())) && (!recibido.es_consulta())){
-				//almacenar en DB con marca offline el mensaje a enviar
 		}
 		return respuesta;
 	}
@@ -236,6 +208,7 @@ public class ConexionConsorcio_Bancos extends Thread {
     	//}
     	
     	//Seteamos el estado de la conexion a cerrada
+    	
     	Database_lib.getInstance().setEstado_conexion_banco(id_banco,EstadoSesion.CERRADA);
 
     	//Comprobar total de reintegros, abonos y traspasos
@@ -265,7 +238,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	/**
 	 * Inicia el proceso de recuperacion
 	 */
-	private void iniciar_recuperacion(RespIniTraficoRecuperacion recibido){
+	private void iniciar_recuperacion(RespIniTraficoRec recibido){
 		String id_banco = recibido.getOrigen();
 		
 		Database_lib.getInstance().setEstado_conexion_banco(id_banco,EstadoSesion.RECUPERACION);
