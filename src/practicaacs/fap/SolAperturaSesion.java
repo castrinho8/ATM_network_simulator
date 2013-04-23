@@ -36,6 +36,8 @@ public class SolAperturaSesion extends Mensaje {
 		this.puerto = puerto;
 	}
 	
+	public SolAperturaSesion(){}
+	
 	public int getNcanales() {
 		return ncanales;
 	}
@@ -50,7 +52,7 @@ public class SolAperturaSesion extends Mensaje {
 
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2s%10s%8s%20s",
+		return String.format("%2d%10s%8s%20s",
 				this.ncanales, 
 				new SimpleDateFormat("dd/MM/yyyy").format(this.time),
 				new SimpleDateFormat("hh:mm:ss").format(this.time),

@@ -29,11 +29,11 @@ public class RespTraspaso extends MensajeRespDatos {
 		this.saldoOrigen = saldoOrigen;
 	}
 	
-	protected RespTraspaso(){}
+	public RespTraspaso(){}
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%1i%10i%1i%10i",this.signoOrigen ? 1 : 0, this.saldoOrigen,this.signoDestino ? 1 : 0, this.saldoDestino);
+		return String.format("%1d%10d%1d%10d",this.signoOrigen ? 1 : 0, this.saldoOrigen,this.signoDestino ? 1 : 0, this.saldoDestino);
 	}
 	
 	

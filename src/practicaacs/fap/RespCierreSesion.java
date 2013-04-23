@@ -21,11 +21,11 @@ public class RespCierreSesion extends Mensaje {
 		this.total_traspasos = total_traspasos;
 	}
 	
-	protected RespCierreSesion(){}
+	public RespCierreSesion(){}
 
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2i%2s%10i%10i%10i", this.cod_resp,this.cod_error,
+		return String.format("%2s%2s%10d%10d%10d", this.cod_resp ? "11" : "00",this.cod_error,
 				this.total_reintegros,this.total_abonos,this.total_traspasos);
 	}
 

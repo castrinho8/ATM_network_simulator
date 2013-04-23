@@ -46,7 +46,7 @@ public class SolCierreSesion extends Mensaje {
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%10i%10i%10i",
+		return String.format("%10d%10d%10d",
 				this.total_reintegros,
 				this.abonos,
 				this.traspasos);

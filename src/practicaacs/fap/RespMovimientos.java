@@ -41,11 +41,11 @@ public class RespMovimientos extends MensajeRespDatos {
 		this.fecha = fecha;
 	}
 	
-	protected RespMovimientos(){}
+	public RespMovimientos(){}
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%2i%s%s%8i%s%s", 
+		return String.format("%2d%s%s%8d%s%s", 
 				nmovimientos,
 				tipo_mov,
 				signo?"+":"-",

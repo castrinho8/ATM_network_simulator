@@ -19,7 +19,7 @@ public class SolTraspaso extends MensajeDatos {
 		this.importe = importe;
 	}
 
-	protected SolTraspaso(){}
+	public SolTraspaso(){}
 	
 	/**
 	 * Getter para o número de tarxeta.

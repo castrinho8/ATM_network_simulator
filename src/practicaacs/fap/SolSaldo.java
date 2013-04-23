@@ -29,7 +29,7 @@ public class SolSaldo extends MensajeDatos {
 		this.num_cuenta = num_cuenta;
 	}
 	
-	protected SolSaldo(){}
+	public SolSaldo(){}
 	
 	public String getNum_tarjeta() {
 		return num_tarjeta;
@@ -41,7 +41,7 @@ public class SolSaldo extends MensajeDatos {
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%11s%1i", this.num_cuenta,this.num_tarjeta);
+		return String.format("%11s%1d", this.num_tarjeta,this.num_cuenta);
 	}
 
 	@Override

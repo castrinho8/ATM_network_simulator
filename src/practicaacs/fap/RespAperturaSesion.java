@@ -29,11 +29,11 @@ public class RespAperturaSesion extends Mensaje {
 		this.cod_error = cod_error;
 	}
 	
-	protected RespAperturaSesion(){}
+	public RespAperturaSesion(){}
 	
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2i%s", this.cod_resp,this.cod_error);
+		return String.format("%2s%s", cod_resp ? "11" : "00",this.cod_error);
 	}
 
 	@Override

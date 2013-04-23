@@ -48,9 +48,7 @@ public abstract class Mensaje implements java.io.Serializable {
 	}
 
 	
-	public Mensaje() {
-		super();
-	}
+	public Mensaje() {}
 
 	public String getOrigen() {
 		return origen;
@@ -78,7 +76,8 @@ public abstract class Mensaje implements java.io.Serializable {
 	}
 
 	protected String printCabecera() {
-		return String.format("%8s%8s%2d", origen,destino,this.tipoMensaje.getNum());
+		int codmsg = this.tipoMensaje.getNum();
+		return String.format("%8s%8s%02d", origen,destino, codmsg);
 	}
 	
 	public int size() {
@@ -96,9 +95,9 @@ public abstract class Mensaje implements java.io.Serializable {
 			throw new MensajeNoValidoException("Lonxitude (" + bs.toString().length() + ") non valida  (Mensaje)");
 		
 		try {
-			tipo = CodigosMensajes.parse(bs.toString().substring(16, 18));
+			tipo = CodigosMensajes.parse(bs.substring(16, 18));
 		} catch (CodigoNoValidoException e) {
-			throw new MensajeNoValidoException("Codigo non valido (Mensaje)");
+			throw new MensajeNoValidoException("Codigo (\"" + bs.substring(16, 18) + "\") non valido (Mensaje)");
 		}
 			
 		try {
@@ -115,12 +114,14 @@ public abstract class Mensaje implements java.io.Serializable {
 	}
 	
 	protected void parseComp(String bs) throws MensajeNoValidoException{
-		try{
-			this.origen = bs.toString().substring(0, 8);
-			this.destino = bs.toString().substring(8, 16);
-			this.tipoMensaje = CodigosMensajes.parse(bs.toString().substring(16, 18));
-		}catch(CodigoNoValidoException | NumberFormatException e){
-			throw new MensajeNoValidoException("Origen, Destino ou Tipo non validos (Mensaje)");
+		
+		this.origen = bs.toString().substring(0, 8);
+		this.destino = bs.toString().substring(8, 16);
+		
+		try {
+			this.tipoMensaje = CodigosMensajes.parse(bs.substring(16, 18));
+		} catch (CodigoNoValidoException e) {
+			throw new MensajeNoValidoException("Formato de Codigo non válido (Mensaje)");
 		}
 	}
 

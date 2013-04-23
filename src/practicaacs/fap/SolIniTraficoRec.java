@@ -13,10 +13,10 @@ public class SolIniTraficoRec extends Mensaje {
 		super(origen, destino,CodigosMensajes.SOLINIREC);
 	}
 	
-	protected SolIniTraficoRec(){}
+	public SolIniTraficoRec(){}
 
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
-		this.parseComp(bs); 
+		super.parseComp(bs); 
 	}
 }

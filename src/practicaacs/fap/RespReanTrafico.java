@@ -21,11 +21,11 @@ public class RespReanTrafico extends Mensaje {
 		this.cod_error = cod_error;
 	}
 	
-	protected RespReanTrafico(){}
+	public RespReanTrafico(){}
 	
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2i%s", this.cod_resp,this.cod_error);
+		return String.format("%2s%s", this.cod_resp ? "00" : "11",this.cod_error);
 	}
 
 	@Override

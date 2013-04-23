@@ -19,7 +19,7 @@ public class SolMovimientos extends MensajeDatos {
 		this.num_cuenta = num_cuenta;
 	}
 	
-	protected SolMovimientos(){}
+	public SolMovimientos(){}
 
 	@Override
 	protected String printCuerpo() {
