@@ -28,7 +28,7 @@ public class RespCierreSesion extends Mensaje {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
 		try {
@@ -44,5 +44,27 @@ public class RespCierreSesion extends Mensaje {
 		} catch (CodigoNoValidoException e) {}
 		throw new MensajeNoValidoException();
 	}
+
+	public boolean getCodResp() {
+		return cod_resp;
+	}
+
+	public CodigosError getCodError() {
+		return cod_error;
+	}
+
+	public int getTotalReintegros() {
+		return total_reintegros;
+	}
+
+	public int getTotalAbonos() {
+		return total_abonos;
+	}
+
+	public int getTotalTraspasos() {
+		return total_traspasos;
+	}
+	
+	
 
 }

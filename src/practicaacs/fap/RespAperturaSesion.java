@@ -14,6 +14,8 @@ public class RespAperturaSesion extends Mensaje {
 	private boolean cod_resp;
 	private CodigosError cod_error;
 	
+	public RespAperturaSesion(){}
+	
 	/**
 	 * Contructor del mensaje Respuesta Apertura Sesión.
 	 * @param origen
@@ -35,17 +37,33 @@ public class RespAperturaSesion extends Mensaje {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
 		try {
-			if(bs.toString().length() == 23 && 
-					(bs.toString().substring(21, 22).equals("11") || bs.toString().substring(21, 22).equals("00"))){
-				this.cod_error = CodigosError.parse((bs.toString().substring(19, 20)));
-				this.cod_resp = bs.toString().substring(21, 22).equals("11");
+			if(bs.length() != 22)
+				throw new MensajeNoValidoException("Error na lonxitude (" + bs.length() + ") (RespAperturaSesion)");
+
+			if(bs.toString().substring(18, 20).equals("11") || bs.toString().substring(18, 20).equals("00")){
+				this.cod_resp = bs.toString().substring(18, 20).equals("00");
+				this.cod_error = CodigosError.parse((bs.toString().substring(20, 22)));
 				return;
+			}else{
+				throw new MensajeNoValidoException("Error no codResp (RespAperturaSesion)");
 			}
-		} catch (CodigoNoValidoException e) {}
-		throw new MensajeNoValidoException();
+		} catch (CodigoNoValidoException e) {
+			throw new MensajeNoValidoException("Error no codError (RespAperturaSesion)");
+		}
 	}
+
+	public boolean getCodResp() {
+		return cod_resp;
+	}
+
+	public CodigosError getCodError() {
+		return cod_error;
+	}
+
+	
+	
 }

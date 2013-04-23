@@ -43,7 +43,7 @@ public class SolSaldo extends MensajeDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		
 		super.parseComp(bs);
 

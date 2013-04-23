@@ -53,8 +53,30 @@ public class RespMovimientos extends MensajeRespDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		// TODO Auto-generated method stub
 		return;
 	}
+
+	public int getNmovimientos() {
+		return nmovimientos;
+	}
+
+	public CodigosMovimiento getTipoMov() {
+		return tipo_mov;
+	}
+
+	public boolean getSigno() {
+		return signo;
+	}
+
+	public int getImporte() {
+		return importe;
+	}
+
+	public Date getFecha() {
+		return fecha;
+	}
+	
+	
 }

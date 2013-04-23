@@ -58,7 +58,7 @@ public class SolAperturaSesion extends Mensaje {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		try {
 			if(bs.toString().length() == 59){

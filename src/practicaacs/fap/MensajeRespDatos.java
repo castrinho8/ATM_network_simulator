@@ -19,7 +19,7 @@ public abstract class MensajeRespDatos extends MensajeDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException{
+	protected void parseComp(String bs) throws MensajeNoValidoException{
 		super.parseComp(bs);
 		try {
 			this.cod_resp = CodigosRespuesta.parse(bs.toString().substring(26, 27));

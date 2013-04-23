@@ -36,12 +36,12 @@ public abstract class MensajeDatos extends Mensaje {
 		return nmsg;
 	}
 
-	public boolean isCodonline() {
+	public boolean getCodonline() {
 		return codonline;
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		try{
 			if(bs.toString().charAt(25) == '1' || bs.toString().charAt(25) == '0'){

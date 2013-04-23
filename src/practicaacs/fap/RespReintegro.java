@@ -34,7 +34,7 @@ public class RespReintegro extends MensajeRespDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		try{
 			if(bs.toString().length() == 39 && ( bs.toString().charAt(28) == '+' || bs.toString().charAt(28) == '-')){
@@ -45,7 +45,14 @@ public class RespReintegro extends MensajeRespDatos {
 		
 		throw new MensajeNoValidoException();
 	}
-	
+
+	public boolean getSigno() {
+		return signo;
+	}
+
+	public int getSaldo() {
+		return saldo;
+	}
 	
 	
 }

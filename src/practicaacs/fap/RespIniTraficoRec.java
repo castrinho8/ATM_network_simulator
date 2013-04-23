@@ -26,7 +26,7 @@ public class RespIniTraficoRec extends Mensaje {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
 		try {
@@ -39,5 +39,16 @@ public class RespIniTraficoRec extends Mensaje {
 		} catch (CodigoNoValidoException e) {}
 		throw new MensajeNoValidoException();
 	}
+
+	public boolean getCodResp() {
+		return cod_resp;
+	}
+
+	public CodigosError getCodError() {
+		return cod_error;
+	}
+	
+	
+	
 
 }

@@ -8,10 +8,9 @@ public class SolReintegro extends MensajeDatos {
 	private int importe;
 	
 
-	public SolReintegro(String origen, String destino,
-			CodigosMensajes tipoMensaje, int numcanal, int nmsg,
+	public SolReintegro(String origen, String destino, int numcanal, int nmsg,
 			boolean codonline, String num_tarjeta, int num_cuenta, int importe) {
-		super(origen, destino, tipoMensaje, numcanal, nmsg, codonline);
+		super(origen, destino, CodigosMensajes.SOLREINTEGRO, numcanal, nmsg, codonline);
 		this.num_tarjeta = num_tarjeta;
 		this.num_cuenta = num_cuenta;
 		this.importe = importe;
@@ -34,7 +33,7 @@ public class SolReintegro extends MensajeDatos {
 
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
 		try{

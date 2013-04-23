@@ -14,7 +14,7 @@ public class SolFinTraficoRec extends Mensaje {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		this.parseComp(bs);
 	}
 

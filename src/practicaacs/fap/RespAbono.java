@@ -31,7 +31,7 @@ public class RespAbono extends MensajeRespDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		try{
 			if(bs.toString().length() != 39){
@@ -42,5 +42,16 @@ public class RespAbono extends MensajeRespDatos {
 		}catch(NumberFormatException e){}
 		throw new MensajeNoValidoException();
 	}
+
+	public boolean getSigno() {
+		return signo;
+	}
+
+	public int getSaldo() {
+		return saldo;
+	}
+	
+	
+	
 	
 }
