@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 
+import practicaacs.fap.CodigosError;
+import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeNoValidoException;
 import practicaacs.fap.SolAperturaSesion;
@@ -221,16 +223,19 @@ public class Banco implements AnalizadorMensajes{
 	 * @param bs mensaxe recibido
 	 */
 	@Override
-	public void analizarMensaje(byte[] bs) {
-		this.iu.engadirLinhaLog("MensaxeRecibida!!\n");
+	public void analizarMensaje(String bs) {
 		
 		Mensaje msx;
+		this.iu.engadirLinhaLog("MENSAXE::" + bs.toString());
 		try {
 			msx = Mensaje.parse(bs);
+			this.iu.engadirLinhaLog("Mensaxe recibida: " + msx.getTipoMensaje().getNum() + "\n");
 			this.estado.analizarMensaje(msx,this);
-		} catch (MensajeNoValidoException e){ 
+		} catch (MensajeNoValidoException e){
+			this.iu.engadirLinhaLog("Mensaxe recibida: Formato non recoñecido (" + e.getLocalizedMessage() + ")\n");
 			this.estado.analizarMensaje(null,this);
 		}
+		
 	}
 
 	/**
@@ -298,6 +303,29 @@ public class Banco implements AnalizadorMensajes{
 		this.iu.engadirLinhaLog("Soliciatado peche de sesión.\n");
 	}
 	
+	public void errorRespuestaSolicitud(CodigosMensajes cm, CodigosError ce){
+		String s = null;
+		
+		switch(cm){
+		case RESABRIRSESION:
+			s = "Error na apertura de sesion: " + ce.getMensaje();
+			break;
+		case RESDETENERTRAFICO:
+			s = "Error na solicitude de detencion de sesion: " + ce.getMensaje();
+			break;
+		case RESREANUDARTRAFICO:
+			s = "Error na solicitude de reanudación de sesion: " + ce.getMensaje() ;
+			break;
+		case RESCIERRESESION:
+			s = "Error no peche de sesion: " + ce.getMensaje();
+			break;
+		default:
+			assert(false);
+		}
+		
+		this.iu.engadirLinhaLog(s+"\n");
+	}
+	
 	/**
 	 * Método que establece a apertura da sesion.
 	 */
@@ -349,8 +377,9 @@ public class Banco implements AnalizadorMensajes{
 	 * @param numConta O número de conta dentro de esta tarxeta.
 	 */
 	public void facerConsultaSaldo(int ncanal,int nmsg, boolean online,String numtarx,int numConta){
-		bd.getConta(numtarx, numConta);
-	
+		int lastmsgcanal;
+		
+		//lastmsgcanal = this.bd.getLastMsgNumber(ncanal);
 	}
 	
 	/**
@@ -402,7 +431,6 @@ public class Banco implements AnalizadorMensajes{
 	 * @param importe
 	 */
 	public void facerTranspaso(int ncanal,int nmsg, boolean online,String numtarx,int numContaOrigen, int numContaDestino,int importe){
-		
 	}
 	
 	private void cambEstado(EstadoSesion nuevoEstado) {

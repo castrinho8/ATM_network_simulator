@@ -3,6 +3,7 @@ package practicaacs.banco.estados;
 import practicaacs.banco.Banco;
 import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
+import practicaacs.fap.RespCierreSesion;
 
 public class SolPechar extends EstadoSesion {
 	private static SolPechar instance;
@@ -12,8 +13,11 @@ public class SolPechar extends EstadoSesion {
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
 		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.SOLCIERRESESION)){
-			b.establecerSesionPechada();
-			return;
+			if(((RespCierreSesion) m).getCodResp()){
+				b.establecerSesionPechada();
+			}else{
+				b.errorRespuestaSolicitud(m.getTipoMensaje(), ((RespCierreSesion) m).getCodError());
+			}
 		}
 	}
 

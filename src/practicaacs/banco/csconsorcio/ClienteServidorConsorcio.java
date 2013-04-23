@@ -47,7 +47,7 @@ public class ClienteServidorConsorcio extends Thread {
 		this.mensajesAEnviar.put(m);
 	}
 	
-	private void analizarMensaje(byte[] bs){
+	private void analizarMensaje(String bs){
 		analizador.analizarMensaje(bs);
 	}
 	
@@ -70,7 +70,7 @@ public class ClienteServidorConsorcio extends Thread {
 			
 			try{
 				socketServidor.receive(recibirPaquete);
-				this.analizarMensaje(recibirPaquete.getData());
+				this.analizarMensaje(new String(recibirPaquete.getData()));
 			}catch (SocketTimeoutException e){
 			
 			}catch (IOException e) {
