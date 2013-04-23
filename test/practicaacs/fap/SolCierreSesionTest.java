@@ -1,6 +1,7 @@
 package practicaacs.fap;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 public class SolCierreSesionTest {
@@ -29,6 +30,7 @@ public class SolCierreSesionTest {
 			return;
 		}
 		
+		assertNotNull(m);
 		assertEquals(m.getOrigen(),"ma.ch.te");
 		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getTotal_reintegros(),1);

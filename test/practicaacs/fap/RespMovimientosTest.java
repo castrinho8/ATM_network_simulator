@@ -43,6 +43,7 @@ public class RespMovimientosTest {
 			return;
 		}
 		
+		assertNotNull(m);
 		assertEquals("ma.ch.te",m.getOrigen());
 		assertEquals("pa.ca.va",m.getDestino());
 		assertEquals(m.getNumcanal(),4);

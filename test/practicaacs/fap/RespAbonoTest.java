@@ -34,6 +34,7 @@ public class RespAbonoTest {
 			return;
 		}
 		
+		assertNotNull(m);
 		assertEquals("ma.ch.te",m.getOrigen());
 		assertEquals("pa.ca.va",m.getOrigen());
 		assertEquals(4,m.getNumcanal());

@@ -1,6 +1,7 @@
 package practicaacs.fap;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 public class SolDetTraficoTest {
@@ -26,6 +27,7 @@ public class SolDetTraficoTest {
 			return;
 		}
 
+		assertNotNull(m);
 		assertEquals(m.getOrigen(),"ma.ch.te");
 		assertEquals(m.getDestino(),"pa.ca.va");
 	}

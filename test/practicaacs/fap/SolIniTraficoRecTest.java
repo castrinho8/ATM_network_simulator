@@ -26,6 +26,7 @@ public class SolIniTraficoRecTest {
 			return;
 		}
 		
+		assertNotNull(m);
 		assertEquals(m.getOrigen(),"ma.ch.te");
 		assertEquals(m.getDestino(),"pa.ca.va");
 	}

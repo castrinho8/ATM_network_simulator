@@ -33,6 +33,7 @@ public class RespSaldoTest {
 			return;
 		}
 		
+		assertNotNull(m);
 		assertEquals(m.getOrigen(),"ma.ch.te");
 		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);

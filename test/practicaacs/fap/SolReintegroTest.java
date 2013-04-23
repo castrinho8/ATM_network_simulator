@@ -28,10 +28,11 @@ public class SolReintegroTest {
 		try {
 			m = (SolReintegro) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
 			return;
 		}
 		
+		assertNotNull(m);
 		assertEquals(m.getOrigen(),"ma.ch.te");
 		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);

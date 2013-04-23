@@ -29,6 +29,7 @@ public class RespAperturaSesionTest {
 			return;
 		}
 		
+		assertNotNull(m);
 		assertEquals("ma.ch.te",m.getOrigen());
 		assertEquals("pa.ca.va",m.getDestino());
 		assertFalse(m.getCodResp());
