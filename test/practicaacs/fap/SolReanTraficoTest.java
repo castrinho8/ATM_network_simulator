@@ -22,7 +22,8 @@ public class SolReanTraficoTest {
 		try {
 			m = (SolReanTrafico) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");

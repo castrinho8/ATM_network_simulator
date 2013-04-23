@@ -31,6 +31,7 @@ public class SolTraspasoTest {
 			m = (SolTraspaso) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
 			fail();
+			return;
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");

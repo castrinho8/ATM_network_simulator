@@ -30,6 +30,7 @@ public class RespSaldoTest {
 			m = (RespSaldo) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
 			fail();
+			return;
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");

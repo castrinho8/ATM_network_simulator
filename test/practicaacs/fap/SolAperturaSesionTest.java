@@ -32,7 +32,8 @@ public class SolAperturaSesionTest {
 		try {
 			m = (SolAperturaSesion) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");

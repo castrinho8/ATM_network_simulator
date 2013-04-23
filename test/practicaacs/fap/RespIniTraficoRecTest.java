@@ -25,7 +25,8 @@ public class RespIniTraficoRecTest {
 		try {
 			m = (RespIniTraficoRec) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());

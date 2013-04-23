@@ -28,6 +28,7 @@ public class SolSaldoTest {
 			m = (SolSaldo) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
 			fail();
+			return;
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");

@@ -39,7 +39,8 @@ public class RespMovimientosTest {
 		try {
 			m = (RespMovimientos) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());

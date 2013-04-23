@@ -27,7 +27,8 @@ public class RespCierreSesionTest {
 		try {
 			m = (RespCierreSesion) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());

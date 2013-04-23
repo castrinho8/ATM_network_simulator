@@ -29,7 +29,8 @@ public class SolAbonoTest {
 		try {
 			m = (SolAbono) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");

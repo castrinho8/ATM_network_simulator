@@ -25,7 +25,8 @@ public class RespAperturaSesionTest {
 		try {
 			m = (RespAperturaSesion) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());

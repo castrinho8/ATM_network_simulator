@@ -22,9 +22,10 @@ public class SolDetTraficoTest {
 		try {
 			m = (SolDetTrafico) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
+			return;
 		}
-		
+
 		assertEquals(m.getOrigen(),"ma.ch.te");
 		assertEquals(m.getDestino(),"pa.ca.va");
 	}
