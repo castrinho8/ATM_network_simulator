@@ -15,7 +15,7 @@ public class SolAperturaSesionTest {
 		SolAperturaSesion m = new SolAperturaSesion("ma.ch.te", "pa.ca.va", 23, null, "124.234.234.233/2323");
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNcanales(),23);
 		assertEquals(m.getPuerto(), "124.234.234.233/2323");
 		assertEquals(m.getTime().getDay(),new Date().getDay());
@@ -36,7 +36,7 @@ public class SolAperturaSesionTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNcanales(),23);
 		assertEquals(m.getPuerto(), "124.234.234.233/2323");
 		assertEquals(m.getTime().getDay(),new Date().getDay());

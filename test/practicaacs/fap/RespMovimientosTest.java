@@ -15,7 +15,7 @@ public class RespMovimientosTest {
 				32, CodigosMovimiento.REINTEGRO, true, 2300, new Date());
 		
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.ca",m.getDestino());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertEquals(m.getNumcanal(),4);
 		assertEquals(m.getNmsg(),2);
 		assertTrue(m.getCodonline());
@@ -43,7 +43,7 @@ public class RespMovimientosTest {
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.ca",m.getDestino());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertEquals(m.getNumcanal(),4);
 		assertEquals(m.getNmsg(),2);
 		assertTrue(m.getCodonline());

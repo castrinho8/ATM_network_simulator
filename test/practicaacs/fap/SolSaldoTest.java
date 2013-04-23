@@ -11,7 +11,7 @@ public class SolSaldoTest {
 		SolSaldo m = new SolSaldo("ma.ch.te", "pa.ca.va", 23, 43, true, "tarjeta", 3);
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());
@@ -31,7 +31,7 @@ public class SolSaldoTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());

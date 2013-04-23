@@ -11,7 +11,7 @@ public class RespCierreSesionTest {
 		RespCierreSesion m = new RespCierreSesion("ma.ch.te", "pa.ca.va", false, CodigosError.FUERASEC, 32, 43, 34);
 		
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.ca",m.getDestino());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertFalse(m.getCodResp());
 		assertEquals(CodigosError.FUERASEC,m.getCodError());
 		assertEquals(m.getTotalReintegros(),32);
@@ -31,7 +31,7 @@ public class RespCierreSesionTest {
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.ca",m.getDestino());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertFalse(m.getCodResp());
 		assertEquals(CodigosError.FUERASEC,m.getCodError());	
 		assertEquals(m.getTotalReintegros(),32);

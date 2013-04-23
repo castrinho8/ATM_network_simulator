@@ -33,7 +33,7 @@ public class SolReintegroTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());

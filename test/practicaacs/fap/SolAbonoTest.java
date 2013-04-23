@@ -11,7 +11,7 @@ public class SolAbonoTest {
 		SolAbono m = new SolAbono("ma.ch.te", "pa.ca.va", 23, 43, true, "tarjeta", 3, 2000);
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());
@@ -33,7 +33,7 @@ public class SolAbonoTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());

@@ -14,7 +14,7 @@ public class SolCierreSesionTest {
 		SolCierreSesion m = new SolCierreSesion("ma.ch.te", "pa.ca.va", 1,3,4);
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getTotal_reintegros(),1);
 		assertEquals(m.getAbonos(),3);
 		assertEquals(m.getTraspasos(),4);
@@ -32,7 +32,7 @@ public class SolCierreSesionTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getTotal_reintegros(),1);
 		assertEquals(m.getAbonos(),3);
 		assertEquals(m.getTraspasos(),4);

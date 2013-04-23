@@ -11,7 +11,7 @@ public class RespSaldoTest {
 		RespSaldo m = new RespSaldo("ma.ch.te", "pa.ca.va",23, 43, true, CodigosRespuesta.CONSACEPTADA, true, 3000);
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());
@@ -33,7 +33,7 @@ public class RespSaldoTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());

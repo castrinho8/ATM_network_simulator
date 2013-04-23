@@ -29,7 +29,7 @@ public class RespFinTraficoRecTest {
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.ca",m.getDestino());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertFalse(m.getCodResp());
 		assertEquals(CodigosError.FUERASEC,m.getCodError());	
 	}

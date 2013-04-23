@@ -10,7 +10,7 @@ public class SolFinTraficoRecTest {
 		SolFinTraficoRec m = new SolFinTraficoRec("ma.ch.te", "pa.ca.va");
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 	}
 
 	@Test
@@ -25,7 +25,7 @@ public class SolFinTraficoRecTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 	}
 
 

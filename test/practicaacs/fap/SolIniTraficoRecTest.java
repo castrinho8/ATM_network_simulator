@@ -11,7 +11,7 @@ public class SolIniTraficoRecTest {
 		SolIniTraficoRec m = new SolIniTraficoRec("ma.ch.te", "pa.ca.va");
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 	}
 
 	@Test
@@ -26,7 +26,7 @@ public class SolIniTraficoRecTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 	}
 
 

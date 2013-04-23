@@ -11,7 +11,7 @@ public class RespReanTraficoTest {
 		RespReanTrafico m = new RespReanTrafico("ma.ch.te", "pa.ca.va", false, CodigosError.FUERASEC);
 		
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.ca",m.getDestino());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertFalse(m.getCodResp());
 		assertEquals(CodigosError.FUERASEC,m.getCodError());
 		
@@ -29,7 +29,7 @@ public class RespReanTraficoTest {
 		}
 		
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.ca",m.getDestino());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertFalse(m.getCodResp());
 		assertEquals(CodigosError.FUERASEC,m.getCodError());
 		

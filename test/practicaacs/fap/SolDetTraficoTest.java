@@ -14,7 +14,7 @@ public class SolDetTraficoTest {
 		SolDetTrafico m = new SolDetTrafico("ma.ch.te", "pa.ca.va");
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 	}
 
 	@Test
@@ -29,7 +29,7 @@ public class SolDetTraficoTest {
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");
-		assertEquals(m.getDestino(),"pa.ca.ca");
+		assertEquals(m.getDestino(),"pa.ca.va");
 	}
 
 }
