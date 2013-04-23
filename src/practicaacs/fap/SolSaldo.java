@@ -29,6 +29,8 @@ public class SolSaldo extends MensajeDatos {
 		this.num_cuenta = num_cuenta;
 	}
 	
+	protected SolSaldo(){}
+	
 	public String getNum_tarjeta() {
 		return num_tarjeta;
 	}

@@ -21,11 +21,13 @@ public abstract class MensajeDatos extends Mensaje {
 		this.nmsg = nmsg;
 		this.codonline = codonline;
 	}
+	
+	public MensajeDatos(){}
 
 	@Override
 	protected String printCabecera() {
 		return super.printCabecera() + 
-				String.format("%2i%5i%1i", numcanal, nmsg, codonline ? 1 : 0);
+				String.format("%2d%5d%1d", numcanal, nmsg, codonline ? 1 : 0);
 	}
 
 	public int getNumcanal() {

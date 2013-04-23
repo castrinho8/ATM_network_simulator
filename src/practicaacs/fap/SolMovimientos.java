@@ -18,6 +18,8 @@ public class SolMovimientos extends MensajeDatos {
 		this.num_tarjeta = num_tarjeta;
 		this.num_cuenta = num_cuenta;
 	}
+	
+	protected SolMovimientos(){}
 
 	@Override
 	protected String printCuerpo() {

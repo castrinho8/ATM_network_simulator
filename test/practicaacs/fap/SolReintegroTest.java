@@ -29,6 +29,7 @@ public class SolReintegroTest {
 			m = (SolReintegro) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
 			fail();
+			return;
 		}
 		
 		assertEquals(m.getOrigen(),"ma.ch.te");

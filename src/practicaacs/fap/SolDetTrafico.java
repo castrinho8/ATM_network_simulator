@@ -12,6 +12,8 @@ public class SolDetTrafico extends Mensaje {
 	public SolDetTrafico(String origen, String destino) {
 		super(origen, destino,CodigosMensajes.SOLDETENERTRAFICO);
 	}
+	
+	protected SolDetTrafico(){}
 
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {

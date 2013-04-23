@@ -13,9 +13,7 @@ public class RespAperturaSesion extends Mensaje {
 	private static final long serialVersionUID = -1076294313735245375L;
 	private boolean cod_resp;
 	private CodigosError cod_error;
-	
-	public RespAperturaSesion(){}
-	
+		
 	/**
 	 * Contructor del mensaje Respuesta Apertura Sesión.
 	 * @param origen
@@ -30,7 +28,9 @@ public class RespAperturaSesion extends Mensaje {
 		this.cod_resp = cod_resp;
 		this.cod_error = cod_error;
 	}
-
+	
+	protected RespAperturaSesion(){}
+	
 	@Override
 	protected String printCuerpo(){
 		return String.format("%2i%s", this.cod_resp,this.cod_error);

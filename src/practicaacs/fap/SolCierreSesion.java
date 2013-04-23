@@ -29,6 +29,8 @@ public class SolCierreSesion extends Mensaje {
 		this.abonos = abonos;
 		this.traspasos = traspasos;
 	}
+	
+	public SolCierreSesion(){}
 
 	public long getTotal_reintegros() {
 		return total_reintegros;

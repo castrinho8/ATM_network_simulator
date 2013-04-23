@@ -15,6 +15,8 @@ public class SolAbono extends MensajeDatos {
 		this.num_cuenta = num_cuenta;
 		this.importe = importe;
 	}
+	
+	protected SolAbono(){}
 
 
 	public String getNum_tarjeta() {

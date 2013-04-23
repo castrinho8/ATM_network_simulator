@@ -28,6 +28,8 @@ public class RespTraspaso extends MensajeRespDatos {
 		this.signoOrigen = signoOrigen;
 		this.saldoOrigen = saldoOrigen;
 	}
+	
+	protected RespTraspaso(){}
 
 	@Override
 	protected String printCuerpo() {

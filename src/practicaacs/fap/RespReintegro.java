@@ -28,6 +28,8 @@ public class RespReintegro extends MensajeRespDatos {
 		this.saldo = saldo;
 	}
 	
+	protected RespReintegro(){}
+	
 	@Override
 	protected String printCuerpo() {
 		return String.format("%1i%10i",this.signo ? 1 : 0, this.saldo);

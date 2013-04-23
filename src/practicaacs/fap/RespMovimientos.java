@@ -40,6 +40,8 @@ public class RespMovimientos extends MensajeRespDatos {
 		this.importe = importe;
 		this.fecha = fecha;
 	}
+	
+	protected RespMovimientos(){}
 
 	@Override
 	protected String printCuerpo() {

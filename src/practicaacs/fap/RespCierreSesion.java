@@ -20,6 +20,8 @@ public class RespCierreSesion extends Mensaje {
 		this.total_reintegros = total_reintegros;
 		this.total_traspasos = total_traspasos;
 	}
+	
+	protected RespCierreSesion(){}
 
 	@Override
 	protected String printCuerpo(){

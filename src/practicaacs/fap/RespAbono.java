@@ -25,6 +25,8 @@ public class RespAbono extends MensajeRespDatos {
 		this.saldo = saldo;
 	}
 
+	protected RespAbono(){}
+	
 	@Override
 	protected String printCuerpo() {
 		return String.format("%1i%10i",this.signo ? 1 : 0, this.saldo);

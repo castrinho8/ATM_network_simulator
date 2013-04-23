@@ -20,6 +20,8 @@ public class RespIniTraficoRec extends Mensaje {
 		this.cod_error = cod_error;
 	}
 	
+	protected RespIniTraficoRec(){}
+	
 	@Override
 	protected String printCuerpo(){
 		return String.format("%2i%2s", this.cod_resp,this.cod_error);

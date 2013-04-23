@@ -15,6 +15,8 @@ public class SolReintegro extends MensajeDatos {
 		this.num_cuenta = num_cuenta;
 		this.importe = importe;
 	}
+	
+	protected SolReintegro(){}
 
 
 	public String getNum_tarjeta() {
