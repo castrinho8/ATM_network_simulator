@@ -8,15 +8,21 @@ public class SolReintegro extends MensajeDatos {
 	private int importe;
 	
 
-	public SolReintegro(String origen, String destino,
-			CodigosMensajes tipoMensaje, int numcanal, int nmsg,
+	public SolReintegro(String origen, String destino, int numcanal, int nmsg,
 			boolean codonline, String num_tarjeta, int num_cuenta, int importe) {
-		super(origen, destino, tipoMensaje, numcanal, nmsg, codonline);
+		super(origen, destino, CodigosMensajes.SOLREINTEGRO, numcanal, nmsg, codonline);
 		this.num_tarjeta = num_tarjeta;
 		this.num_cuenta = num_cuenta;
 		this.importe = importe;
 	}
+	
+	public SolReintegro(){}
 
+	
+	@Override
+	protected String printCuerpo() {
+		return String.format("%11s%1d%04d", num_tarjeta, this.num_cuenta, importe);
+	}
 
 	public String getNum_tarjeta() {
 		return num_tarjeta;
@@ -34,19 +40,21 @@ public class SolReintegro extends MensajeDatos {
 
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
-		try{
-			if(bs.toString().length() == 41){
-				this.num_cuenta = new Integer(bs.toString().charAt(37));
-				this.num_tarjeta = bs.toString().substring(26,36);
-				this.importe = new Integer(bs.toString().substring(37, 40));
-				return;
-			}
-		}catch(NumberFormatException e){}
+		System.err.println(bs);
 		
-		throw new MensajeNoValidoException();
+		if(bs.length() != 42)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida. (SolReintegro)");
+		
+		this.num_tarjeta = bs.substring(26,37).trim();
+		try {	
+			this.num_cuenta = new Integer(bs.charAt(37));
+			this.importe = new Integer(bs.substring(37, 42));
+		} catch(NumberFormatException e){
+			throw new MensajeNoValidoException("Error de formato dos numeros.");
+		}
 	}
 	
 	

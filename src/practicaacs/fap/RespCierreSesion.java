@@ -20,15 +20,17 @@ public class RespCierreSesion extends Mensaje {
 		this.total_reintegros = total_reintegros;
 		this.total_traspasos = total_traspasos;
 	}
+	
+	public RespCierreSesion(){}
 
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2i%2s%10i%10i%10i", this.cod_resp,this.cod_error,
+		return String.format("%2s%2s%10d%10d%10d", this.cod_resp ? "11" : "00",this.cod_error,
 				this.total_reintegros,this.total_abonos,this.total_traspasos);
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
 		try {
@@ -44,5 +46,27 @@ public class RespCierreSesion extends Mensaje {
 		} catch (CodigoNoValidoException e) {}
 		throw new MensajeNoValidoException();
 	}
+
+	public boolean getCodResp() {
+		return cod_resp;
+	}
+
+	public CodigosError getCodError() {
+		return cod_error;
+	}
+
+	public int getTotalReintegros() {
+		return total_reintegros;
+	}
+
+	public int getTotalAbonos() {
+		return total_abonos;
+	}
+
+	public int getTotalTraspasos() {
+		return total_traspasos;
+	}
+	
+	
 
 }

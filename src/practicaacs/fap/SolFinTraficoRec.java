@@ -10,12 +10,14 @@ public class SolFinTraficoRec extends Mensaje {
 	 * @param destino Destino del Mensaje
 	 */
 	public SolFinTraficoRec(String origen, String destino) {
-		super(origen, destino,CodigosMensajes.SOLINIREC);
+		super(origen, destino,CodigosMensajes.SOLFINREC);
 	}
+	
+	public SolFinTraficoRec(){}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
-		this.parseComp(bs);
+	protected void parseComp(String bs) throws MensajeNoValidoException {
+		super.parseComp(bs);
 	}
 
 }

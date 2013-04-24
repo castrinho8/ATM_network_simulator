@@ -29,6 +29,8 @@ public class SolCierreSesion extends Mensaje {
 		this.abonos = abonos;
 		this.traspasos = traspasos;
 	}
+	
+	public SolCierreSesion(){}
 
 	public long getTotal_reintegros() {
 		return total_reintegros;
@@ -44,14 +46,14 @@ public class SolCierreSesion extends Mensaje {
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%10i%10i%10i",
+		return String.format("%10d%10d%10d",
 				this.total_reintegros,
 				this.abonos,
 				this.traspasos);
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		try{
 			if(bs.toString().length() == 59){

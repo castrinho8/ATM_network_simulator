@@ -40,10 +40,12 @@ public class RespMovimientos extends MensajeRespDatos {
 		this.importe = importe;
 		this.fecha = fecha;
 	}
+	
+	public RespMovimientos(){}
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%2i%s%s%8i%s%s", 
+		return String.format("%2d%s%s%8d%s%s", 
 				nmovimientos,
 				tipo_mov,
 				signo?"+":"-",
@@ -53,8 +55,30 @@ public class RespMovimientos extends MensajeRespDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		// TODO Auto-generated method stub
 		return;
 	}
+
+	public int getNmovimientos() {
+		return nmovimientos;
+	}
+
+	public CodigosMovimiento getTipoMov() {
+		return tipo_mov;
+	}
+
+	public boolean getSigno() {
+		return signo;
+	}
+
+	public int getImporte() {
+		return importe;
+	}
+
+	public Date getFecha() {
+		return fecha;
+	}
+	
+	
 }

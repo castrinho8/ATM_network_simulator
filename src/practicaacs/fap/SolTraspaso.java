@@ -19,6 +19,8 @@ public class SolTraspaso extends MensajeDatos {
 		this.importe = importe;
 	}
 
+	public SolTraspaso(){}
+	
 	/**
 	 * Getter para o número de tarxeta.
 	 * @return
@@ -43,7 +45,7 @@ public class SolTraspaso extends MensajeDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
 		try{

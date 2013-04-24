@@ -18,6 +18,8 @@ public class SolMovimientos extends MensajeDatos {
 		this.num_tarjeta = num_tarjeta;
 		this.num_cuenta = num_cuenta;
 	}
+	
+	public SolMovimientos(){}
 
 	@Override
 	protected String printCuerpo() {
@@ -33,7 +35,7 @@ public class SolMovimientos extends MensajeDatos {
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 
 		try{

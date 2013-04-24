@@ -1,4 +1,4 @@
-package practicaacs.banco;
+package practicaacs.banco.bd;
 
 public class Conta {
 	private int numero;

@@ -21,13 +21,15 @@ public class RespReanTrafico extends Mensaje {
 		this.cod_error = cod_error;
 	}
 	
+	public RespReanTrafico(){}
+	
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2i%s", this.cod_resp,this.cod_error);
+		return String.format("%2s%s", this.cod_resp ? "00" : "11",this.cod_error);
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
 		try {
@@ -40,5 +42,16 @@ public class RespReanTrafico extends Mensaje {
 		} catch (CodigoNoValidoException e) {}
 		throw new MensajeNoValidoException();
 	}
+
+	public boolean getCodResp() {
+		return cod_resp;
+	}
+
+	public CodigosError getCodError() {
+		return cod_error;
+	}
+	
+	
+	
 
 }

@@ -28,13 +28,15 @@ public class RespReintegro extends MensajeRespDatos {
 		this.saldo = saldo;
 	}
 	
+	public RespReintegro(){}
+	
 	@Override
 	protected String printCuerpo() {
-		return String.format("%1i%10i",this.signo ? 1 : 0, this.saldo);
+		return String.format("%1s%10d",this.signo ? "+" : "-", this.saldo);
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		try{
 			if(bs.toString().length() == 39 && ( bs.toString().charAt(28) == '+' || bs.toString().charAt(28) == '-')){
@@ -45,7 +47,14 @@ public class RespReintegro extends MensajeRespDatos {
 		
 		throw new MensajeNoValidoException();
 	}
-	
+
+	public boolean getSigno() {
+		return signo;
+	}
+
+	public int getSaldo() {
+		return saldo;
+	}
 	
 	
 }

@@ -15,7 +15,7 @@ public class SesAberta extends EstadoSesion {
 			case SOLSALDO:
 				b.facerConsultaSaldo(	((SolSaldo) m).getNumcanal(),
 										((SolSaldo) m).getNmsg(),
-										((SolSaldo) m).isCodonline(),
+										((SolSaldo) m).getCodonline(),
 										((SolSaldo) m).getNum_tarjeta(),
 										((SolSaldo) m).getNum_cuenta()
 									);
@@ -23,7 +23,7 @@ public class SesAberta extends EstadoSesion {
 			case SOLMOVIMIENTOS:
 				b.facerConsultaMovementos(	((SolMovimientos) m).getNumcanal(),
 											((SolMovimientos) m).getNmsg(),
-											((SolMovimientos) m).isCodonline(),
+											((SolMovimientos) m).getCodonline(),
 											((SolMovimientos) m).getNum_tarjeta(),
 											((SolMovimientos) m).getNum_cuenta()
 										);
@@ -34,7 +34,7 @@ public class SesAberta extends EstadoSesion {
 			case SOLREINTEGRO:
 				b.facerReintegro(	((SolReintegro) m).getNumcanal(),
 									((SolReintegro) m).getNmsg(), 
-									((SolReintegro) m).isCodonline(), 
+									((SolReintegro) m).getCodonline(), 
 									((SolReintegro) m).getNum_tarjeta(), 
 									((SolReintegro) m).getNum_cuenta(), 
 									((SolReintegro) m).getImporte()
@@ -43,7 +43,7 @@ public class SesAberta extends EstadoSesion {
 			case SOLABONO:
 				b.facerAbono(	((SolAbono) m).getNumcanal(),
 								((SolAbono) m).getNmsg(),
-								((SolAbono) m).isCodonline(),
+								((SolAbono) m).getCodonline(),
 								((SolAbono) m).getNum_tarjeta(),
 								((SolAbono) m).getNum_cuenta(),
 								((SolAbono) m).getImporte()
@@ -52,7 +52,7 @@ public class SesAberta extends EstadoSesion {
 			case SOLTRASPASO:
 				b.facerTranspaso(	((SolTraspaso) m).getNumcanal(),
 									((SolTraspaso) m).getNmsg(), 
-									((SolTraspaso) m).isCodonline(), 
+									((SolTraspaso) m).getCodonline(), 
 									((SolTraspaso) m).getNum_tarjeta(), 
 									((SolTraspaso) m).getNum_cuenta_origen(), 
 									((SolTraspaso) m).getNum_cuenta_destino(), 

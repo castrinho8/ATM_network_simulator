@@ -12,10 +12,12 @@ public class SolDetTrafico extends Mensaje {
 	public SolDetTrafico(String origen, String destino) {
 		super(origen, destino,CodigosMensajes.SOLDETENERTRAFICO);
 	}
+	
+	public SolDetTrafico(){}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
-		this.parseComp(bs);
+	protected void parseComp(String bs) throws MensajeNoValidoException {
+		super.parseComp(bs);
 	}
 
 }

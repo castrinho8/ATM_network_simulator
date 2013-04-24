@@ -21,11 +21,13 @@ public abstract class MensajeDatos extends Mensaje {
 		this.nmsg = nmsg;
 		this.codonline = codonline;
 	}
+	
+	public MensajeDatos(){}
 
 	@Override
 	protected String printCabecera() {
 		return super.printCabecera() + 
-				String.format("%2i%5i%1i", numcanal, nmsg, codonline ? 1 : 0);
+				String.format("%02d%05d%1d", numcanal, nmsg, codonline ? 1 : 0);
 	}
 
 	public int getNumcanal() {
@@ -36,22 +38,36 @@ public abstract class MensajeDatos extends Mensaje {
 		return nmsg;
 	}
 
-	public boolean isCodonline() {
+	public boolean getCodonline() {
 		return codonline;
 	}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
+	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
+		
+		if(bs.length() < 25){
+			throw new MensajeNoValidoException("Lonxitude non válida (" + bs.length() + ") (MDatos)");
+		}
+		
 		try{
-			if(bs.toString().charAt(25) == '1' || bs.toString().charAt(25) == '0'){
-				this.numcanal = new Integer(bs.toString().substring(18,19));
-				this.nmsg = new Integer(bs.toString().substring(20, 24));
-				this.codonline =  bs.toString().charAt(25) == '1';
-				return;
-			}
-		}catch(NumberFormatException e){}
-		throw new MensajeNoValidoException();
+			numcanal = new Integer(bs.toString().substring(18,20).trim());
+		}catch(NumberFormatException e){
+			throw new MensajeNoValidoException("Formato de número de canal non válido. (MDatos)");
+		}
+		
+		try{
+			nmsg = new Integer(bs.substring(20, 25));
+		}catch(NumberFormatException e){
+			throw new MensajeNoValidoException("Formato de número de mensaxe (" + bs.substring(20, 25) + ") non válido. (MDatos)");
+		}
+		
+		if(bs.toString().charAt(25) == '1' || bs.toString().charAt(25) == '0'){
+			this.codonline =  bs.toString().charAt(25) == '1';
+		}else{
+			throw new MensajeNoValidoException("Non hai un 1 ou un 0 no codigoOnline. (MDatos)");
+		}
+		
 	}
 	
 	

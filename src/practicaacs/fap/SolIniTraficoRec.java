@@ -12,9 +12,11 @@ public class SolIniTraficoRec extends Mensaje {
 	public SolIniTraficoRec(String origen, String destino) {
 		super(origen, destino,CodigosMensajes.SOLINIREC);
 	}
+	
+	public SolIniTraficoRec(){}
 
 	@Override
-	protected void parseComp(byte[] bs) throws MensajeNoValidoException {
-		this.parseComp(bs); 
+	protected void parseComp(String bs) throws MensajeNoValidoException {
+		super.parseComp(bs); 
 	}
 }
