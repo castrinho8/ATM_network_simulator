@@ -80,6 +80,18 @@ public class Database_lib {
 	public boolean comprueba_cuentas(String id_banco,long reintegros, long abonos, long traspasos){
 		return false;
 	}
+	
+	public Long getNumReintegros(String id_banco2) {
+		return null;
+	}
+
+	public Long getNumTraspasos(String id_banco2) {
+		return null;
+	}
+
+	public Long getNumAbonos(String id_banco2) {
+		return null;
+	}
 	//-------------------------
 	
 	
@@ -251,5 +263,7 @@ public class Database_lib {
 		//crear una entrada en Hastable con <canal,mensaje_enviado> 
 		return null;
 	}
+
+
 	
 }

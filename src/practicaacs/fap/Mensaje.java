@@ -53,7 +53,7 @@ public abstract class Mensaje implements java.io.Serializable {
 	public String getOrigen() {
 		return origen;
 	}
-
+	
 	public String getDestino() {
 		return destino;
 	}

@@ -29,6 +29,8 @@ public class ServidorConsorcio_Bancos {
 
 	/**
 	 * Constructor de la clase ServidorConsorcio_Cajeros
+	 * @param cons El consorcio asociado al servidor.
+	 * @param puerto El puerto en el que se establece.
 	 */
 	public ServidorConsorcio_Bancos(Consorcio cons,int puerto) throws IOException{
 		this.consorcio = cons;
@@ -39,7 +41,7 @@ public class ServidorConsorcio_Bancos {
 		try {
 			 socketServidor = new DatagramSocket(this.port);
 		 }catch (IOException e) {
-			 System.out.println("Error al crear el objeto socket servidor");
+			 System.out.println("Error al crear el objeto socket servidor Consorcio_Bancos");
 			 System.exit(-1);
 		 }
 		try { //Establece un timeout
@@ -86,7 +88,7 @@ public class ServidorConsorcio_Bancos {
     				t.start();
     				
     			}catch (SocketTimeoutException e){
-    			
+    				cierra_servidorBancos();
     			}catch (IOException e) {
     				System.out.println("Error al recibir");
     				System.exit ( 0 );
