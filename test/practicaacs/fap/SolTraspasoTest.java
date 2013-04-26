@@ -30,7 +30,7 @@ public class SolTraspasoTest {
 		try {
 			m = (SolTraspaso) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
 			return;
 		}
 		

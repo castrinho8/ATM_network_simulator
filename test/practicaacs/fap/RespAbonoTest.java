@@ -30,13 +30,13 @@ public class RespAbonoTest {
 		try {
 			m = (RespAbono) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail("Mensaje No Valido!!");
+			fail(e.getLocalizedMessage());
 			return;
 		}
 		
 		assertNotNull(m);
 		assertEquals("ma.ch.te",m.getOrigen());
-		assertEquals("pa.ca.va",m.getOrigen());
+		assertEquals("pa.ca.va",m.getDestino());
 		assertEquals(4,m.getNumcanal());
 		assertEquals(23,m.getNmsg());
 		assertFalse(m.getCodonline());

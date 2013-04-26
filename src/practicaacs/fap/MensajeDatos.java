@@ -46,7 +46,7 @@ public abstract class MensajeDatos extends Mensaje {
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
-		if(bs.length() < 25){
+		if(bs.length() < 26){
 			throw new MensajeNoValidoException("Lonxitude non válida (" + bs.length() + ") (MDatos)");
 		}
 		
@@ -62,8 +62,8 @@ public abstract class MensajeDatos extends Mensaje {
 			throw new MensajeNoValidoException("Formato de número de mensaxe (" + bs.substring(20, 25) + ") non válido. (MDatos)");
 		}
 		
-		if(bs.toString().charAt(25) == '1' || bs.toString().charAt(25) == '0'){
-			this.codonline =  bs.toString().charAt(25) == '1';
+		if(bs.substring(25,26).equals("1") || bs.substring(25,26).equals("0")){
+			this.codonline = bs.substring(25,26).equals("1");
 		}else{
 			throw new MensajeNoValidoException("Non hai un 1 ou un 0 no codigoOnline. (MDatos)");
 		}

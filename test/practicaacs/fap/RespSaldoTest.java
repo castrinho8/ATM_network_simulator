@@ -26,10 +26,12 @@ public class RespSaldoTest {
 		String msg = new RespSaldo("ma.ch.te", "pa.ca.va",23, 43, true, CodigosRespuesta.CONSACEPTADA,
 				true, 3000).toString();
 		
+		System.out.println("RespSaldo -> " + msg);
+		
 		try {
 			m = (RespSaldo) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
-			fail();
+			fail(e.getLocalizedMessage());
 			return;
 		}
 		

@@ -46,7 +46,7 @@ public class SolCierreSesion extends Mensaje {
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%10d%10d%10d",
+		return String.format("%010d%010d%010d",
 				this.total_reintegros,
 				this.abonos,
 				this.traspasos);
@@ -55,14 +55,19 @@ public class SolCierreSesion extends Mensaje {
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
-		try{
-			if(bs.toString().length() == 59){
-				this.total_reintegros = new Integer(bs.toString().substring(29, 38));
-				this.abonos = new Integer(bs.toString().substring(39, 48));
-				this.traspasos = new Integer(bs.toString().substring(49, 58));
-			}
-		}catch(NumberFormatException e){}
+				
+		if(bs.toString().length() != 48)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida (SolCierreSesion)");
 		
-		throw new MensajeNoValidoException();
+		try{
+				this.total_reintegros = new Integer(bs.toString().substring(18, 28));
+				this.abonos = new Integer(bs.toString().substring(28, 38));
+				this.traspasos = new Integer(bs.toString().substring(38, 48));
+		}catch(NumberFormatException e){
+			String msg = "Error no formato dos numeros (" + bs.substring(29, 38) + bs.substring(39, 48) + bs.substring(49, 58) + ") (SolCierreSesion)";
+			throw new MensajeNoValidoException(msg);
+		}
+		
+		
 	}
 }

@@ -42,16 +42,14 @@ public class SolReintegro extends MensajeDatos {
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
-		
-		System.err.println(bs);
-		
+				
 		if(bs.length() != 42)
 			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida. (SolReintegro)");
 		
 		this.num_tarjeta = bs.substring(26,37).trim();
-		try {	
-			this.num_cuenta = new Integer(bs.charAt(37));
-			this.importe = new Integer(bs.substring(37, 42));
+		try {
+			this.num_cuenta = new Integer(bs.substring(37,38));
+			this.importe = new Integer(bs.substring(38, 42));
 		} catch(NumberFormatException e){
 			throw new MensajeNoValidoException("Error de formato dos numeros.");
 		}

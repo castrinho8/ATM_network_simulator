@@ -20,7 +20,7 @@ public class RespSaldo extends MensajeRespDatos {
 	public RespSaldo(String origen, String destino, int numcanal, int nmsg,
 			boolean codonline, CodigosRespuesta cod_resp, boolean signo,
 			int saldo) {
-		super(origen, destino,CodigosMensajes.RESREANUDARTRAFICO , numcanal, nmsg, codonline, cod_resp);
+		super(origen, destino,CodigosMensajes.RESSALDO , numcanal, nmsg, codonline, cod_resp);
 		this.signo = signo;
 		this.saldo = saldo;
 	}
@@ -29,21 +29,27 @@ public class RespSaldo extends MensajeRespDatos {
 	
 	@Override
 	protected String printCuerpo() {
-		return String.format("%1d%10d",this.signo ? 1 : 0, this.saldo);
+		return String.format("%1s%010d",this.signo ? "+" : "-", this.saldo);
 	}
 	
 	
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
-		try{
-			if(bs.toString().length() == 39 && ( bs.toString().charAt(28) == '+' || bs.toString().charAt(28) == '-')){
-				this.signo = bs.toString().charAt(28) == '+';
-				this.saldo = new Integer(bs.toString().substring(29, 38));
-			}
-		}catch(NumberFormatException e){}
 		
-		throw new MensajeNoValidoException();
+		if(bs.length() != 39)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida (RespSaldo)");
+		
+		if(bs.substring(28,29).equals("+") || bs.substring(28,29).equals("-"))
+			this.signo = bs.substring(28,29).equals("+");
+		else
+			throw new MensajeNoValidoException("Mal formato en el signo (RespSaldo)");
+		
+		try{
+			this.saldo = new Integer(bs.toString().substring(29, 39));
+		}catch(NumberFormatException e){
+			throw new MensajeNoValidoException("Error saldo (RespSaldo)");
+		}
 	}
 	
 	public boolean getSigno() {

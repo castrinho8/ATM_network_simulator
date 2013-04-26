@@ -24,24 +24,27 @@ public class RespFinTraficoRec extends Mensaje {
 	
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2s%s", this.cod_resp ? "11" : "00",this.cod_error);
+		return String.format("%2s%s", this.cod_resp ? "00" : "11",this.cod_error.getCodigo());
 	}
 
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
-		try {
-			if(bs.toString().length() == 23 && 
-					(bs.toString().substring(21, 22).equals("11") || bs.toString().substring(21, 22).equals("00"))){
-				this.cod_error = CodigosError.parse((bs.toString().substring(19, 20)));
-				this.cod_resp = bs.toString().substring(21, 22).equals("11");
-				return;
-			}
-		} catch (CodigoNoValidoException e) {}
-		throw new MensajeNoValidoException();
-	}
+		if(bs.length() != 22)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida (RespIniTrafico)");
+		
+		if (bs.toString().substring(18, 20).equals("11") || bs.toString().substring(18, 20).equals("00"))
+			this.cod_resp = bs.toString().substring(18, 20).equals("00");
+		else
+			throw new MensajeNoValidoException("Formato codigo resposta non válido (RespIniTrafico)");
 
+		try{
+			this.cod_error = CodigosError.parse((bs.toString().substring(20, 22)));
+		} catch (CodigoNoValidoException e) {
+			throw new MensajeNoValidoException("Codigo de error non válido (RespIniTrafico)");
+		}	
+	}
 	public boolean getCodResp() {
 		return cod_resp;
 	}

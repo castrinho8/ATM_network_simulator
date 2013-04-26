@@ -43,22 +43,29 @@ public class SolTraspaso extends MensajeDatos {
 	public int getImporte() {
 		return importe;
 	}
+	
+
+	@Override
+	protected String printCuerpo() {
+		return String.format("%11s%1d%1d%04d", this.num_tarjeta,this.num_cuenta_origen,this.num_cuenta_destino,this.importe);
+	}
 
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
 		
-		try{
-			if(bs.toString().length() == 41){
-				this.num_tarjeta = bs.toString().substring(26,36);
-				this.num_cuenta_origen = new Integer(bs.toString().charAt(37));
-				this.num_cuenta_destino = new Integer(bs.toString().charAt(38));
-				this.importe = new Integer(bs.toString().substring(39, 42));
-				return;
-			}
-		}catch(NumberFormatException e){}
+		if(bs.length() != 43)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida (SolTraspaso)");
 		
-		throw new MensajeNoValidoException();
+		this.num_tarjeta = bs.substring(26,37).trim();
+		
+		try{
+			this.num_cuenta_origen = new Integer(bs.substring(37,38));
+			this.num_cuenta_destino = new Integer(bs.substring(38,39));
+			this.importe = new Integer(bs.substring(39, 43));
+		}catch(NumberFormatException e){
+			throw new MensajeNoValidoException("Formato de numeros incorrecto (SolTraspaso)");
+		}
 	}
 	
 }

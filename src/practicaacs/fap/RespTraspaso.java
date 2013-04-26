@@ -25,31 +25,46 @@ public class RespTraspaso extends MensajeRespDatos {
 		super(origen, destino,CodigosMensajes.RESTRASPASO , numcanal, nmsg, codonline, cod_resp);
 		this.signoOrigen = signoOrigen;
 		this.saldoOrigen = saldoOrigen;
-		this.signoOrigen = signoOrigen;
-		this.saldoOrigen = saldoOrigen;
+		this.saldoDestino = saldoDestino;
+		this.signoDestino = signoDestino;
 	}
 	
 	public RespTraspaso(){}
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%1d%10d%1d%10d",this.signoOrigen ? 1 : 0, this.saldoOrigen,this.signoDestino ? 1 : 0, this.saldoDestino);
+		return String.format("%1s%010d%1s%010d",this.signoOrigen ? "+" : "-", this.saldoOrigen,this.signoDestino ? "+" : "-", this.saldoDestino);
 	}
 	
 	
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
-		try{
-			if(bs.toString().length() == 39 && ( bs.toString().charAt(28) == '+' || bs.toString().charAt(28) == '-')){
-				this.signoOrigen = bs.toString().charAt(28) == '+';
-				this.saldoOrigen = new Integer(bs.toString().substring(29, 38));
-				this.signoDestino = bs.toString().charAt(39) == '+';
-				this.saldoDestino = new Integer(bs.toString().substring(40, 49));
-			}
-		}catch(NumberFormatException e){}
+
+		if(bs.length() != 50)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida (RespSaldo)");
 		
-		throw new MensajeNoValidoException();
+		if(bs.substring(28,29).equals("+") || bs.substring(28,29).equals("-"))
+			this.signoOrigen = bs.substring(28,29).equals("+");
+		else
+			throw new MensajeNoValidoException("Mal formato en el signo origen (" + bs.substring(28, 29) + ") (RespTraspaso)");
+		
+		try{
+			this.saldoOrigen = new Integer(bs.substring(29, 39));
+		}catch(NumberFormatException e){
+			throw new MensajeNoValidoException("Error saldo origen (" + bs.substring(29, 39) + ") (RespTraspaso)");
+		}
+		
+		if(bs.substring(39,40).equals("+") || bs.substring(39,40).equals("-"))
+			this.signoDestino = bs.substring(39,40).equals("+");
+		else
+			throw new MensajeNoValidoException("Mal formato en el signo origen (RespTraspaso)");
+		
+		try{
+			this.saldoDestino = new Integer(bs.substring(40, 50));
+		}catch(NumberFormatException e){
+			throw new MensajeNoValidoException("Error saldo origen (" + bs.substring(40,50) + ") (RespTraspaso)");
+		}
 	}
 
 	public boolean getSignoOrigen() {

@@ -23,7 +23,7 @@ public class RespAperturaSesion extends Mensaje {
 	 */
 	public RespAperturaSesion(String origen, String destino, boolean cod_resp,
 			CodigosError cod_error) {
-		super(origen, destino,CodigosMensajes.RESREINTEGRO);
+		super(origen, destino,CodigosMensajes.RESABRIRSESION);
 		
 		this.cod_resp = cod_resp;
 		this.cod_error = cod_error;
@@ -33,7 +33,7 @@ public class RespAperturaSesion extends Mensaje {
 	
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2s%s", cod_resp ? "11" : "00",this.cod_error);
+		return String.format("%2s%s", cod_resp ? "00" : "11",this.cod_error.getCodigo());
 	}
 
 	@Override

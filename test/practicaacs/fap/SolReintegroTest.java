@@ -24,7 +24,7 @@ public class SolReintegroTest {
 	public void testParse() {
 		SolReintegro m = null;
 		String msg = new SolReintegro("ma.ch.te", "pa.ca.va", 23, 43, true, "tarjeta", 3, 2000).toString();
-		
+				
 		try {
 			m = (SolReintegro) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
@@ -38,9 +38,9 @@ public class SolReintegroTest {
 		assertEquals(m.getNumcanal(),23);
 		assertEquals(m.getNmsg(),43);
 		assertTrue(m.getCodonline());
+		assertEquals(m.getImporte(),2000);
 		assertEquals(m.getNum_tarjeta(),"tarjeta");
 		assertEquals(m.getNum_cuenta(),3);
-		assertEquals(m.getImporte(),2000);
 
 	}
 

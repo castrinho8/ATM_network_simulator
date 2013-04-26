@@ -22,6 +22,8 @@ public class RespAperturaSesionTest {
 		RespAperturaSesion m = null;
 		String msg = new RespAperturaSesion("ma.ch.te", "pa.ca.va", false, CodigosError.FUERASEC).toString();
 		
+		System.out.println("RespAperturaSesion -> " + msg);
+		
 		try {
 			m = (RespAperturaSesion) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {

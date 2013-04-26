@@ -52,7 +52,7 @@ public class SolAperturaSesion extends Mensaje {
 
 	@Override
 	protected String printCuerpo(){
-		return String.format("%2d%10s%8s%20s",
+		return String.format("%02d%10s%8s%20s",
 				this.ncanales, 
 				new SimpleDateFormat("dd/MM/yyyy").format(this.time),
 				new SimpleDateFormat("hh:mm:ss").format(this.time),
@@ -62,14 +62,22 @@ public class SolAperturaSesion extends Mensaje {
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
+		
+		if(bs.length() != 58)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non valida (SolAperturaSesion)");
+		
+		try{
+			this.ncanales = new Integer(bs.substring(18, 20));
+		}catch (NumberFormatException e){
+			throw new MensajeNoValidoException("Formato do numero de mensaxes non valido. (SolAperturaSesion)");
+		}
+
 		try {
-			if(bs.toString().length() == 59){
-				this.ncanales = new Integer(bs.toString().substring(19, 20));
-				this.time = new SimpleDateFormat("dd/MM/yyyyhh:mm:ss").parse(bs.toString().substring(21, 38));
-				this.puerto = bs.toString().substring(39,58);
-				return;
-			}
-		} catch (ParseException e) {}
-		throw new MensajeNoValidoException();
+			this.time = new SimpleDateFormat("dd/MM/yyyyhh:mm:ss").parse(bs.substring(20, 38));
+		} catch (ParseException e) {
+			throw new MensajeNoValidoException("Formato da data non valido (SolAperturaSesion)");
+		}
+
+		this.puerto = bs.toString().substring(38,58);
 	}
 }

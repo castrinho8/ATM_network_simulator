@@ -17,16 +17,20 @@ public abstract class MensajeRespDatos extends MensajeDatos {
 
 	@Override
 	protected String printCabecera() {
-		return super.printCabecera() + "";
+		return super.printCabecera() + cod_resp.getCodigo();
 	}
 
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException{
 		super.parseComp(bs);
+		
+		if(bs.length() < 28)
+			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida (MensajeRespDatos)");
+		
 		try {
-			this.cod_resp = CodigosRespuesta.parse(bs.toString().substring(26, 27));
+			this.cod_resp = CodigosRespuesta.parse(bs.toString().substring(26, 28));
 		} catch (CodigoNoValidoException e) {
-			throw new MensajeNoValidoException();
+			throw new MensajeNoValidoException("Formato de codigo non válido (MensajeRespDatos)");
 		}
 	}
 

@@ -22,7 +22,7 @@ public class SolCierreSesionTest {
 	public void testParse() {
 		SolCierreSesion m = null;
 		String msg = new SolCierreSesion("ma.ch.te", "pa.ca.va", 1,3,4).toString();
-		
+				
 		try {
 			m = (SolCierreSesion) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {

@@ -22,6 +22,8 @@ public class RespIniTraficoRecTest {
 		RespIniTraficoRec m = null;
 		String msg = new RespIniTraficoRec("ma.ch.te", "pa.ca.va", false, CodigosError.FUERASEC).toString();
 		
+		System.out.println("RespIniTrafRec -> " + msg);
+		
 		try {
 			m = (RespIniTraficoRec) Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
