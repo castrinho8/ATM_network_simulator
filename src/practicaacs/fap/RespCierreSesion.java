@@ -6,13 +6,13 @@ public class RespCierreSesion extends Mensaje {
 	private static final long serialVersionUID = 8175815137753089508L;
 	private boolean cod_resp;
 	private CodigosError cod_error;
-	private long total_reintegros;
-	private long total_abonos;
-	private long total_traspasos;
+	private int total_reintegros;
+	private int total_abonos;
+	private int total_traspasos;
 	
 
 	public RespCierreSesion(String origen, String destino, boolean cod_resp,
-			CodigosError cod_error,long total_reintegros, long total_abonos, long total_traspasos) {
+			CodigosError cod_error,int total_reintegros, int total_abonos, int total_traspasos) {
 		super(origen, destino,CodigosMensajes.RESCIERRESESION);
 		this.cod_resp = cod_resp;
 		this.cod_error = cod_error;

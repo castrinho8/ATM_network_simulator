@@ -9,7 +9,7 @@ public enum CodigosMovimiento {
 	private CodigosMovimiento(int numero){
 		this.numero = numero;
 	}
-	
+
 	public static CodigosMovimiento getTipoMovimiento(int valor) throws CodigoNoValidoException{
 		switch(valor){
 		case 10:
@@ -29,5 +29,10 @@ public enum CodigosMovimiento {
 		default:
 			throw new CodigoNoValidoException();
 		}
+	}
+
+	public int getNum() {
+		// TODO Auto-generated method stub
+		return numero;
 	}
 }

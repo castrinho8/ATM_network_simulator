@@ -34,7 +34,7 @@ public class RespMovimientosTest {
 	public void testParse() {
 		RespMovimientos m = null;
 		String msg = new RespMovimientos("ma.ch.te", "pa.ca.va", 4, 2, true, CodigosRespuesta.CUENTANVALIDA,
-				32, CodigosMovimiento.REINTEGRO, true, 2300, new Date()).toString();
+				18, CodigosMovimiento.REINTEGRO, true, 2300, new Date()).toString();
 		
 		try {
 			m = (RespMovimientos) Mensaje.parse(msg);
@@ -50,7 +50,7 @@ public class RespMovimientosTest {
 		assertEquals(m.getNmsg(),2);
 		assertTrue(m.getCodonline());
 		assertEquals(m.getCod_resp(),CodigosRespuesta.CUENTANVALIDA);
-		assertEquals(m.getNmovimientos(),32);
+		assertEquals(m.getNmovimientos(),18);
 		assertEquals(m.getTipoMov(),CodigosMovimiento.REINTEGRO);
 		assertTrue(m.getSigno());
 		assertEquals(m.getImporte(),2300);
