@@ -1,8 +1,20 @@
-package practicaacs.consorcio;
+package practicaacs.consorcio.bd;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Properties;
 
+import practicaacs.banco.bd.ClienteBDBanco;
+import practicaacs.banco.bd.Conta;
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.fap.*;
@@ -10,26 +22,82 @@ import practicaacs.fap.*;
 //Libreria de acceso a la base de datos
 public class Database_lib {
 	
-	static private Database_lib instancia = new Database_lib();
+	static private Database_lib instancia;
+
+	private Connection con;
+	private Statement statement = null;
 	
-	/**
-	 * Constructor del Singleton.
-	 */
-	private Database_lib(){}
+	private Database_lib() {
+		
+    	//Obtenemos los datos del fichero properties
+		Properties prop = new Properties();
+		InputStream is;
+		String file = ""; //LA SITUACION DEL FICHERO DE CONFIGURACION
+		try {
+			is = new FileInputStream(file);
+		    prop.load(is);
+		} catch (FileNotFoundException e) {
+			System.err.println("Non se encontrou arquivo de configuracion " + file + ".");
+			System.exit(-1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		String bdname = prop.getProperty("consorcio.bd.name");
+		String bdadd = prop.getProperty("consorcio.bd.add");
+		String bduser = prop.getProperty("consorcio.bd.user");
+		String bdpass = prop.getProperty("consorcio.bd.pass");
+		
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			con = DriverManager.getConnection("jdbc:mysql://" + bdadd + "/" + bdname + "?user=" + bduser + "&password=" + bdpass));
+			statement = con.createStatement();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}
 	
 	/**
 	 * Devuelve la instancia del singleton
+	 * @return El singleton de acceso a la base de datos
 	 */
-	static Database_lib getInstance(){
+	static public Database_lib getInstance(){
+		if(instancia == null)
+			instancia = new Database_lib();
+		
 		return instancia;
 	}
+	
+	
+	//------------------------CONSULTAS EN CUENTAS---------------------------------
 	
 	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino){
 		return CodigosRespuesta.CONSACEPTADA;
 	}
 	
+	/**
+	 * Consulta que hace un SELECT en la tabla CUENTA y devuelve la indicada.
+	 * @param tarjeta La tarjeta a la que pertenece la cuenta.
+	 * @param cuenta La cuenta a consultar.
+	 * @return Devuelve el saldo actual de la cuenta y null en caso de error
+	 */
 	public int consultar_saldo(String tarjeta, int cuenta){
-		return 0;
+		ResultSet resultSet;
+		try{
+			resultSet = this.statement.executeQuery("SELECT ncuenta,saldo FROM ContaTarxeta JOIN Conta" +
+					" USING (ccod) where tcod = " + numtarx + " AND " + " cnum = " + numConta);
+			resultSet.next();
+			return resultSet.getInt(2);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+			return (Integer) null;
+		}
 	}
 
 	public ArrayList<Movimiento> consultar_movimientos(String tarjeta,int cuenta){
@@ -66,11 +134,6 @@ public class Database_lib {
 		return 0;
 	}
 	
-	public void almacenar_envio(Mensaje message){
-		
-	}
-	
-	
 	//----------------MOVIMIENTOS------------------------
 	
 	/**
@@ -92,8 +155,6 @@ public class Database_lib {
 	public Long getNumAbonos(String id_banco2) {
 		return null;
 	}
-	//-------------------------
-	
 	
 	//----------------SESIONES--------------
 	private String id_banco;
@@ -226,18 +287,22 @@ public class Database_lib {
 	 * Devuelve los ultimos mensajes enviados hacia el banco introducido
 	 * por parámetro, por todos los canales.
 	 */
-	public ArrayList<Mensaje> recupera_mensajes(String id_banco){
+	public ArrayList<Mensaje> recupera_ultimos_mensajes(String id_banco){
 		return null;
 	}
 	
 	
-	//---------------ULTIMOS ENVIOS----------------
+	//---------------ENVIOS----------------
 	
 	//private int id_banco;
 	private int canal;
 	private Mensaje mensaje;
 	private boolean conestado;
 
+	public void almacenar_envio(Mensaje message){
+		
+	}
+	
 	/**
 	 * Cambia el ultimo envio del canal indicado por el pasado por parametro
 	 */
