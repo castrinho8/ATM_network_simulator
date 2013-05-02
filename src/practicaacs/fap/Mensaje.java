@@ -66,6 +66,18 @@ public abstract class Mensaje implements java.io.Serializable {
 		return ((tipoMensaje == CodigosMensajes.SOLSALDO) | (tipoMensaje == CodigosMensajes.SOLMOVIMIENTOS));
 	}
 	
+	public boolean es_datos(){
+		return ((tipoMensaje == CodigosMensajes.RESABONO) ||
+				(tipoMensaje == CodigosMensajes.SOLABONO) ||
+				(tipoMensaje == CodigosMensajes.RESMOVIMIENTOS) ||
+				(tipoMensaje == CodigosMensajes.SOLMOVIMIENTOS) ||	
+				(tipoMensaje == CodigosMensajes.RESSALDO) ||				
+				(tipoMensaje == CodigosMensajes.SOLSALDO) ||				
+				(tipoMensaje == CodigosMensajes.RESREINTEGRO) ||
+				(tipoMensaje == CodigosMensajes.SOLREINTEGRO)
+				);
+	}
+	
 	@Override
 	public String toString(){
 		return this.printCabecera() + this.printCuerpo(); 
@@ -123,6 +135,16 @@ public abstract class Mensaje implements java.io.Serializable {
 		} catch (CodigoNoValidoException e) {
 			throw new MensajeNoValidoException("Formato de Codigo non válido (Mensaje)");
 		}
+	}
+
+
+	public void setOrigen(String origen) {
+		this.origen = origen;
+	}
+
+
+	public void setDestino(String destino) {
+		this.destino = destino;
 	}
 
 }

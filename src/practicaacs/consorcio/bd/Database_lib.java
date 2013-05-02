@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -163,8 +164,12 @@ public class Database_lib {
 	private int num_canales;
 	//tabla de canales
 	
-	public void insertar_sesion(String id_banco, String puerto, int num_canales, EstadoSesion estado){
-		
+	public void abrir_sesion(String id_banco, String puerto, int num_canales, EstadoSesion estado){
+		//Comprueba si ya esta la sesión, si está se reempleza y si no se inserta una nueva
+	}
+	
+	public void cerrar_sesion(String id_banco){
+		//Comprueba si esta la sesión y si esta la elimina.
 	}
 	
 	/**
@@ -225,6 +230,14 @@ public class Database_lib {
 		Integer.getInteger(puerto);
 	}
 	
+	public InetAddress getDestinationAddress(String id_banco2) {
+		return null;
+	}
+	
+	public Object getSesiones() {
+		return null;
+	}
+
 	
 	//----------------CANALES---------------
 	
@@ -329,6 +342,11 @@ public class Database_lib {
 		return null;
 	}
 
-
-	
+	/**
+	 * Añade una linea en la lista de MemRecibido
+	 * @param banco Valor booleano que indica si procede de un banco o no
+	 */
+	public void almacenar_recepcion(Mensaje message,boolean banco){
+		
+	}
 }

@@ -7,15 +7,19 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.banco.estados.SesAberta;
+import practicaacs.consorcio.aux.Sesion;
+import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
 
@@ -26,7 +30,9 @@ public class ServidorConsorcio_Bancos {
 	
 	private boolean abierto_serv_bancos;
 	private DatagramSocket socketServidor;
-
+	//Banco,sesion
+	private HashMap<String,Sesion> sesiones;
+	
 	/**
 	 * Constructor de la clase ServidorConsorcio_Cajeros
 	 * @param cons El consorcio asociado al servidor.
@@ -37,6 +43,7 @@ public class ServidorConsorcio_Bancos {
 		this.port = puerto;
 
 		this.abierto_serv_bancos = false;
+		this.sesiones = new HashMap<String,Sesion>();
 		
 		try {
 			 socketServidor = new DatagramSocket(this.port);
@@ -59,17 +66,29 @@ public class ServidorConsorcio_Bancos {
 	public boolean isOnline() {
 		return abierto_serv_bancos;
 	}
+	
+	public Sesion getSesion(String id_banco){
+		return this.sesiones.get(id_banco);
+	}
+
+	public void insertaSesion(Sesion ses){
+    	this.sesiones.put(ses.getId(),ses);
+    }
+	
+	public void eliminarSesion(String id_banco){
+		this.sesiones.remove(id_banco);
+	}
 	//-------END GETTERS & SETTERS-------
 	
 
 
 	/**
-     * Levanta el servidorBancos
+     * Levanta el servidorBancos hasta que la variable que controla el estado se ponga a False.
+     * El servidor espera la recepcion de mensajes y para cada uno crea un thread para realizar las tareas
+     * que sean necesarias.
      */
     public void levantar_servidorBancos() throws ClassNotFoundException, IOException{
     	
-     	
-    		Mensaje msgEnviar;
     		byte [] recibirDatos = new byte[1024];
     		
         	Calendar time = Calendar.getInstance();
@@ -84,7 +103,7 @@ public class ServidorConsorcio_Bancos {
     				socketServidor.receive(inputPacket);
     				
     				//Crea una conexión para analizar el datagrama
-    				ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(inputPacket,this.consorcio,this);
+    				ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(inputPacket,this.consorcio,this,this.socketServidor);
     				t.start();
     				
     			}catch (SocketTimeoutException e){
@@ -110,17 +129,42 @@ public class ServidorConsorcio_Bancos {
     }
 
     /**
+     * Método que envia un mensaje de solicitar Recuperacion
+     * @param id_banco 
+     */
+    public void solicitar_recuperacion(String id_banco){
+    	
+    }
+    
+    /**
+     * Método que envia un mensaje de finalizar recuperacion
+     * @param id_banco
+     */
+    public void solicitar_fin_recuperacion(String id_banco){
+    	
+    }
+    
+    /**
      * Recupera los mensajes del banco
      */
     public void realiza_recuperacion(String banco){
-    	for(Object message : this.conexiones.get(banco)){
-    		this.consorcio.getBancos_client().send_message((Mensaje) message);
-    	}
+    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(null, consorcio, this, socketServidor);
+    	c.iniciar_recuperacion(banco);
     }
     
+    
+    /**
+     * Método que envia el mensaje pasado por parámetro.
+     * @param message El mensaje a enviar.
+     */
     public void send_message(Mensaje message){
+    	
+    	//CAMBIAR TODOOOO PARA CREAR UN THREAD QUE HAGA EL ENVIO y acordarse de poner los timers
+    	
+    	//Obtiene el banco al que enviar
     	String id_banco = message.getDestino();
     	
+    	//Obtiene de la base de datos la IP y PUERTO del banco al que enviar
     	InetAddress dir = Database_lib.getInstance().getDestinationAddress(id_banco);
     	int puerto = Database_lib.getInstance().getPuerto(id_banco);
     	
@@ -133,8 +177,8 @@ public class ServidorConsorcio_Bancos {
 		}catch (IOException e) {
 			System.out.println("Error al enviar");
 			System.exit ( 0 );
-		}    	//obtiene de la BD a donde lo tiene que enviar
-    	//crea una conexion
+		}
     }
+    
 }
 

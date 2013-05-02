@@ -4,7 +4,10 @@ import java.io.*;
 import java.net.*;
 import java.util.Calendar;
 
-
+/**
+ * Clase que implementa un servidor para la recepción de mensajes de los cajeros.
+ *
+ */
 public class ServidorConsorcio_Cajeros {
 
 	private int port;
@@ -58,7 +61,7 @@ public class ServidorConsorcio_Cajeros {
     	System.out.println("APERTURA: Sesion Servidor de Cajeros comenzada a las " + time.getTime());
     	this.abierto_serv_cajeros = true;
 
-		while(this.abierto_serv_cajeros){
+		while(this.isOnline()){
 			//Crea el Datagrama en donde recibir los datos
 			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
 			try{

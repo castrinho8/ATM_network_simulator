@@ -7,19 +7,19 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.logging.*;
 
+import practicaacs.banco.bd.ClienteBDBanco;
 import practicaacs.fap.*;
+import practicaacs.consorcio.bd.*;
 
 public class Consorcio {
 
 	static private int next_id_consorcio = 0;
-	
+
 	private int id_consorcio;
 	private InetAddress address;
-
+	
 	private ServidorConsorcio_Cajeros cajeros_server;
-
 	private ServidorConsorcio_Bancos bancos_server;
-	private ClienteConsorcio_Bancos bancos_client;
 	
 	/**
 	 * Constructor de la clase Consorcio
@@ -48,11 +48,8 @@ public class Consorcio {
 		this.id_consorcio = next_id_consorcio++;
 		this.cajeros_server = new ServidorConsorcio_Cajeros(this,puerto_cajeros);
 		this.bancos_server = new ServidorConsorcio_Bancos(this,puerto_bancos);
-		this.bancos_client = new ClienteConsorcio_Bancos();
 	}
 
-    //CONSORCIO - CAJEROS
-    
 	public ServidorConsorcio_Cajeros getCajeros_server() {
 		return cajeros_server;
 	}
@@ -68,14 +65,6 @@ public class Consorcio {
 	public InetAddress getAddress() {
 		return address;
 	}
-    
-    //CONSORCIO - BANCO
-    
-	public ClienteConsorcio_Bancos getBancos_client() {
-		return bancos_client;
-	}
-
-    //solicitar reanudacion
     
 }
 
