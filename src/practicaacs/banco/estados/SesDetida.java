@@ -15,9 +15,14 @@ public class SesDetida extends EstadoSesion {
 	}
 	
 	@Override
-	public void analizarMensaje(Mensaje m, Banco b) {
-		// TODO Auto-generated method stub
+	public void analizarMensaje(Mensaje m, Banco b) {}
 
+	@Override
+	public boolean traficoActivo() {
+		return false;
 	}
 
+	
+	
+	
 }

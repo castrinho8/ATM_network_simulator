@@ -36,6 +36,28 @@ CREATE TABLE Movemento(
 	CONSTRAINT m_pk PRIMARY KEY (ccod,mcod)
 );
 
+CREATE TABLE Sesion(
+	scod INTEGER AUTOINCREMENT,
+	CONSTRAINT s_pk PRIMARY KEY (scod)
+);
+
+CREATE TABLE Canle(
+	scod INTEGER,
+	cncod INTEGER,
+	CONSTRAINT cn_scod_fk FOREIGN KEY (scod) REFERENCES Sesion(scod) ON DELETE CASCADE,
+	CONSTRAINT s_pk PRIMARY KEY (scod,cncod)	
+);
+
+CREATE TABLE Mensaxe (
+	scod INTEGER,
+	cncod INTEGER,
+	mscod INTEGER,
+	enviado BOOLEAN,
+	texto VARCHAR2(100),
+	CONSTRAINT ms_scncod_fk FOREIGN KEY (scod,cncod) REFERENCES Sesion(scod,cncod) ON DELETE CASCADE,
+	CONSTRAINT ms_pk PRIMARY KEY (scod, cncod, mscod)
+);
+
 -- Valores iniciales das contas do banco.
 
 INSERT INTO Tarxeta VALUES ('pastor42 01');
@@ -78,3 +100,5 @@ INSERT INTO TipoMovemento VALUES(13,'Pago recibo');
 INSERT INTO TipoMovemento VALUES(50,'Abono');
 INSERT INTO TipoMovemento VALUES(51,'Cobro de cheque');
 INSERT INTO TipoMovemento VALUES(99,'Otros');
+
+

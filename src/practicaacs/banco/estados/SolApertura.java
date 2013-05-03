@@ -14,7 +14,7 @@ public class SolApertura extends EstadoSesion {
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
 		
-		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)){
+		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.RESABRIRSESION)){
 			if(((RespAperturaSesion) m).getCodResp()){
 				b.establecerSesionAceptada();
 			}else{
@@ -28,5 +28,12 @@ public class SolApertura extends EstadoSesion {
 			instance = new SolApertura();
 		return instance;
 	}
+
+	@Override
+	public boolean sesionAberta() {
+		return false;
+	}
+	
+	
 
 }

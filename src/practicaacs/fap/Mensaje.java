@@ -5,10 +5,12 @@ import java.util.HashMap;
 
 public abstract class Mensaje implements java.io.Serializable {
 
+	private static final long serialVersionUID = 6662050802750979312L;
 	private String origen;
 	private String destino;
 	private CodigosMensajes tipoMensaje;
 	private static HashMap<CodigosMensajes,Class<? extends Mensaje>> codigo_clase;
+	private static HashMap<CodigosMensajes,Class<? extends RespDatosError>> codigo_clase_error;
 	
 	public Mensaje(String origen, String destino,CodigosMensajes tipoMensaje){
 		assert(origen.length()<=8);
@@ -31,7 +33,6 @@ public abstract class Mensaje implements java.io.Serializable {
 			codigo_clase.put(CodigosMensajes.SOLREINTEGRO, SolReintegro.class);
 			codigo_clase.put(CodigosMensajes.SOLABONO,  SolAbono.class);
 			codigo_clase.put(CodigosMensajes.SOLTRASPASO, SolTraspaso.class);
-			
 			codigo_clase.put(CodigosMensajes.RESINIREC, RespIniTraficoRec.class);
 			codigo_clase.put(CodigosMensajes.RESFINREC, RespFinTraficoRec.class);
 			codigo_clase.put(CodigosMensajes.RESABRIRSESION, RespAperturaSesion.class);
@@ -43,6 +44,15 @@ public abstract class Mensaje implements java.io.Serializable {
 			codigo_clase.put(CodigosMensajes.RESREINTEGRO, RespReintegro.class);
 			codigo_clase.put(CodigosMensajes.RESABONO, RespAbono.class);
 			codigo_clase.put(CodigosMensajes.RESTRASPASO, RespTraspaso.class);
+		}
+		
+		if(codigo_clase_error == null){
+			codigo_clase_error = new HashMap<CodigosMensajes,Class<? extends RespDatosError>>();
+			codigo_clase_error.put(CodigosMensajes.RESSALDO, RespSaldoError.class);
+			codigo_clase_error.put(CodigosMensajes.RESMOVIMIENTOS, RespMovimientosError.class);
+			codigo_clase_error.put(CodigosMensajes.RESREINTEGRO, RespReintegroError.class);
+			codigo_clase_error.put(CodigosMensajes.RESABONO, RespAbonoError.class);
+			codigo_clase_error.put(CodigosMensajes.RESTRASPASO, RespTraspasoError.class);
 		}
 		
 	}
@@ -113,7 +123,12 @@ public abstract class Mensaje implements java.io.Serializable {
 		}
 			
 		try {
-			Mensaje m = Mensaje.codigo_clase.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
+			Mensaje m;
+			if(esRespuestaDatos(tipo)){
+				m = Mensaje.codigo_clase_error.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
+			}else{
+				m = Mensaje.codigo_clase.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
+			}
 			m.parseComp(bs);
 			return m;
 		}catch (IllegalArgumentException | InvocationTargetException
@@ -125,6 +140,16 @@ public abstract class Mensaje implements java.io.Serializable {
 		return null;
 	}
 	
+	private static boolean esRespuestaDatos(CodigosMensajes tipo) {
+		if(tipo.equals(CodigosMensajes.RESABONO)) return true;
+		if(tipo.equals(CodigosMensajes.RESMOVIMIENTOS)) return true;
+		if(tipo.equals(CodigosMensajes.RESREINTEGRO)) return true;
+		if(tipo.equals(CodigosMensajes.RESSALDO)) return true;
+		if(tipo.equals(CodigosMensajes.RESTRASPASO)) return true;
+		return false;
+	}
+
+
 	protected void parseComp(String bs) throws MensajeNoValidoException{
 		
 		this.origen = bs.toString().substring(0, 8);
@@ -136,6 +161,7 @@ public abstract class Mensaje implements java.io.Serializable {
 			throw new MensajeNoValidoException("Formato de Codigo non válido (Mensaje)");
 		}
 	}
+	
 
 
 	public void setOrigen(String origen) {

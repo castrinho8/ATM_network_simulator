@@ -18,4 +18,15 @@ public class SesNonAberta extends EstadoSesion {
 	public void analizarMensaje(Mensaje m, Banco b) {
 	}
 
+	@Override
+	public boolean sesionAberta() {
+		return false;
+	}
+
+	@Override
+	public boolean traficoActivo() {
+		return false;
+	}
+	
+
 }

@@ -24,7 +24,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import practicaacs.banco.Banco;
+import practicaacs.banco.bd.Canal;
 import practicaacs.banco.bd.Conta;
+import practicaacs.banco.bd.Mensaxe;
 import practicaacs.banco.bd.Movemento;
 import practicaacs.banco.bd.Tarxeta;
 
@@ -60,8 +62,7 @@ public class VentanaBanco extends javax.swing.JFrame{
     	this.banco = banco;
         initComponents();
         this.setTitle("Ventana Banco \"" + nombre + "\"" + " - ACS 2012/2013");
-        this.actualizarContas();
-        this.actualizarTarxetas();
+        this.actualizar();
         
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -73,7 +74,70 @@ public class VentanaBanco extends javax.swing.JFrame{
         this.setIconImage(new ImageIcon("/home/ch01/Dropbox/UNI_Fedora/ACS/RepositorioPractica/res/iconobanco.png").getImage());
     }
 
-	public void actualizarContasAsociadas(){
+    
+    //----------------------------------------------------------------------------------------//
+    //---------------------------------- METODOS CONTROL LOG  --------------------------------//
+    //----------------------------------------------------------------------------------------//
+    
+    public void engadirLinhaLog(String s){
+    	this.textlog.append(s);
+    }
+    
+    public void baleirarLog(){
+    	this.textlog.setText("");
+    }
+    
+    
+    
+    
+    //----------------------------------------------------------------------------------------//
+    //---------------------------------- METODOS ACTUALIZAR INTERFACE ------------------------//
+    //----------------------------------------------------------------------------------------//
+    
+	public void actualizar() {
+		this.actualizarContas();
+		this.actualizarContasAsociadas();
+		this.actualizarMovementos();
+		this.actualizarTarxetas();
+		this.actualizarCanles();
+		this.actualizarMensaxesRecibidas();
+		this.actualizarMensaxesEnviadas();
+		this.actualizarBotones();
+	}
+
+	private void actualizarBotones() {
+		if(this.banco.sesionAberta()){
+			this.botonabrirsesion.setText("Cerrar Sesión");
+			this.sesionabierta = true;
+			this.botondetenertrafico.setEnabled(false);
+			this.botonforzarrecuperacion.setEnabled(false);
+		
+			if(this.banco.traficoActivo()){
+				
+			}else{
+				
+			}
+		}
+		else{
+			
+		}
+		
+	}
+
+
+	private void actualizarMensaxesEnviadas() {
+		this.setTablaMensaxesEnviados(this.formatTaboaMensaxes(this.banco.getMensaxesEnviadas()));
+	}
+
+	private void actualizarMensaxesRecibidas() {
+		this.setTablaMensaxesRecibidos(this.formatTaboaMensaxes(this.banco.getMensaxesRecibidas()));
+	}
+	
+	private void actualizarCanles() {
+		this.setTablaCanles(this.formatTaboaCanles(this.banco.getCanales()));
+	}
+
+	private void actualizarContasAsociadas(){
  		int selrow = listatarxetas.getSelectedIndex();
  		HashMap<Integer, Conta> res;
  		
@@ -86,11 +150,11 @@ public class VentanaBanco extends javax.swing.JFrame{
 		setListaContasAsociadas(formatListContas(res));
 	}
 	
-	public void actualizarContas(){
+	private void actualizarContas(){
 		setTablaContas(this.formatTaboaContas(banco.getContas()));
 	}
 	
-	public void actualizarMovementos(){
+	private void actualizarMovementos(){
 		int selrow = tablacontas.getSelectedRow();
 		ArrayList<Movemento> res;
 		if(selrow != -1){
@@ -102,21 +166,17 @@ public class VentanaBanco extends javax.swing.JFrame{
 		setMovementos(formatTaboaMovementos(res));
 	}
 	
-	public void actualizarTarxetas(){
+	private void actualizarTarxetas(){
         setListaTarxetas(this.formatListTarxetas(banco.getTarxetas()));
-        this.actualizarContasAsociadas();
 	}
 	
-    public void engadirLinhaLog(String s){
-    	this.textlog.append(s);
-    }
     
-    public void baleirarLog(){
-    	this.textlog.setText("");
-    }
 	
+	
+	//----------------------------------------------------------------------------------------//
+    //-------------------------------- METODO INICIALIZAR COMPONENTES ------------------------//
+    //----------------------------------------------------------------------------------------//
     
-    //METODOS PRIVADOS  
 	private void initComponents() {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -170,7 +230,7 @@ public class VentanaBanco extends javax.swing.JFrame{
     	rowSM.addListSelectionListener(new ListSelectionListener() {
     		public void valueChanged(ListSelectionEvent e) {
     			if (e.getValueIsAdjusting()) return;
-    			actualizarMovementos();
+    			actualizar();
     		}
     	});
     	
@@ -317,7 +377,7 @@ public class VentanaBanco extends javax.swing.JFrame{
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (e.getValueIsAdjusting()) return;
-				VentanaBanco.this.actualizarContasAsociadas();
+				VentanaBanco.this.actualizar();
 			}
         	
         });
@@ -530,6 +590,11 @@ public class VentanaBanco extends javax.swing.JFrame{
     }
 	
 
+	
+	
+	//----------------------------------------------------------------------------------------//
+    //------------------------------------ METODOS ACCIONS BOTONS ----------------------------//
+    //----------------------------------------------------------------------------------------//
 
 	private void establecerValoresDefecto() {
 		new DialogoSiNon("Estas seguro de que queres establecer os valores por defecto?",new Runnable(){
@@ -537,10 +602,7 @@ public class VentanaBanco extends javax.swing.JFrame{
 					@Override
 					public void run() {
 						banco.establecerValoresPorDefecto();
-						VentanaBanco.this.actualizarContas();
-						VentanaBanco.this.actualizarTarxetas();
-						VentanaBanco.this.actualizarContasAsociadas();
-						VentanaBanco.this.actualizarMovementos();
+						VentanaBanco.this.actualizar();
 					}
 			
 		}).setVisible(true);
@@ -566,14 +628,13 @@ public class VentanaBanco extends javax.swing.JFrame{
 						@Override
 						public void run() {
 							banco.eliminarContaAsociada(cdgtarxeta, numconta+1);
-							VentanaBanco.this.actualizarContasAsociadas();
+							VentanaBanco.this.actualizar();
 						}
 				
 			}).setVisible(true);			
 		}
 	}
-	
-	
+		
 	private void engadircontaasociada() {
 		String aux = null;
 		int selectedindex = this.listatarxetas.getSelectedIndex();
@@ -602,29 +663,22 @@ public class VentanaBanco extends javax.swing.JFrame{
 	}
 
 	private void reanudarTrafico() {
-		// TODO Auto-generated method stub
-		this.botondetenertrafico.setText("Detener Tráfico");
-		this.traficoactivo = true;
+		this.banco.solicitarReanudarTrafico();
 	}
-
+	
 	private void detenerTrafico() {
-		// TODO Auto-generated method stub
+		this.banco.solicitarDeterTrafico();
 		this.botondetenertrafico.setText("Reanudar Tráfico");
 		this.traficoactivo = false;
 	}
-
+	
 	private void forzarRecuperacion() {
-		// TODO Auto-generated method stub
-		
+		this.banco.setResponderMensaxes(! this.botonforzarrecuperacion.isEnabled());
 	}
-
 	
 	private void abrirSesion() {
 		new DialogoAbrirSesion(this.banco).setVisible(true);
-		//TODO
-		this.botondetenertrafico.setEnabled(true);
-		this.botonabrirsesion.setText("Cerrar Sesión");
-		this.sesionabierta = true;
+		this.actualizar();
 	}
 	
 	private void cerrarSesion() {
@@ -637,11 +691,8 @@ public class VentanaBanco extends javax.swing.JFrame{
 			}
 			
 		}).setVisible(true);
-		this.botondetenertrafico.setEnabled(false);
-		this.botonabrirsesion.setText("Abrir Sesión");
-		this.sesionabierta = false;
+		this.actualizar();
 	}
-
 	
 	private void eliminarTarxeta() {
 		int selrow = this.listatarxetas.getSelectedIndex();
@@ -660,12 +711,10 @@ public class VentanaBanco extends javax.swing.JFrame{
 			
 		}).setVisible(true);
 	}
-
 	
 	private void engadirTarxeta() {
 		new DialogoNovaTarxeta(this.banco).setVisible(true);
 	}
-
 	
 	private void eliminarConta() {
 		
@@ -681,18 +730,21 @@ public class VentanaBanco extends javax.swing.JFrame{
 					@Override
 					public void run() {
 						banco.eliminarConta(cdgConta);
-						VentanaBanco.this.actualizarContas();
-						VentanaBanco.this.actualizarContasAsociadas();
+						VentanaBanco.this.actualizar();
 					}
 			
 		}).setVisible(true);
 	}
-
 	
 	private void engadirConta() {
 		new DialogoNovaConta(this.banco).setVisible(true);
 	}
 
+		
+	
+	//----------------------------------------------------------------------------------------//
+    //------------------------------ METODOS MODIFICAR VALORES TABOAS ------------------------//
+    //----------------------------------------------------------------------------------------//
 	
 	private void setMovementos(Object[][] data){
 		movementos.setModel(new javax.swing.table.DefaultTableModel(
@@ -701,6 +753,7 @@ public class VentanaBanco extends javax.swing.JFrame{
         ));
     }
     
+	
     private void setTablaContas(Object[][] data){
     	tablacontas.setModel(new javax.swing.table.DefaultTableModel(
                 data,
@@ -708,15 +761,31 @@ public class VentanaBanco extends javax.swing.JFrame{
             ));
     }
     
+    
     private void setTablaCanles(Object[][] data){
     	tablacanles.setModel(new javax.swing.table.DefaultTableModel(
                 data,
-                new String [] {
-                    "Title 1", "Title 2", "Title 3", "Title 4"
-                }
+                new String [] {"Num. Canle", "Id. Ultimo Mensaxe"}
             ));
     }
     
+    
+    private void setTablaMensaxesRecibidos(Object[][] data){
+    	this.tablamsgrecibidos.setModel(new javax.swing.table.DefaultTableModel(
+                data,
+                new String [] {"#Canle", "#Msx", "Tipo"}
+            ));
+    }
+
+    
+    private void setTablaMensaxesEnviados(Object[][] data){
+    	this.tablamsgrecibidos.setModel(new javax.swing.table.DefaultTableModel(
+                data,
+                new String [] {"#Canle", "#Msx", "Tipo"}
+            ));
+    }
+    
+    	
     private void setListaTarxetas(final String[] list){
     	listatarxetas.setModel(new javax.swing.AbstractListModel<String>() {
 			private static final long serialVersionUID = 1L;	
@@ -733,6 +802,13 @@ public class VentanaBanco extends javax.swing.JFrame{
             public String getElementAt(int i) { return list[i]; }
         });
     }
+
+    
+    
+    
+    //----------------------------------------------------------------------------------------//
+    //---------------------------------- METODOS FORMATEAR DATOS --- ------------------------//
+    //----------------------------------------------------------------------------------------//
     
     private Object[][] formatTaboaMovementos(ArrayList<Movemento> movementos) {
     	int i=0;
@@ -780,6 +856,29 @@ public class VentanaBanco extends javax.swing.JFrame{
  		}
  		return res;
 	}
- 	
+
+	private Object[][] formatTaboaCanles(ArrayList<Canal> canales) {
+		int i=0;
+ 		Object[][] res = new Object[canales.size()][2];
+ 		for(Canal c : canales){
+ 			
+ 			res[i][0] = c.numero;
+ 			res[i][1] = c.lastMsg;
+ 			i++;
+ 		}
+ 		return res;
+	}
+
+	private Object[][] formatTaboaMensaxes(ArrayList<Mensaxe> mensaxes){
+		int i=0;
+ 		Object[][] res = new Object[mensaxes.size()][3];
+ 		for(Mensaxe c : mensaxes){
+ 			
+ 			res[i][0] = c.numCanal;
+ 			res[i][1] = c.numMenx;
+ 			res[i][2] = c.tipo;
+ 			i++;
+ 		}
+ 		return res;	}
 
 }

@@ -1,12 +1,14 @@
 package practicaacs.banco.bd;
 
+import java.util.Date;
+
 public class Movemento {
 	public int codigo;
-	public float importe;
-	public String data;
+	public int importe;
+	public Date data;
 	public String tipo;
 	
-	public Movemento(int codigo, float importe, String data, String tipo) {
+	public Movemento(int codigo, int importe, Date data, String tipo) {
 		super();
 		this.codigo = codigo;
 		this.importe = importe;

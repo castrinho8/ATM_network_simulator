@@ -4,6 +4,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import practicaacs.fap.Mensaje;
+import practicaacs.fap.RespSaldo;
+
 
 public class ClienteBDBanco {
 	private Connection con;
@@ -80,7 +83,7 @@ public class ClienteBDBanco {
 			ArrayList<Conta> res = new ArrayList<Conta>();
 			
 			while(resultSet.next()){
-				res.add(new Conta(resultSet.getInt(1),resultSet.getFloat(2)));
+				res.add(new Conta(resultSet.getInt(1),resultSet.getInt(2)));
 			}
 			
 			return res;
@@ -117,7 +120,7 @@ public class ClienteBDBanco {
 			HashMap<Integer,Conta> res = new HashMap<Integer,Conta>(3);
 			
 			while(resultSet.next()){
-				res.put(resultSet.getInt(1),new Conta(resultSet.getInt(2),resultSet.getFloat(3)));
+				res.put(resultSet.getInt(1),new Conta(resultSet.getInt(2),resultSet.getInt(3)));
 			}
 			
 			return res;
@@ -139,7 +142,7 @@ public class ClienteBDBanco {
 			ArrayList<Movemento> res = new ArrayList<Movemento>();
 			
 			while(resultSet.next()){
-				res.add(new Movemento(resultSet.getInt(1),resultSet.getFloat(3),resultSet.getString(2),resultSet.getString(4)));
+				res.add(new Movemento(resultSet.getInt(1),resultSet.getInt(3),resultSet.getDate(2),resultSet.getString(4)));
 			}
 			
 			return res;
@@ -212,6 +215,57 @@ public class ClienteBDBanco {
 	public int getTotalTraspasosSesion(int idSesion) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public int getEstadoCanal(int ncanal) {
+		return -1;
+	}
+
+	public boolean existeTarxeta(String numtarx) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void facerReintegro(int num_conta, int importe) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void facerAbono(int num_conta, int importe) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void facerTraspaso(int num_ori, int num_des, int importe) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public int crearTablasSesion() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public void registrarMensaje(Integer codMensaje, Integer numCanal, 
+								Integer numMsx,boolean esEnviado,
+								String s) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ArrayList<Mensaxe> getMensaxesRecibidas() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public ArrayList<Mensaxe> getMensaxesEnviadas() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public ArrayList<Canal> getCanales() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

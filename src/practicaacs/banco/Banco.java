@@ -9,17 +9,33 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 
+import practicaacs.fap.CodigoNoValidoException;
 import practicaacs.fap.CodigosError;
 import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.CodigosMovimiento;
+import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
+import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.MensajeNoValidoException;
+import practicaacs.fap.RespAbono;
+import practicaacs.fap.RespAbonoError;
+import practicaacs.fap.RespMovimientos;
+import practicaacs.fap.RespMovimientosError;
+import practicaacs.fap.RespReintegro;
+import practicaacs.fap.RespReintegroError;
+import practicaacs.fap.RespSaldo;
+import practicaacs.fap.RespSaldoError;
+import practicaacs.fap.RespTraspaso;
+import practicaacs.fap.RespTraspasoError;
 import practicaacs.fap.SolAperturaSesion;
 import practicaacs.fap.SolCierreSesion;
 import practicaacs.fap.SolDetTrafico;
 import practicaacs.fap.SolReanTrafico;
 
+import practicaacs.banco.bd.Canal;
 import practicaacs.banco.bd.ClienteBDBanco;
 import practicaacs.banco.bd.Conta;
+import practicaacs.banco.bd.Mensaxe;
 import practicaacs.banco.bd.Movemento;
 import practicaacs.banco.bd.Tarxeta;
 import practicaacs.banco.csconsorcio.AnalizadorMensajes;
@@ -45,6 +61,7 @@ public class Banco implements AnalizadorMensajes{
 	private String idbanco;
 	private String portBanco;
 	private int idSesion;
+	private boolean responderMensaxes;
 	
 	/**
 	 * Constructor do banco a partir dun ficheiro de configuración.
@@ -85,6 +102,7 @@ public class Banco implements AnalizadorMensajes{
 		this.iu.setVisible(true);
 	}
 	
+
 	/**
 	 * Contructor do banco a partir dos parametros.
 	 * @param nombre Nome do banco.
@@ -109,15 +127,21 @@ public class Banco implements AnalizadorMensajes{
 		
 	}
 
-	/**
-	 * Metodo que engade unha nova conta ó banco.
+	
+	
+	//------------------------------------------------------------------------------------------//
+	//------------------------  FUNCIÓNS DE INTERACIÓN CA INTERFACE  ---------------------------//
+	//------------------------------------------------------------------------------------------//
+	
+	/** Metodo que engade unha nova conta ó banco.
 	 * @param Numero de conta.
 	 * @param Saldo da conta.
 	 */
 	public void engadirConta(int num, float saldo) {
 		bd.engadirConta(num,saldo);
-		this.iu.actualizarContas();
+		this.iu.actualizar();
 	}
+	
 	
 	/**
 	 * Método que elimina unha conta.
@@ -125,8 +149,9 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void eliminarConta(int codigo){
 		bd.eliminarConta(codigo);
-		this.iu.actualizarContas();
+		this.iu.actualizar();
 	}
+
 	
 	/**
 	 * Metodo que engade unha tarxeta.
@@ -134,18 +159,20 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void engadirTarxeta(String codigo){
 		bd.engadirTarxeta(codigo);
-		this.iu.actualizarTarxetas();
+		this.iu.actualizar();
 	}
-	
+
+
 	/**
 	 * Metodo que elimina unha tarxeta do banco.
 	 * @param codigo Código da tarxeta a eliminar.
 	 */
 	public void eliminarTarxeta(String codigo){
 		bd.eliminarTarxeta(codigo);
-		this.iu.actualizarTarxetas();
+		this.iu.actualizar();
 	}
 	
+
 	/**
 	 * Metodo que asocia unha tarxeta con unha conta.
 	 * @param cdgtarxeta Código da tarxeta a asociar.
@@ -153,9 +180,10 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void engadirContaAsociada(String cdgtarxeta, int numconta, int cdgconta){
 		bd.engadirContaAsociada(cdgtarxeta, numconta, cdgconta);
-		this.iu.actualizarContasAsociadas();
+		this.iu.actualizar();
 	}
 
+	
 	/**
 	 * Método que desasocia unha tarxeta dunha conta asociada.
 	 * @param cdgtarxeta Codigo da tarxeta.
@@ -165,13 +193,6 @@ public class Banco implements AnalizadorMensajes{
 		bd.eliminarContaAsociada(cdgtarxeta,numconta);
 	}
 	
-	/**
-	 * Método para engadir un movemento a unha conta.
-	 * @param codconta
-	 */
-	public void engadirMovemento(int codconta){
-		//TODO
-	}
 	
 	/**
 	 * Método que devolve todas as contas do banco.
@@ -181,6 +202,7 @@ public class Banco implements AnalizadorMensajes{
 	 	return bd.getContas();
 	}
 	
+	
 	/**
 	 * Método que devolve todas as tarxetas do banco.
 	 * @return Devolve as tarxetas do banco.
@@ -188,6 +210,7 @@ public class Banco implements AnalizadorMensajes{
 	public ArrayList<Tarxeta> getTarxetas(){
 		return bd.getTarxetas();
 	}
+	
 	
 	/**
 	 * Método que devolve as contas asociadas con unha certa tarxeta.
@@ -198,6 +221,7 @@ public class Banco implements AnalizadorMensajes{
 		return bd.getContasAsociadas(ntarxeta);
 	}
 	
+	
 	/**
 	 * Metodo que devolve os movementos dunha determinada conta.
 	 * @param nconta Número da conta a analizar.
@@ -207,17 +231,47 @@ public class Banco implements AnalizadorMensajes{
 		return bd.getMovementos(nconta);
 	}
 
+	
+	/**
+	 * Método que devolve a lista de canles da sesión.
+	 * @return
+	 */
+	public ArrayList<Canal> getCanales(){
+		return this.bd.getCanales();
+	}
+	
+	
+	/**
+	 * Método que devolve a lista de canles recibidas.
+	 * @return
+	 */
+	public ArrayList<Mensaxe> getMensaxesRecibidas(){
+		return this.bd.getMensaxesRecibidas();
+	}
+	
+	
+	/**
+	 * Metodo que devolve a lista de canles enviadas.
+	 * @return
+	 */
+	public ArrayList<Mensaxe> getMensaxesEnviadas(){
+		return this.bd.getMensaxesEnviadas();
+	}
+
+	
 	/**
 	 * Método que establece as contas e tarxetas do banco os seus valores por defecto.
 	 */
 	public void establecerValoresPorDefecto() {
 		bd.valoresPorDefecto();
-		this.iu.actualizarContas();
-		this.iu.actualizarMovementos();
-		this.iu.actualizarTarxetas();
-		this.iu.actualizarContasAsociadas();
+		this.iu.actualizar();
 	}
 
+	
+	//------------------------------------------------------------------------------------------//
+	//------------------------  FUNCIÓNS DE INTERACIÓN CO CONSORCIO  ---------------------------//
+	//------------------------------------------------------------------------------------------//
+	
 	/**
 	 * Método que analiza unha mensaxe recibida.
 	 * @param bs mensaxe recibido
@@ -226,31 +280,34 @@ public class Banco implements AnalizadorMensajes{
 	public void analizarMensaje(String bs) {
 		
 		Mensaje msx;
-		this.iu.engadirLinhaLog("MENSAXE::" + bs.toString());
 		try {
 			msx = Mensaje.parse(bs);
-			this.iu.engadirLinhaLog("Mensaxe recibida: " + msx.getTipoMensaje().getNum() + "\n");
+			this.iu.engadirLinhaLog("Mensaxe recibida: " + msx.getTipoMensaje() + "\n");
+			this.rexistrarMensaxe(msx, bs);
 			this.estado.analizarMensaje(msx,this);
+
 		} catch (MensajeNoValidoException e){
 			this.iu.engadirLinhaLog("Mensaxe recibida: Formato non recoñecido (" + e.getLocalizedMessage() + ")\n");
 			this.estado.analizarMensaje(null,this);
 		}
-		
 	}
+
+	
+
 
 	/**
 	 * Metodo que solicita a apertura dunha sesion.
 	 * @param canales Canles cas que se abre a sesion.
 	 */
 	public void solicitarAbrirSesion(int canales){
-		Mensaje m = new SolAperturaSesion(this.idbanco,this.idconsorcio, canales, new Date(), this.portBanco); //TODO
+		Mensaje m = new SolAperturaSesion(this.idbanco,this.idconsorcio, canales, new Date(), this.portBanco);
 		try {
 			this.cs.enviarMensaje(m);
+			this.iu.engadirLinhaLog("Solicitada apertura de sesión.\n");
+			this.cambEstado(SolApertura.instance());
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			this.iu.engadirLinhaLog("Error:: " + e.getLocalizedMessage());
 		}
-		this.cambEstado(SolApertura.instance());
-		this.iu.engadirLinhaLog("Solicitada apertura de sesión.\n");
 	}
 
 	
@@ -261,11 +318,11 @@ public class Banco implements AnalizadorMensajes{
 		Mensaje m = new SolReanTrafico(this.idbanco, this.idconsorcio);
 		try {
 			this.cs.enviarMensaje(m);
+			this.iu.engadirLinhaLog("Solicitado reanudación do trafico.\n");
+			this.cambEstado(SolReanudar.instance());
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			this.iu.engadirLinhaLog("Error:: " + e.getLocalizedMessage());
 		}
-		this.cambEstado(SolReanudar.instance());
-		this.iu.engadirLinhaLog("Soliciatado reanudación do trafico.\n");
 	}
 	
 	
@@ -276,11 +333,11 @@ public class Banco implements AnalizadorMensajes{
 		Mensaje m = new SolDetTrafico(this.idbanco,this.idconsorcio);
 		try {
 			this.cs.enviarMensaje(m);
+			this.iu.engadirLinhaLog("Solicitado detencion do trafico.\n");
+			this.cambEstado(SolDeter.instance());
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			this.iu.engadirLinhaLog("Error:: " + e.getLocalizedMessage());
 		}
-		this.cambEstado(SolDeter.instance());
-		this.iu.engadirLinhaLog("Soliciatado detencion do trafico.\n");
 	}
 
 
@@ -295,14 +352,19 @@ public class Banco implements AnalizadorMensajes{
 		Mensaje m = new SolCierreSesion(this.idbanco, this.idconsorcio, total_reintegros, total_abonos, total_traspasos);
 		try {
 			this.cs.enviarMensaje(m);
+			this.iu.engadirLinhaLog("Solicitado peche de sesión.\n");
+			this.cambEstado(SolPechar.instance());
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.iu.engadirLinhaLog("Error:: " + e.getLocalizedMessage());
 		}
-		this.cambEstado(SolPechar.instance());
-		this.iu.engadirLinhaLog("Soliciatado peche de sesión.\n");
 	}
-	
+
+
+	/**
+	 * Método que rexistra no log un erro nunha solicitude.
+	 * @param cm 
+	 * @param ce
+	 */
 	public void errorRespuestaSolicitud(CodigosMensajes cm, CodigosError ce){
 		String s = null;
 		
@@ -322,18 +384,20 @@ public class Banco implements AnalizadorMensajes{
 		default:
 			assert(false);
 		}
-		
 		this.iu.engadirLinhaLog(s+"\n");
 	}
 	
+
 	/**
 	 * Método que establece a apertura da sesion.
 	 */
 	public void establecerSesionAceptada() {
 		this.cambEstado(SesAberta.instance());
+		this.idSesion = this.bd.crearTablasSesion();
 		this.iu.engadirLinhaLog("Sesión aberta\n");
 	}
 	
+
 	/**
 	 * Método que establece o peche da sesión.
 	 */
@@ -342,16 +406,25 @@ public class Banco implements AnalizadorMensajes{
 		this.iu.engadirLinhaLog("Sesión pechada.\n");
 	}
 	
+
+	/**
+	 * Metodo que establece a detención da sesión.
+	 */
 	public void establecerSesionDetida() {
 		this.cambEstado(SesDetida.instance());
 		this.iu.engadirLinhaLog("Tráfico de sesión detido.\n");
 	}
 	
+
+	/**
+	 * Metodo que establece a reanudación da sesión.
+	 */
 	public void establecerSesionReanudada() {
 		this.cambEstado(SesAberta.instance());
 		this.iu.engadirLinhaLog("Tráfico de sesión reanudado\n");
 	}
 	
+
 	/**
 	 * Método que establece trafico en recuperación.
 	 */
@@ -360,6 +433,7 @@ public class Banco implements AnalizadorMensajes{
 		this.iu.engadirLinhaLog("Entrando en modo recuperación.\n");
 	}
 
+
 	/**
 	 * Método que establece o fin do trafico en recuperación.
 	 */
@@ -367,7 +441,8 @@ public class Banco implements AnalizadorMensajes{
 		this.cambEstado(SesAberta.instance());
 		this.iu.engadirLinhaLog("Saindo de modo recuperación.\n");
 	}
-	
+
+
 	/**
 	 * Metodo que fai unha consulta de saldo.
 	 * @param ncanal Número da canle que emitiu a consulta.
@@ -378,10 +453,53 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void facerConsultaSaldo(int ncanal,int nmsg, boolean online,String numtarx,int numConta){
 		int lastmsgcanal;
+		RespSaldo r = null;
+		RespSaldoError r2 = null;
+		Conta conta;
 		
-		//lastmsgcanal = this.bd.getLastMsgNumber(ncanal);
+		try {
+			if((lastmsgcanal = this.bd.getEstadoCanal(ncanal)) < 0){
+				r2 = new RespSaldoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if (lastmsgcanal != nmsg +1){
+				r2 = new RespSaldoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if(!this.bd.existeTarxeta(numtarx)){
+				r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Tarxeta Invalida).");
+				return;
+			}
+			
+			if((conta = this.bd.getConta(numtarx, numConta)) == null){
+				r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CUENTANVALIDA, false, 0);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Conta Invalida).");
+				return;
+			}
+			
+			r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo());
+			this.cs.enviarMensaje(r);
+			rexistrarMensaxe(r,r.toString());
+			this.iu.engadirLinhaLog("Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").");
+		} catch (InterruptedException e) {
+			this.iu.engadirLinhaLog("ERROR::" +  e.getLocalizedMessage());
+		}
 	}
-	
+
+
 	/**
 	 * Metodo que fai unha consulta dos movementos.
 	 * @param ncanal Número da canle que emitiu a consulta.
@@ -391,9 +509,60 @@ public class Banco implements AnalizadorMensajes{
 	 * @param numConta O número de conta dentro de esta tarxeta.
 	 */
 	public void facerConsultaMovementos(int ncanal,int nmsg, boolean online,String numtarx,int numConta){
+		RespMovimientos r;
+		RespMovimientosError r2;
+		int lastmsgcanal, ind;
+		ArrayList<Movemento> movs;
+		Conta conta;
 		
+		try{
+			if((lastmsgcanal = this.bd.getEstadoCanal(ncanal)) < 0){
+				r2 = new RespMovimientosError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if (lastmsgcanal != nmsg +1){
+				r2 = new RespMovimientosError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if(!this.bd.existeTarxeta(numtarx)){
+				r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, 0, null, false, 0, null);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Tarxeta Invalida).");
+				return;
+			}
+			
+			if((conta = this.bd.getConta(numtarx, numConta)) == null){
+				r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CUENTANVALIDA, 0, null, false, 0, null);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Conta Invalida).");
+				return;
+			}
+			
+			
+			movs = this.getMovementosConta(conta.getNumero());
+			ind = movs.size() >= 20 ? 20 : movs.size();
+			for (Movemento m : movs){
+				r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, ind--,
+						CodigosMovimiento.getTipoMovimiento(m.codigo), m.importe >= 0, m.importe > 0 ? m.importe : - m.importe, m.data);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Movemento("+ CodigosMovimiento.getTipoMovimiento(m.codigo) + ").");
+			}
+		} catch (InterruptedException | CodigoNoValidoException e) {
+			this.iu.engadirLinhaLog("ERROR::" +  e.getLocalizedMessage());
+		}
 	}
-	
+
+
 	/**
 	 * Metodo que fai un reitegro dun certo importe.
 	 * @param ncanal Número da canle que emitiu a consulta.
@@ -404,9 +573,55 @@ public class Banco implements AnalizadorMensajes{
 	 * @param importe Importe.
 	 */
 	public void facerReintegro(int ncanal,int nmsg, boolean online,String numtarx,int numConta,int importe){
+		int lastmsgcanal;
+		RespReintegro r;
+		RespReintegroError r2;
+		Conta conta;
 		
+		try{
+			if((lastmsgcanal = this.bd.getEstadoCanal(ncanal)) < 0){
+				r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if (lastmsgcanal != nmsg +1){
+				r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if(!this.bd.existeTarxeta(numtarx)){
+				r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Tarxeta Invalida).");
+				return;
+			}
+			
+			if((conta = this.bd.getConta(numtarx, numConta)) == null){
+				r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CUENTANVALIDA, false, 0);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Conta Invalida).");
+				return;
+			}
+			
+			this.bd.facerReintegro(conta.getNumero(), importe);
+			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
+			this.cs.enviarMensaje(r);
+			rexistrarMensaxe(r,r.toString());
+			this.iu.engadirLinhaLog("Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").");
+		} catch (InterruptedException e) {
+			this.iu.engadirLinhaLog("ERROR::" +  e.getLocalizedMessage());
+		}
 	}
-	
+
+
 	/**
 	 * Metodo que fai un abono.
 	 * @param ncanal Número da canle que emitiu a consulta.
@@ -418,8 +633,64 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void facerAbono(int ncanal,int nmsg, boolean online,String numtarx,int numConta,int importe){
 		
+		int lastmsgcanal;
+		RespAbono r;
+		RespAbonoError r2;
+		Conta conta;
+		
+		try{
+			if((lastmsgcanal = this.bd.getEstadoCanal(ncanal)) < 0){
+				r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosError.CANALOCUP);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2, r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if (lastmsgcanal != nmsg +1){
+				r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosError.FUERASEC);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2, r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if(!this.bd.existeTarxeta(numtarx)){
+				r = new RespAbono(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r,r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Tarxeta Invalida).");
+				return;
+			}
+			
+			if((conta = this.bd.getConta(numtarx, numConta)) == null){
+				r = new RespAbono(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosRespuesta.CUENTANVALIDA, false, 0);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r, r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Conta Invalida).");
+				return;
+			}
+			
+			if(conta.getSaldo() < importe){
+				r = new RespAbono(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r, r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Saldo insuficiente).");
+				return;
+			}
+			
+			this.bd.facerAbono(conta.getNumero(), importe);
+			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()-importe);
+			this.cs.enviarMensaje(r);
+			rexistrarMensaxe(r,r.toString());
+			this.iu.engadirLinhaLog("Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").");
+		} catch (InterruptedException e) {
+			this.iu.engadirLinhaLog("ERROR::" +  e.getLocalizedMessage());
+		}
+		
 	}
-	
+
+
 	/**
 	 * Metodo que fai unha consulta de saldo.
 	 * @param ncanal Número da canle que emitiu a consulta.
@@ -431,6 +702,125 @@ public class Banco implements AnalizadorMensajes{
 	 * @param importe
 	 */
 	public void facerTranspaso(int ncanal,int nmsg, boolean online,String numtarx,int numContaOrigen, int numContaDestino,int importe){
+		int lastmsgcanal;
+		RespTraspaso r;
+		RespTraspasoError r2;
+		Conta contaori, contades;
+		
+		try{
+			if((lastmsgcanal = this.bd.getEstadoCanal(ncanal)) < 0){
+				r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosError.CANALOCUP);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if (lastmsgcanal != nmsg +1){
+				r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosError.FUERASEC);
+				this.cs.enviarMensaje(r2);
+				rexistrarMensaxe(r2,r2.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Canal Opupado).");
+				return;
+			}
+			
+			if(!this.bd.existeTarxeta(numtarx)){
+				r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.TARJETANVALIDA, false, 0, online, lastmsgcanal);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r, r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Tarxeta Invalida).");
+				return;
+			}
+			
+			if((contaori = this.bd.getConta(numtarx, numContaOrigen)) == null){
+				r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, online, lastmsgcanal);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r, r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Conta Invalida).");
+				return;
+			}
+			
+			if(contaori.getSaldo() < importe){
+				r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0, online, lastmsgcanal);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r, r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Saldo insuficiente).");
+				return;}
+			
+			if((contades = this.bd.getConta(numtarx, numContaDestino)) == null){
+				r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, online, lastmsgcanal);
+				this.cs.enviarMensaje(r);
+				rexistrarMensaxe(r, r.toString());
+				this.iu.engadirLinhaLog("Mensaxe enviada: Error (Conta Invalida).");
+				return;
+			}
+			
+			this.bd.facerTraspaso(contaori.getNumero(),contades.getNumero(),importe);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA,
+					(contaori.getSaldo() - importe) >= 0, contaori.getSaldo() - importe, 
+					(contades.getSaldo() + importe) >= 0, contades.getSaldo() + importe);
+			this.cs.enviarMensaje(r);
+			rexistrarMensaxe(r, r.toString());
+			this.iu.engadirLinhaLog("Mensaxe enviada: Consulta Aceptada.");
+		} catch (InterruptedException e) {
+			this.iu.engadirLinhaLog("ERROR::" +  e.getLocalizedMessage());
+		}
+	}
+
+
+	private boolean esEnviado(Mensaje msx) {
+		msx.getTipoMensaje().equals(CodigosMensajes.RESABONO);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESMOVIMIENTOS);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESREINTEGRO);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESSALDO);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESTRASPASO);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLCIERRESESION);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLDETENERTRAFICO);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLREANUDARTRAFICO);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESFINREC);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESINIREC);
+		return false;
+	}
+
+
+	private boolean eMensaxeDatos(Mensaje msx) {
+		msx.getTipoMensaje().equals(CodigosMensajes.RESABONO);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESMOVIMIENTOS);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESREINTEGRO);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESSALDO);
+		msx.getTipoMensaje().equals(CodigosMensajes.RESTRASPASO);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLABONO);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLMOVIMIENTOS);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLREINTEGRO);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLSALDO);
+		msx.getTipoMensaje().equals(CodigosMensajes.SOLTRASPASO);
+		return false;
+	}
+	
+	private void rexistrarMensaxe(Mensaje m, String s){
+		if(m != null){
+			if(eMensaxeDatos(m)){
+				this.bd.registrarMensaje(	m.getTipoMensaje().getNum(),
+											((MensajeDatos) m).getNumcanal(),
+											((MensajeDatos) m).getNmsg(),
+											esEnviado(m),
+											s);
+				
+			}else{
+				this.bd.registrarMensaje(	m.getTipoMensaje().getNum(),
+						null,
+						null,
+						esEnviado(m),
+						s);
+			}
+		}else{
+			this.bd.registrarMensaje(	null,
+					null,
+					null,
+					false,
+					s);
+		}
 	}
 	
 	private void cambEstado(EstadoSesion nuevoEstado) {
@@ -438,7 +828,20 @@ public class Banco implements AnalizadorMensajes{
 	}
 
 
+	
+	public void setResponderMensaxes(boolean b) {
+		this.responderMensaxes = b;
+		this.iu.engadirLinhaLog("Non se responden as mensaxes.\n");
+	}
 
 
+	public boolean sesionAberta() {
+		return this.estado.sesionAberta();
+	}
+
+
+	public boolean traficoActivo() {
+		return this.estado.traficoActivo();
+	}
 
 }

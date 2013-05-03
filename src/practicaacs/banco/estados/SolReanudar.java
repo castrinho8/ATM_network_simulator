@@ -27,4 +27,11 @@ public class SolReanudar extends EstadoSesion {
 		}
 	}
 
+	@Override
+	public boolean traficoActivo() {
+		return false;
+	}
+	
+	
+
 }

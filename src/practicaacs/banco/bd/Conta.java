@@ -2,9 +2,9 @@ package practicaacs.banco.bd;
 
 public class Conta {
 	private int numero;
-	private float saldo;
+	private int saldo;
 	
-	public Conta(int numero, float saldo) {
+	public Conta(int numero, int saldo) {
 		super();
 		this.numero = numero;
 		this.saldo = saldo;
@@ -12,7 +12,7 @@ public class Conta {
 	public int getNumero() {
 		return numero;
 	}
-	public float getSaldo() {
+	public int getSaldo() {
 		return saldo;
 	}
 }
