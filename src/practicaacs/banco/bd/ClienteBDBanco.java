@@ -24,6 +24,7 @@ public class ClienteBDBanco {
 			statement = con.createStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}	
 	}
 	
@@ -255,17 +256,16 @@ public class ClienteBDBanco {
 
 	public ArrayList<Mensaxe> getMensaxesRecibidas() {
 		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<Mensaxe>();
 	}
 
 	public ArrayList<Mensaxe> getMensaxesEnviadas() {
 		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<Mensaxe>();
 	}
 
 	public ArrayList<Canal> getCanales() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<Canal>();
 	}
 	
 }

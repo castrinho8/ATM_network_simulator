@@ -26,7 +26,7 @@ public class Banco implements AnalizadorMensajes{
 	private String idbanco;
 	private String portBanco;
 	private int idSesion;
-	private boolean responderMensaxes;
+	private boolean responderMensaxes = true;
 	
 	/**
 	 * Constructor do banco a partir dun ficheiro de configuración.
@@ -44,6 +44,8 @@ public class Banco implements AnalizadorMensajes{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		this.estado = SesNonAberta.instance();
 		
 		this.idbanco = prop.getProperty("banco.id");
 		this.idconsorcio = prop.getProperty("consorcio.id");
@@ -77,6 +79,8 @@ public class Banco implements AnalizadorMensajes{
 	 * @param portconsorcio Porto do consorcio.
 	 */
 	public Banco(String nombre, String idbanco, String idconsorcio, String portBanco, String bdurl, int puerto,String hostconsorcio, int portconsorcio) {
+		
+		this.estado = SesNonAberta.instance();
 		
 		this.bd = new ClienteBDBanco(bdurl);
 		
@@ -268,6 +272,7 @@ public class Banco implements AnalizadorMensajes{
 		Mensaje m = new SolAperturaSesion(this.idbanco,this.idconsorcio, canales, new Date(), this.portBanco);
 		this.enviarMensaje(m, "Solicitada apertura de sesión.\n");
 		this.cambEstado(SolApertura.instance());
+		this.iu.actualizar();
 	}
 
 	
@@ -278,6 +283,7 @@ public class Banco implements AnalizadorMensajes{
 		Mensaje m = new SolReanTrafico(this.idbanco, this.idconsorcio);
 		this.enviarMensaje(m, "Solicitado reanudación do trafico.\n");
 		this.cambEstado(SolReanudar.instance());
+		this.iu.actualizar();
 		
 	}
 
@@ -289,6 +295,7 @@ public class Banco implements AnalizadorMensajes{
 		Mensaje m = new SolDetTrafico(this.idbanco,this.idconsorcio);
 		this.enviarMensaje(m, "Solicitado detencion do trafico.\n");
 		this.cambEstado(SolDeter.instance());
+		this.iu.actualizar();
 	}
 
 
@@ -303,6 +310,7 @@ public class Banco implements AnalizadorMensajes{
 		Mensaje m = new SolCierreSesion(this.idbanco, this.idconsorcio, total_reintegros, total_abonos, total_traspasos);
 		this.enviarMensaje(m, "Solicitado peche de sesión.\n");
 		this.cambEstado(SolPechar.instance());
+		this.iu.actualizar();
 	}
 
 
@@ -331,6 +339,7 @@ public class Banco implements AnalizadorMensajes{
 			assert(false);
 		}
 		this.iu.engadirLinhaLog(s+"\n");
+		this.iu.actualizar();
 	}
 	
 
@@ -341,6 +350,7 @@ public class Banco implements AnalizadorMensajes{
 		this.cambEstado(SesAberta.instance());
 		this.idSesion = this.bd.crearTablasSesion();
 		this.iu.engadirLinhaLog("Sesión aberta\n");
+		this.iu.actualizar();
 	}
 	
 
@@ -350,6 +360,7 @@ public class Banco implements AnalizadorMensajes{
 	public void establecerSesionPechada() {
 		this.cambEstado(SesNonAberta.instance());
 		this.iu.engadirLinhaLog("Sesión pechada.\n");
+		this.iu.actualizar();
 	}
 	
 
@@ -359,6 +370,7 @@ public class Banco implements AnalizadorMensajes{
 	public void establecerSesionDetida() {
 		this.cambEstado(SesDetida.instance());
 		this.iu.engadirLinhaLog("Tráfico de sesión detido.\n");
+		this.iu.actualizar();
 	}
 	
 
@@ -368,6 +380,7 @@ public class Banco implements AnalizadorMensajes{
 	public void establecerSesionReanudada() {
 		this.cambEstado(SesAberta.instance());
 		this.iu.engadirLinhaLog("Tráfico de sesión reanudado\n");
+		this.iu.actualizar();
 	}
 	
 
@@ -377,6 +390,7 @@ public class Banco implements AnalizadorMensajes{
 	public void establecerTraficoRecuperacion(){
 		this.cambEstado(SesRecuperacion.instance());
 		this.iu.engadirLinhaLog("Entrando en modo recuperación.\n");
+		this.iu.actualizar();
 	}
 
 
@@ -386,6 +400,7 @@ public class Banco implements AnalizadorMensajes{
 	public void establecerFinTraficoRecuperacion(){
 		this.cambEstado(SesAberta.instance());
 		this.iu.engadirLinhaLog("Saindo de modo recuperación.\n");
+		this.iu.actualizar();
 	}
 
 
@@ -429,6 +444,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo());
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").");
+		this.iu.actualizar();
 	}
 
 
@@ -483,6 +499,7 @@ public class Banco implements AnalizadorMensajes{
 				e.printStackTrace();
 			}
 		}
+		this.iu.actualizar();
 	}
 
 
@@ -528,6 +545,7 @@ public class Banco implements AnalizadorMensajes{
 		this.bd.facerReintegro(conta.getNumero(), importe);
 		r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").");
+		this.iu.actualizar();
 	}
 
 
@@ -580,7 +598,7 @@ public class Banco implements AnalizadorMensajes{
 		this.bd.facerAbono(conta.getNumero(), importe);
 		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()-importe);
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").");
-		
+		this.iu.actualizar();
 	}
 
 
@@ -641,6 +659,7 @@ public class Banco implements AnalizadorMensajes{
 				(contaori.getSaldo() - importe) >= 0, contaori.getSaldo() - importe, 
 				(contades.getSaldo() + importe) >= 0, contades.getSaldo() + importe);
 		this.enviarMensaje(r,"Mensaxe enviada: Consulta Aceptada.");
+		this.iu.actualizar();
 	}
 
 
@@ -721,13 +740,14 @@ public class Banco implements AnalizadorMensajes{
 	}
 	
 	private void enviarMensaje(Mensaje m, String string) {
-		
-		try {
-			this.cs.enviarMensaje(m);
-			rexistrarMensaxe(m, m.toString());
-			this.iu.engadirLinhaLog(string);
-		} catch (InterruptedException e) {
-			this.iu.engadirLinhaLog("Error:: " + e.getLocalizedMessage());
+		if (this.responderMensaxes){
+			try {
+				this.cs.enviarMensaje(m);
+				rexistrarMensaxe(m, m.toString());
+				this.iu.engadirLinhaLog(string);
+			} catch (InterruptedException e) {
+				this.iu.engadirLinhaLog("Error:: " + e.getLocalizedMessage());
+			}
 		}
 	}
 

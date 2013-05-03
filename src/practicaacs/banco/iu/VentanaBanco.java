@@ -109,17 +109,22 @@ public class VentanaBanco extends javax.swing.JFrame{
 		if(this.banco.sesionAberta()){
 			this.botonabrirsesion.setText("Cerrar Sesión");
 			this.sesionabierta = true;
-			this.botondetenertrafico.setEnabled(false);
-			this.botonforzarrecuperacion.setEnabled(false);
+			this.botondetenertrafico.setEnabled(true);
+			this.botonforzarrecuperacion.setEnabled(true);
 		
 			if(this.banco.traficoActivo()){
-				
+				this.botondetenertrafico.setText("Detener Trafico");
+				this.traficoactivo = true;
 			}else{
-				
+				this.botondetenertrafico.setText("ReanudarTrafico");
+				this.traficoactivo = false;
 			}
 		}
 		else{
-			
+			this.botonabrirsesion.setText("Abrir Sesión");
+			this.sesionabierta = false;
+			this.botondetenertrafico.setEnabled(false);
+			this.botonforzarrecuperacion.setEnabled(false);
 		}
 		
 	}
