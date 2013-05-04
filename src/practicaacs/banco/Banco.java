@@ -25,8 +25,9 @@ public class Banco implements AnalizadorMensajes{
 	private String idconsorcio;
 	private String idbanco;
 	private String portBanco;
-	private int idSesion;
+	private int idSesion = -1;
 	private boolean responderMensaxes = true;
+	private int numCanales;
 	
 	/**
 	 * Constructor do banco a partir dun ficheiro de configuración.
@@ -206,7 +207,7 @@ public class Banco implements AnalizadorMensajes{
 	 * @return
 	 */
 	public ArrayList<Canal> getCanales(){
-		return this.bd.getCanales();
+		return this.bd.getCanales(this.idSesion);
 	}
 	
 	
@@ -271,6 +272,7 @@ public class Banco implements AnalizadorMensajes{
 	public void solicitarAbrirSesion(int canales){
 		Mensaje m = new SolAperturaSesion(this.idbanco,this.idconsorcio, canales, new Date(), this.portBanco);
 		this.enviarMensaje(m, "Solicitada apertura de sesión.\n");
+		this.numCanales = canales;
 		this.cambEstado(SolApertura.instance());
 		this.iu.actualizar();
 	}
@@ -348,7 +350,7 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void establecerSesionAceptada() {
 		this.cambEstado(SesAberta.instance());
-		this.idSesion = this.bd.crearTablasSesion();
+		this.idSesion = this.bd.crearTablasSesion(this.numCanales);
 		this.iu.engadirLinhaLog("Sesión aberta\n");
 		this.iu.actualizar();
 	}
@@ -359,6 +361,7 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void establecerSesionPechada() {
 		this.cambEstado(SesNonAberta.instance());
+		this.idSesion = -1;
 		this.iu.engadirLinhaLog("Sesión pechada.\n");
 		this.iu.actualizar();
 	}
@@ -424,7 +427,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if (lastmsgcanal != nmsg +1){
+		if (lastmsgcanal + 1 != nmsg){
 			r2 = new RespSaldoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).");
 			return;
@@ -696,25 +699,28 @@ public class Banco implements AnalizadorMensajes{
 	private void rexistrarMensaxe(Mensaje m, String s){
 		if(m != null){
 			if(eMensaxeDatos(m)){
-				this.bd.registrarMensaje(	m.getTipoMensaje().getNum(),
+				this.bd.registrarMensaje(	this.idSesion,
 											((MensajeDatos) m).getNumcanal(),
 											((MensajeDatos) m).getNmsg(),
+											m.getTipoMensaje().getNum(),
 											esEnviado(m),
 											s);
 				
 			}else{
-				this.bd.registrarMensaje(	m.getTipoMensaje().getNum(),
-						null,
-						null,
-						esEnviado(m),
-						s);
+				this.bd.registrarMensaje(	this.idSesion,
+											null,
+											null,
+											m.getTipoMensaje().getNum(),
+											esEnviado(m),
+											s);
 			}
 		}else{
-			this.bd.registrarMensaje(	null,
-					null,
-					null,
-					false,
-					s);
+			this.bd.registrarMensaje(	this.idSesion,
+										null,
+										null,
+										null,
+										false,
+										s);
 		}
 	}
 	

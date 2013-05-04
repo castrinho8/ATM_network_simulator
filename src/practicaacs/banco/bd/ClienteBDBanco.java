@@ -242,30 +242,99 @@ public class ClienteBDBanco {
 		
 	}
 
-	public int crearTablasSesion() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int crearTablasSesion(int numCanles) {
+		try {
+			this.statement.executeUpdate("INSERT INTO Sesion() VALUES ()");
+			
+			ResultSet resultSet = this.statement.executeQuery("SELECT max(scod) FROM Canle");
+			resultSet.next();
+			int numCanle = resultSet.getInt(1);
+		
+			for(int i = 1; i <= numCanles; i++){
+				this.statement.executeUpdate("INSERT INTO Canle(scod,cncod) VALUES (" + numCanle + ", " + i + ")");
+			}
+		
+			return numCanle;
+		
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
-	public void registrarMensaje(Integer codMensaje, Integer numCanal, 
-								Integer numMsx,boolean esEnviado,
-								String s) {
-		// TODO Auto-generated method stub
+	public void registrarMensaje(Integer codSesion, Integer numCanal, Integer numMsx, Integer codMsx, boolean esEnviado, String s) {
+		String sql;
+		if(codSesion == null){
+			sql = "INSERT INTO Mensaxe(enviado, texto) values (" + (esEnviado ? "1" : "0") + ", '" + s + "')";
+		}else if (numCanal == null || numMsx == null || codMsx == null){
+			sql = "INSERT INTO Mensaxe(scod,enviado,texto) values (" + codSesion + ", "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
+		}else{
+			sql = "INSERT INTO Mensaxe(scod,cncod,msnum,enviado,texto) values (" + codSesion + ", "  + numCanal + ", "  + numMsx + ", "
+					+ (esEnviado ? "1" : "0") + ", '" + s + "')";
+		}
+		
+		try {
+			this.statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
 	}
 
 	public ArrayList<Mensaxe> getMensaxesRecibidas() {
-		// TODO Auto-generated method stub
-		return new ArrayList<Mensaxe>();
+		try {
+			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 0 sort by mscod");
+			
+			ArrayList<Mensaxe> res = new ArrayList<Mensaxe>();
+			
+			while(resultSet.next()){
+				String tipo = resultSet.getString(1);
+				Integer ncanal = resultSet.getInt(2);
+				Integer nmsx = resultSet.getInt(3);
+				res.add(new Mensaxe(tipo,ncanal == 0 ? null : ncanal,nmsx == 0 ? null : nmsx, false));
+			}
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return new ArrayList<Mensaxe>();
+		}
 	}
 
 	public ArrayList<Mensaxe> getMensaxesEnviadas() {
-		// TODO Auto-generated method stub
-		return new ArrayList<Mensaxe>();
+		try {
+			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 1 sort by mscod");
+			
+			ArrayList<Mensaxe> res = new ArrayList<Mensaxe>();
+			
+			while(resultSet.next()){
+				String tipo = resultSet.getString(1);
+				Integer ncanal = resultSet.getInt(2);
+				Integer nmsx = resultSet.getInt(3);
+				res.add(new Mensaxe(tipo,ncanal == 0 ? null : ncanal,nmsx == 0 ? null : nmsx, true));
+			}
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return new ArrayList<Mensaxe>();
+		}
 	}
 
-	public ArrayList<Canal> getCanales() {
-		return new ArrayList<Canal>();
+	public ArrayList<Canal> getCanales(int sesionId) {
+		if(sesionId == -1) return new ArrayList<Canal>();
+		
+		try {
+			ResultSet resultSet = statement.executeQuery("SELECT cncod canle, max(msnum) ultmsx FROM Canle LEFT JOIN Mensaxe USING (cncod,scod) where scod = " + sesionId + " group by cncod,scod");
+			
+			ArrayList<Canal> res = new ArrayList<Canal>();
+			
+			while(resultSet.next()){
+				res.add(new Canal(resultSet.getInt(1),resultSet.getInt(2)));
+			}
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return new ArrayList<Canal>();
+		}	
 	}
 	
 }
