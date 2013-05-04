@@ -433,7 +433,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if(!this.bd.existeTarxeta(numtarx)){
+		if(this.bd.getTarxeta(numtarx) != null){
 			r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta Invalida).");
 			return;
@@ -478,7 +478,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if(!this.bd.existeTarxeta(numtarx)){
+		if(this.bd.getTarxeta(numtarx) != null){
 			r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, 0, null, false, 0, null);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta Invalida).");
 			return;
@@ -533,7 +533,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if(!this.bd.existeTarxeta(numtarx)){
+		if(this.bd.getTarxeta(numtarx) != null){
 			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta Invalida).");
 			return;
@@ -580,7 +580,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if(!this.bd.existeTarxeta(numtarx)){
+		if(this.bd.getTarxeta(numtarx) != null){
 			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta Invalida).");
 			return;
@@ -634,7 +634,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if(!this.bd.existeTarxeta(numtarx)){
+		if(this.bd.getTarxeta(numtarx) != null){
 			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.TARJETANVALIDA, false, 0, online, lastmsgcanal);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Tarxeta Invalida).");
 			return;

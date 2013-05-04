@@ -165,6 +165,18 @@ public class ClienteBDBanco {
 			return null;
 		}
 	}
+	
+	public Tarxeta getTarxeta(String numtarx) {
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT tcod from Tarxeta where tcod = '" + numtarx + "'");
+			resultSet.next();
+			return new Tarxeta(resultSet.getString(1));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	public void valoresPorDefecto() {
 		try {
@@ -220,11 +232,6 @@ public class ClienteBDBanco {
 
 	public int getEstadoCanal(int ncanal) {
 		return -1;
-	}
-
-	public boolean existeTarxeta(String numtarx) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	public void facerReintegro(int num_conta, int importe) {
