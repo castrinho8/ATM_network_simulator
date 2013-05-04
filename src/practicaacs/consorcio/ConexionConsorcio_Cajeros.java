@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import practicaacs.consorcio.aux.EstadoEnvio;
 import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
@@ -61,11 +62,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	
 	/**
 	 * Funcion que envia el mensaje pasado por parámetro con los datos de la conexion.
+	 * Por lo tanto, solo sirve para responder el envio hacia el Cajero.
 	 * @param respuesta El mensaje a enviar
-	 * @param address La direccion a la que enviar
-	 * @param port El puerto a donde enviar
 	 */
-	public void send_message(Mensaje respuesta){
+	public void reply_message(Mensaje respuesta){
 		
 		System.out.printf(respuesta.toString());
 		
@@ -94,6 +94,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		message.setDestino(destino);
 		message.setOrigen(origen);
+		
+		//Almacenamos el envio en la BD
+		Database_lib.getInstance().almacenar_envio(message);
+		
 		this.consorcio.getBancos_server().send_message(message);
 	}
 	
@@ -176,22 +180,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 
 				//Enviamos el mensaje
-				send_message(respuesta);
-				break;
-			}
-			case ALMACENAMIENTO:{
-				//Almacenamos el envio en la BD
-				Database_lib.getInstance().almacenar_envio(recibido);
-				
-				//REALIZA LA CONSULTA
-				int saldo = Database_lib.getInstance().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
-				boolean signo = (saldo>=0);
-				
-				//Creamos la respuesta
-				respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo);
-
-				//Enviamos el mensaje
-				send_message(respuesta);
+				reply_message(respuesta);
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -229,26 +218,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 						0,CodigosMovimiento.OTRO,true,0,null/*Fecha*/);
 			
 				//Enviamos el mensaje
-				send_message(respuesta);
-				break;
-			}
-			case ALMACENAMIENTO:{
-				//Almacenamos el envio en la BD
-				Database_lib.getInstance().almacenar_envio(recibido);
-
-				//Obtenemos los movimientos de la BD
-				ArrayList<Movimiento> movimientos = 
-						Database_lib.getInstance().consultar_movimientos(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
-				
-				//Enviamos todos los movimientos realizados
-				for(Movimiento m : movimientos){
-					//Creamos la respuesta correcta.
-					respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,codonline,cod_resp,
-							movimientos.size(),m.tipo,(m.importe>=0),m.importe,m.data);
-				
-					//Enviamos el mensaje
-					send_message(respuesta);
-				}
+				reply_message(respuesta);
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -259,6 +229,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		}
 	}
 	
+	/**
+	 * Método que realiza un reintegro.
+	 * @param recibido El mensaje a analizar
+	 */
 	public void realizar_reintegro(SolReintegro recibido){
 		
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -277,13 +251,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespReintegro(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0); 
 						
 				//Enviamos el mensaje
-				send_message(respuesta);
+				reply_message(respuesta);
 				break;
 			}
 			case ALMACENAMIENTO:{
-				//Almacenamos el envio en la BD
-				Database_lib.getInstance().almacenar_envio(recibido);
-
 				//REALIZA EL REINTEGRO
 				int saldo = Database_lib.getInstance().realizar_reintegro(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),recibido.getImporte());
 				boolean signo = saldo >= 0;
@@ -292,7 +263,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespReintegro(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo); 
 
 				//Enviamos el mensaje
-				send_message(respuesta);
+				reply_message(respuesta);
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -304,6 +275,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 	}
 	
+	/**
+	 * Método que realiza un abono.
+	 * @param recibido El mensaje a analizar.
+	 */
 	public void realizar_abono(SolAbono recibido){
 		
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -322,13 +297,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespAbono(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 						
 				//Enviamos el mensaje
-				send_message(respuesta);
+				reply_message(respuesta);
 				break;
 			}
 			case ALMACENAMIENTO:{
-				//Almacenamos el envio en la BD
-				Database_lib.getInstance().almacenar_envio(recibido);
-	
 				//REALIZA EL ABONO
 				int saldo = Database_lib.getInstance().realizar_abono(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),recibido.getImporte());
 				boolean signo = saldo >= 0;
@@ -337,7 +309,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespAbono(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo);
 	
 				//Enviamos el mensaje
-				send_message(respuesta);
+				reply_message(respuesta);
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -348,6 +320,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		}
 	}
 	
+	/**
+	 * Método que realiza un traspaso.
+	 * @param recibido El mensaje a analizar.
+	 */
 	public void realizar_traspaso(SolTraspaso recibido){
 		
 		String origen = Integer.toString(this.consorcio.getId_consorcio());
@@ -366,13 +342,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespTraspaso(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0,true,0);
 						
 				//Enviamos el mensaje
-				send_message(respuesta);
+				reply_message(respuesta);
 				break;
 			}
 			case ALMACENAMIENTO:{
-				//Almacenamos el envio en la BD
-				Database_lib.getInstance().almacenar_envio(recibido);
-	
 				//REALIZA EL TRASPASO
 				int saldoDestino = Database_lib.getInstance().realizar_traspaso(recibido.getNum_tarjeta(),
 						recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),recibido.getImporte());
@@ -387,7 +360,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 						signoOrigen,saldoOrigen,signoDestino,saldoDestino);
 	
 				//Enviamos el mensaje
-				send_message(respuesta);
+				reply_message(respuesta);
 				break;
 			}
 			case ENVIO_CORRECTO:{

@@ -1,4 +1,4 @@
-package practicaacs.consorcio;
+package practicaacs.consorcio.aux;
 
 import java.net.Socket;
 
