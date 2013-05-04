@@ -230,7 +230,9 @@ public class ClienteBDBanco {
 		return 0;
 	}
 
-	public int getEstadoCanal(int ncanal) {
+	public int getEstadoCanal(int sesionid, int ncanal) {
+		
+		// TODO
 		return -1;
 	}
 
@@ -253,15 +255,15 @@ public class ClienteBDBanco {
 		try {
 			this.statement.executeUpdate("INSERT INTO Sesion() VALUES ()");
 			
-			ResultSet resultSet = this.statement.executeQuery("SELECT max(scod) FROM Canle");
+			ResultSet resultSet = this.statement.executeQuery("SELECT max(scod) FROM Sesion");
 			resultSet.next();
-			int numCanle = resultSet.getInt(1);
-		
+			int numSesion = resultSet.getInt(1);
+					
 			for(int i = 1; i <= numCanles; i++){
-				this.statement.executeUpdate("INSERT INTO Canle(scod,cncod) VALUES (" + numCanle + ", " + i + ")");
+				this.statement.executeUpdate("INSERT INTO Canle(scod,cncod) VALUES (" + numSesion + ", " + i + ")");
 			}
 		
-			return numCanle;
+			return numSesion;
 		
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -269,14 +271,14 @@ public class ClienteBDBanco {
 		}
 	}
 
-	public void registrarMensaje(Integer codSesion, Integer numCanal, Integer numMsx, Integer codMsx, boolean esEnviado, String s) {
+	public void registrarMensaje(String tipo, Integer codSesion, Integer numCanal, Integer numMsx, Integer codMsx, boolean esEnviado, String s) {
 		String sql;
 		if(codSesion == null){
-			sql = "INSERT INTO Mensaxe(enviado, texto) values (" + (esEnviado ? "1" : "0") + ", '" + s + "')";
+			sql = "INSERT INTO Mensaxe(tipo, enviado, texto) values ('" + tipo + "', "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
 		}else if (numCanal == null || numMsx == null || codMsx == null){
-			sql = "INSERT INTO Mensaxe(scod,enviado,texto) values (" + codSesion + ", "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
+			sql = "INSERT INTO Mensaxe(tipo, scod,enviado,texto) values ('" + tipo + "', " + codSesion + ", "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
 		}else{
-			sql = "INSERT INTO Mensaxe(scod,cncod,msnum,enviado,texto) values (" + codSesion + ", "  + numCanal + ", "  + numMsx + ", "
+			sql = "INSERT INTO Mensaxe(tipo, scod,cncod,msnum,enviado,texto) values ( '" + tipo + "', " + codSesion + ", "  + numCanal + ", "  + numMsx + ", "
 					+ (esEnviado ? "1" : "0") + ", '" + s + "')";
 		}
 		
@@ -290,7 +292,7 @@ public class ClienteBDBanco {
 
 	public ArrayList<Mensaxe> getMensaxesRecibidas() {
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 0 sort by mscod");
+			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 0 order by mscod");
 			
 			ArrayList<Mensaxe> res = new ArrayList<Mensaxe>();
 			
@@ -309,7 +311,7 @@ public class ClienteBDBanco {
 
 	public ArrayList<Mensaxe> getMensaxesEnviadas() {
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 1 sort by mscod");
+			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 1 order by mscod");
 			
 			ArrayList<Mensaxe> res = new ArrayList<Mensaxe>();
 			

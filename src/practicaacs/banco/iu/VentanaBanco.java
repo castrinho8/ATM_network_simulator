@@ -107,12 +107,17 @@ public class VentanaBanco extends javax.swing.JFrame{
 
 	private void actualizarBotones() {
 		if(this.banco.sesionAberta()){
+			this.botonabrirsesion.setEnabled(true);
 			this.botonabrirsesion.setText("Cerrar Sesión");
 			this.sesionabierta = true;
 			this.botondetenertrafico.setEnabled(true);
 			this.botonforzarrecuperacion.setEnabled(true);
-		
-			if(this.banco.traficoActivo()){
+			
+			if(this.banco.recuperacion()){
+				this.botonabrirsesion.setEnabled(false);
+				this.botondetenertrafico.setEnabled(false);
+				this.botonforzarrecuperacion.setEnabled(false);
+			}else if(this.banco.traficoActivo()){
 				this.botondetenertrafico.setText("Detener Trafico");
 				this.traficoactivo = true;
 			}else{
@@ -784,7 +789,7 @@ public class VentanaBanco extends javax.swing.JFrame{
 
     
     private void setTablaMensaxesEnviados(Object[][] data){
-    	this.tablamsgrecibidos.setModel(new javax.swing.table.DefaultTableModel(
+    	this.tablamsgenviados.setModel(new javax.swing.table.DefaultTableModel(
                 data,
                 new String [] {"#Canle", "#Msx", "Tipo"}
             ));

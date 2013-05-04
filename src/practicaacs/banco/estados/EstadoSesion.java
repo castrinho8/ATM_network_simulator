@@ -15,4 +15,8 @@ public abstract class EstadoSesion {
 		return true;
 	}
 
+	public boolean recuperacion() {
+		return false;
+	}
+
 }

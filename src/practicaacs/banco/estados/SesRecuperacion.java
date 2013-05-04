@@ -20,4 +20,11 @@ public class SesRecuperacion extends EstadoSesion {
 
 	}
 
+	@Override
+	public boolean recuperacion() {
+		return true;
+	}
+	
+	
+
 }
