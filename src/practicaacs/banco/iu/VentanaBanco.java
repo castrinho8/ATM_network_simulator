@@ -240,7 +240,7 @@ public class VentanaBanco extends javax.swing.JFrame{
     	rowSM.addListSelectionListener(new ListSelectionListener() {
     		public void valueChanged(ListSelectionEvent e) {
     			if (e.getValueIsAdjusting()) return;
-    			actualizar();
+    			VentanaBanco.this.actualizarMovementos();
     		}
     	});
     	
@@ -387,7 +387,7 @@ public class VentanaBanco extends javax.swing.JFrame{
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (e.getValueIsAdjusting()) return;
-				VentanaBanco.this.actualizar();
+				VentanaBanco.this.actualizarContasAsociadas();
 			}
         	
         });

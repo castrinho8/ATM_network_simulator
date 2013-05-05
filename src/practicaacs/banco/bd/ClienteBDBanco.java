@@ -152,12 +152,12 @@ public class ClienteBDBanco {
 			return null;
 		}
 	}
-	
+
 	public Conta getConta(String numtarx, int numConta) {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT ccod,saldo FROM ContaTarxeta JOIN Conta" +
-					" USING (ccod) where tcod = " + numtarx + " AND " + " cnum = " + numConta);
+					" USING (ccod) where tcod = '" + numtarx + "' AND " + " cnum = " + numConta);
 			resultSet.next();
 			return new Conta(resultSet.getInt(1),resultSet.getInt(2));
 		} catch (SQLException e) {
@@ -230,10 +230,30 @@ public class ClienteBDBanco {
 		return 0;
 	}
 
-	public int getEstadoCanal(int sesionid, int ncanal) {
-		
-		// TODO
-		return -1;
+	public void setCanal(int sesionid, int ncanal, int nmsg, boolean ocupado){
+		try {
+			this.statement.executeUpdate("UPDATE Canle SET lastmsg = " + nmsg + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
+			this.statement.executeUpdate("UPDATE Canle SET ocupado = " + (ocupado ? "1" : "0") + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Canal getCanal(int sesionid, int ncanal) {
+		try {
+			ResultSet r = this.statement.executeQuery("SELECT lastmsg, ocupado FROM Canle WHERE scod = " + sesionid +  " AND cncod = " + ncanal);
+			
+			if(r.next()){
+				int lastmsx = r.getInt(1);
+				return  new Canal(ncanal, lastmsx == 0 ? null : lastmsx, r.getBoolean(2));
+			}else{
+				return null;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public void facerReintegro(int num_conta, int importe) {
@@ -280,6 +300,7 @@ public class ClienteBDBanco {
 		}else{
 			sql = "INSERT INTO Mensaxe(tipo, scod,cncod,msnum,enviado,texto) values ( '" + tipo + "', " + codSesion + ", "  + numCanal + ", "  + numMsx + ", "
 					+ (esEnviado ? "1" : "0") + ", '" + s + "')";
+			
 		}
 		
 		try {
@@ -332,7 +353,7 @@ public class ClienteBDBanco {
 		if(sesionId == -1) return new ArrayList<Canal>();
 		
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT cncod canle, max(msnum) ultmsx FROM Canle LEFT JOIN Mensaxe USING (cncod,scod) where scod = " + sesionId + " group by cncod,scod");
+			ResultSet resultSet = statement.executeQuery("SELECT cncod, lastmsg FROM Canle WHERE scod = " + sesionId + " ORDER BY cncod");
 			
 			ArrayList<Canal> res = new ArrayList<Canal>();
 			
