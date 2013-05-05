@@ -1,11 +1,11 @@
 CREATE TABLE Tarxeta(
-	tcod CHAR(11),
+	tcod VARCHAR(11),
 	CONSTRAINT t_pk PRIMARY KEY (tcod)
 );
 
 CREATE TABLE Conta(
 	ccod INTEGER,
-	saldo DECIMAL(10,2),
+	saldo INTEGER,
 	CONSTRAINT c_pk PRIMARY KEY (ccod)
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE TipoMovemento(
 CREATE TABLE Movemento(
 	ccod INTEGER,
 	mcod INTEGER,
-	importe DECIMAL(10,2),
+	importe INTEGER,
 	data DATE,
 	tmcod INTEGER,
 	CONSTRAINT m_ccod_fk FOREIGN KEY (ccod) REFERENCES Conta(ccod) ON DELETE CASCADE,
@@ -37,25 +37,29 @@ CREATE TABLE Movemento(
 );
 
 CREATE TABLE Sesion(
-	scod INTEGER AUTOINCREMENT,
+	scod INTEGER AUTO_INCREMENT,
 	CONSTRAINT s_pk PRIMARY KEY (scod)
 );
 
 CREATE TABLE Canle(
 	scod INTEGER,
 	cncod INTEGER,
+	lastmsg INTEGER DEFAULT NULL,
+	ocupado BOOLEAN DEFAULT 0,
 	CONSTRAINT cn_scod_fk FOREIGN KEY (scod) REFERENCES Sesion(scod) ON DELETE CASCADE,
 	CONSTRAINT s_pk PRIMARY KEY (scod,cncod)	
 );
 
 CREATE TABLE Mensaxe (
+	mscod INTEGER AUTO_INCREMENT,
 	scod INTEGER,
 	cncod INTEGER,
-	mscod INTEGER,
+	msnum INTEGER,
+	tipo VARCHAR(20),
 	enviado BOOLEAN,
-	texto VARCHAR2(100),
-	CONSTRAINT ms_scncod_fk FOREIGN KEY (scod,cncod) REFERENCES Sesion(scod,cncod) ON DELETE CASCADE,
-	CONSTRAINT ms_pk PRIMARY KEY (scod, cncod, mscod)
+	texto VARCHAR(100),
+	CONSTRAINT ms_pk PRIMARY KEY (mscod),
+	CONSTRAINT ms_fk_canle FOREIGN KEY (scod,cncod) REFERENCES Canle(scod,cncod) ON DELETE CASCADE,
 );
 
 -- Valores iniciales das contas do banco.
@@ -102,3 +106,8 @@ INSERT INTO TipoMovemento VALUES(51,'Cobro de cheque');
 INSERT INTO TipoMovemento VALUES(99,'Otros');
 
 
+SELECT cncod canle, max(msnum) ultmsx
+FROM Canle LEFT JOIN Mensaxe USING (cncod)
+GROUP BY cncod
+WHERE scod = 1
+ORDER BY 1
