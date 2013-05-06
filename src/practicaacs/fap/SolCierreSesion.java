@@ -3,9 +3,9 @@ package practicaacs.fap;
 public class SolCierreSesion extends Mensaje {
 
 	private static final long serialVersionUID = 8905474980740931695L;
-	private long total_reintegros;
-	private long abonos;
-	private long traspasos;
+	private int total_reintegros;
+	private int abonos;
+	private int traspasos;
 	
 	/**
 	 * Contructor del mensaje de Solicitud de Cierre de Sesion.
@@ -15,8 +15,8 @@ public class SolCierreSesion extends Mensaje {
 	 * @param abonos Suma total de los abonos.
 	 * @param traspasos Suma total de los transpasos.
 	 */
-	public SolCierreSesion(String origen, String destino, long total_reintegros,
-			long abonos, long traspasos) {
+	public SolCierreSesion(String origen, String destino, int total_reintegros,
+			int abonos, int traspasos) {
 		super(origen, destino,CodigosMensajes.SOLCIERRESESION);
 		
 		assert(total_reintegros >= 0);
@@ -32,15 +32,15 @@ public class SolCierreSesion extends Mensaje {
 	
 	public SolCierreSesion(){}
 
-	public long getTotal_reintegros() {
+	public int getTotal_reintegros() {
 		return total_reintegros;
 	}
 
-	public long getAbonos() {
+	public int getAbonos() {
 		return abonos;
 	}
 
-	public long getTraspasos() {
+	public int getTraspasos() {
 		return traspasos;
 	}
 

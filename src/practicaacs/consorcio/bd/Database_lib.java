@@ -123,6 +123,7 @@ public class Database_lib {
 			e.printStackTrace();
 			return (Integer) null;
 		}
+		this
 	}
 
 	public ArrayList<Movimiento> consultar_movimientos(String tarjeta,int cuenta){
@@ -165,24 +166,28 @@ public class Database_lib {
 	 * Función que comprueba si el total de movimientos guardados en la base para la sesion indicada
 	 * son iguales a los que se le pasa por parámetro.
 	 */
-	public boolean comprueba_cuentas(String id_banco,long reintegros, long abonos, long traspasos){
+	public boolean comprueba_cuentas(String id_banco,int reintegros, int abonos, int traspasos){
 		return false;
 	}
 	
-	public Long getNumReintegros(String id_banco2) {
-		return null;
+	public int getNumReintegros(String id_banco2) {
+		return 0;
 	}
 
-	public Long getNumTraspasos(String id_banco2) {
-		return null;
+	public int getNumTraspasos(String id_banco2) {
+		return 0;
 	}
 
-	public Long getNumAbonos(String id_banco2) {
-		return null;
+	public int getNumAbonos(String id_banco2) {
+		return 0;
 	}
 	
 	public int consultarGastoOffline(String tarjeta){
 		return 0;
+	}
+	
+	private void anhadir_movimiento(CodigosMovimiento tipo,int cantidad,boolean offline){
+		
 	}
 	
 	//----------------SESIONES--------------
@@ -192,7 +197,7 @@ public class Database_lib {
 	private int num_canales;
 	//tabla de canales
 	
-	public void abrir_sesion(String id_banco, String puerto, int num_canales, EstadoSesion estado){
+	public void abrir_sesion(String id_banco, InetAddress ip, String puerto, int num_canales, EstadoSesion estado){
 		//Comprueba si ya esta la sesión, si está se reempleza y si no se inserta una nueva
 	}
 	
@@ -249,18 +254,18 @@ public class Database_lib {
 	/**
 	 * Getter en SESION del puerto
 	 */
-	public int getPuerto(String id_banco){
+	public int getPortBanco(String id_banco){
 		return 0;
 	}
 	
 	/**
 	 * Setter en SESION del puerto
 	 */
-	public void setPuerto(String id_banco, String puerto){
+	public void setPuertoBanco(String id_banco, String puerto){
 		Integer.getInteger(puerto);
 	}
 	
-	public InetAddress getDestinationAddress(String id_banco2) {
+	public InetAddress getIpBanco(String id_banco2) {
 		return null;
 	}
 	
@@ -322,7 +327,7 @@ public class Database_lib {
 
 	
 	public boolean isCanal_ocupado(String id_banco, int canal){
-		//Devuelve true si contestado=false && bloqueado==false
+		//Devuelve true si canal.ultimo_envio.contestado=false && canal.bloqueado==false
 		return false;
 	}
 
@@ -341,6 +346,23 @@ public class Database_lib {
 	 */
 	public ArrayList<Mensaje> recupera_ultimos_mensajes(String id_banco){
 		return null;
+	}
+
+	public void bloquearCanal(String id_banco, int canal){
+		
+	}
+	
+	public boolean esCorrectaContestacion(CodigosMensajes tipo_contestacion, String id_banco, int canal){
+		//comprueba si tipo_contestacion es la contestacion correspondiente al mensaje que hay en el canal y banco indicados.
+		return true;
+	}
+	
+	/**
+	 * Desbloquea todos los canales del banco
+	 * @param id_banco
+	 */
+	public void desbloquearCanales(String id_banco){
+		
 	}
 	
 	

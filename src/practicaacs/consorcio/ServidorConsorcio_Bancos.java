@@ -158,8 +158,7 @@ public class ServidorConsorcio_Bancos {
      * CAJERO->CONSORCIO->BANCOS
      * @param message El mensaje a enviar.
      */
-    public void send_message(Mensaje message,InetAddress ip, int puerto){
-    	
+    public void send_message(MensajeDatos message,InetAddress ip, int puerto){
     	//Crea un Thread y envia el mensaje
     	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,ip,puerto,consorcio,this,socketServidor);
     	c.start();

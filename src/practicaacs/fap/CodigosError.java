@@ -40,4 +40,5 @@ public enum CodigosError {
 		}catch(NumberFormatException e){}
 		throw new CodigoNoValidoException();
 	}	
+	
 }
