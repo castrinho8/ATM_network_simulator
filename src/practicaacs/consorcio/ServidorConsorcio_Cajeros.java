@@ -4,6 +4,10 @@ import java.io.*;
 import java.net.*;
 import java.util.Calendar;
 
+import practicaacs.consorcio.bd.Database_lib;
+import practicaacs.fap.Mensaje;
+import practicaacs.fap.MensajeDatos;
+
 /**
  * Clase que implementa un servidor para la recepción de mensajes de los cajeros.
  *
@@ -90,5 +94,22 @@ public class ServidorConsorcio_Cajeros {
     	this.abierto_serv_cajeros = false;
     }
     
+    /**
+     * Método que envia la respuestas del MENSAJE DE DATOS al cajero.
+     * BANCOS->CONSORCIO->CAJERO
+     * @param respuesta El mensaje a enviar.
+     */
+    public void reply_message(MensajeDatos respuesta, InetAddress ip, int puerto){
+    	
+		//Creamos el datagrama
+		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip,puerto);
+		
+		try{
+			//Enviamos el mensaje
+			this.socketServidor.send(enviarPaquete);
+		}catch (IOException e) {
+			System.out.println("Error al enviar");
+			System.exit ( 0 );
+		}
 }
 

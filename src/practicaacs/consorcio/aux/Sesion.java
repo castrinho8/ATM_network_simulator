@@ -1,6 +1,5 @@
 package practicaacs.consorcio.aux;
 
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;

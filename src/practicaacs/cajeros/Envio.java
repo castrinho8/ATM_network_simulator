@@ -18,6 +18,15 @@ public class Envio {
 		this.num_cuenta_origen = cuenta;
 	}
 
+	public Envio(String num_tarjeta, CodigosMensajes tipoMensaje, int importe,
+			int num_cuenta_origen, int num_cuenta_destino) {
+		this.num_tarjeta = num_tarjeta;
+		this.tipoMensaje = tipoMensaje;
+		this.importe = importe;
+		this.num_cuenta_origen = num_cuenta_origen;
+		this.num_cuenta_destino = num_cuenta_destino;
+	}
+
 
 	public void setNum_tarjeta(String num_tarjeta) {
 		this.num_tarjeta = num_tarjeta;
@@ -40,6 +49,31 @@ public class Envio {
 
 	public void setNum_cuenta_destino(int num_cuenta_destino) {
 		this.num_cuenta_destino = num_cuenta_destino;
+	}
+
+
+	public String getNum_tarjeta() {
+		return num_tarjeta;
+	}
+
+
+	public CodigosMensajes getTipoMensaje() {
+		return tipoMensaje;
+	}
+
+
+	public int getImporte() {
+		return importe;
+	}
+
+
+	public int getNum_cuenta_origen() {
+		return num_cuenta_origen;
+	}
+
+
+	public int getNum_cuenta_destino() {
+		return num_cuenta_destino;
 	}
 	
 	

@@ -12,9 +12,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.banco.estados.SesAberta;
@@ -118,13 +120,17 @@ public class ServidorConsorcio_Bancos {
         }
     
     /**
-     * Cierra el servidorBancos
+     * Cierra el servidorBancos.
+     * Para ello cierra todas las sesiones con los bancos
      */
     public void cierra_servidorBancos(){
     	this.abierto_serv_bancos = false;
-    	//cerrar todas las conexiones con los bancos
-    	for(Object sesion : Database_lib.getInstance().getSesiones()){
-
+    	ArrayList<String> i = Database_lib.getInstance().getSesiones();
+    	String id_banco;
+    	//Cerrar todas las conexiones con los bancos
+    	while(i.iterator().hasNext()){
+    		id_banco = i.iterator().next(); 
+    		Database_lib.getInstance().cerrar_sesion(id_banco);
     	}
     }
 
@@ -155,11 +161,15 @@ public class ServidorConsorcio_Bancos {
     
     /**
      * Método que envia el mensaje pasado por parámetro.
+     * CAJERO->CONSORCIO->BANCOS
      * @param message El mensaje a enviar.
      */
     public void send_message(Mensaje message){
     	
     	//CAMBIAR TODOOOO PARA CREAR UN THREAD QUE HAGA EL ENVIO y acordarse de poner los timers
+    	
+    	//asignar canal
+    	//poner timer
     	
     	//Obtiene el banco al que enviar
     	String id_banco = message.getDestino();

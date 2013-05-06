@@ -77,8 +77,32 @@ public class Database_lib {
 	
 	//------------------------CONSULTAS EN CUENTAS---------------------------------
 	
-	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino){
+	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino,CodigosMensajes tipo, int importe){
+		if (this.consultarGastoOffline(tarjeta) > 1000)
+			return CodigosRespuesta.IMPORTEEXCLIMITE;
+		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (cuenta_origen == cuenta_destino))
+			return CodigosRespuesta.TRANSCUENTASIGUALES;
+		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (this.consultar_saldo(tarjeta, cuenta_origen) < importe))
+			return CodigosRespuesta.TRANSSINFONDOS;
+		
 		return CodigosRespuesta.CONSACEPTADA;
+/*		CONSDEN(10,"Consulta Denegada."), 
+		CAPTARJ(11,"Consulta Denegada con Captura de Tarjeta."), 
+		TARJETANVALIDA(12,"Consulta Denegada, Tarjeta no Válida."),
+		CUENTANVALIDA(13,"Consulta Denegada, Cuenta especificada no válida."), 
+		TRANSCUENTAORINVALIDA(23,"Consulta Denegada, En operación de Traspaso la Cuenta Origen no es válida."), 
+		TRANSCUENTADESNVALIDA(24,"Consulta Denegada, En operación de Traspaso la Cuenta Destino no es válida.");
+	*/	
+	}
+	
+	/**
+	 * Método que comprueba si el ultimo mensaje del canal ha sido respondido.
+	 * @param id_banco
+	 * @param canal
+	 * @return
+	 */
+	public boolean isContestado(String id_banco, int canal){
+		return true;
 	}
 	
 	/**
@@ -157,6 +181,10 @@ public class Database_lib {
 		return null;
 	}
 	
+	public int consultarGastoOffline(String tarjeta){
+		return 0;
+	}
+	
 	//----------------SESIONES--------------
 	private String id_banco;
 	private int puerto;
@@ -174,6 +202,7 @@ public class Database_lib {
 	
 	/**
 	 * Comprueba en SESION si el banco introducido por parámetro tiene sesión.
+	 * True si la sesion es ACTIVA y False en caso contrario.
 	 */
 	public boolean hasSesion(String id_banco){
 		return true;
@@ -184,6 +213,7 @@ public class Database_lib {
 	 * True si los admite y False en caso contrario
 	 */
 	public boolean consultar_protocolo(String id_banco){
+		//si es trafico detenido o sesion cerrada return false
 		return true;
 	}
 	
@@ -234,7 +264,7 @@ public class Database_lib {
 		return null;
 	}
 	
-	public Object getSesiones() {
+	public ArrayList<String> getSesiones() {
 		return null;
 	}
 
@@ -284,6 +314,11 @@ public class Database_lib {
 		//Le suma 1 al ultimo canal y lo vuelve a guardar.
 		return 0;
 	}
+	
+	public int seleccionarCanal(String id_banco){
+		//selecciona el primero de( envio == null || envio.contestado=false)
+		return 0;
+	}
 
 	
 	public boolean isCanal_ocupado(String id_banco, int canal){
@@ -311,17 +346,40 @@ public class Database_lib {
 	private int canal;
 	private Mensaje mensaje;
 	private boolean conestado;
-
-	public void almacenar_envio(Mensaje message){
+	
+	
+	public InetAddress getIpEnvio(String id_banco, int num_canal){
+		return null;
+	}
+	
+	public int getPortEnvio(String id_banco, int num_canal){
+		return 0;
+	}	
+	
+	public ArrayList<Mensaje> getMensajesOffline(String id_banco){
+		//ponerles offline a false
+		return null;
+	}
+	
+	public void setContestadoEnvio(String id_banco, int num_canal){
 		
 	}
 	
+	public String getIdCajero(String id_banco, int num_canal){
+		return null;
+	}
+	
 	/**
-	 * Cambia el ultimo envio del canal indicado por el pasado por parametro
+	 * Cambia el ultimo envio del canal indicado por el pasado por parametro.
+	 * Tambien añade el mensaje a la tabla de MENSAJES del consorcio.
 	 */
-	public void anhadir_ultimo_envio(String id_banco, Mensaje message){
+	public void anhadir_ultimo_envio(Mensaje message, InetAddress ip, int port){
 		int id_canal = Database_lib.getInstance().getNext_canal(id_banco);
+		String id_banco = message.getDestino();
 		//aceder a la tabla Sesion con id_banco, a la tabla Canal con id_canal y por ultimo a envios añadir el envio
+		
+		//Guardar en la tabla de mensajes 
+		this.almacenar_mensaje(message,true);
 	}
 	
 	/**
@@ -343,10 +401,11 @@ public class Database_lib {
 	}
 
 	/**
-	 * Añade una linea en la lista de MemRecibido
-	 * @param banco Valor booleano que indica si procede de un banco o no
+	 * Añade una linea en la tabla de Mensajes
+	 * @param es_envio Valor booleano inidica si es un envio o una recepcion
 	 */
-	public void almacenar_recepcion(Mensaje message,boolean banco){
+	public void almacenar_mensaje(Mensaje message,boolean es_envio){
 		
 	}
+	
 }
