@@ -19,7 +19,7 @@ public class SolDeter extends EstadoSesion {
 	
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
-		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.SOLDETENERTRAFICO)){
+		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.RESDETENERTRAFICO)){
 			if(((RespDetTrafico) m).getCodResp()){
 				b.establecerSesionDetida();
 			}else{

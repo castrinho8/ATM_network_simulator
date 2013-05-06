@@ -52,6 +52,7 @@ public class VentanaBanco extends javax.swing.JFrame{
     private Banco banco;
 	private boolean sesionabierta = false;
 	private boolean traficoactivo;
+	private boolean silenciaractivo;
 	
 	/**
 	 * Contructor da interface de usuario do banco.
@@ -107,11 +108,12 @@ public class VentanaBanco extends javax.swing.JFrame{
 
 	private void actualizarBotones() {
 		if(this.banco.sesionAberta()){
-			this.botonabrirsesion.setEnabled(true);
+			this.botonabrirsesion.setEnabled(false);
 			this.botonabrirsesion.setText("Cerrar Sesión");
 			this.sesionabierta = true;
 			this.botondetenertrafico.setEnabled(true);
 			this.botonforzarrecuperacion.setEnabled(true);
+			this.botonforzarrecuperacion.setText("Silenciar Canal");
 			
 			if(this.banco.recuperacion()){
 				this.botonabrirsesion.setEnabled(false);
@@ -121,6 +123,7 @@ public class VentanaBanco extends javax.swing.JFrame{
 				this.botondetenertrafico.setText("Detener Trafico");
 				this.traficoactivo = true;
 			}else{
+				this.botonabrirsesion.setEnabled(true);
 				this.botondetenertrafico.setText("ReanudarTrafico");
 				this.traficoactivo = false;
 			}
@@ -450,12 +453,12 @@ public class VentanaBanco extends javax.swing.JFrame{
         
         //TAB MONITORIZACION e CONTROL
         
-        botonforzarrecuperacion.setText("Forzar Modo Recuperacion");
+        botonforzarrecuperacion.setText("Silenciar Canal");
         botonforzarrecuperacion.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				forzarRecuperacion();
+				VentanaBanco.this.silenciarCanle();
 			}
         	
         });
@@ -682,17 +685,39 @@ public class VentanaBanco extends javax.swing.JFrame{
 		this.traficoactivo = false;
 	}
 	
-	private void forzarRecuperacion() {
-		this.banco.setResponderMensaxes(! this.botonforzarrecuperacion.isEnabled());
+	
+	
+	private void silenciarCanle() {
+		
+		if(this.silenciaractivo){
+			this.setSilenciar(false);
+			this.banco.silenciarCanle(-1);
+			this.botonforzarrecuperacion.setText("Silenciar canle.");
+		}else{
+			int selrow = this.tablacanles.getSelectedRow();
+			
+			if(selrow != -1){
+				int numCanle = (Integer) tablacontas.getModel().getValueAt(selrow+1, 0);
+				this.banco.silenciarCanle(numCanle);
+				this.botonforzarrecuperacion.setText("Deixar de silenciar canle.");
+				this.setSilenciar(true);
+			}else{
+				new DialogoError("Selecione unha canle.").setVisible(true);
+			}
+		}
 	}
 	
+	private void setSilenciar(boolean b) {
+		this.silenciaractivo = b;
+	}
+
+
 	private void abrirSesion() {
 		new DialogoAbrirSesion(this.banco).setVisible(true);
 		this.actualizar();
 	}
 	
 	private void cerrarSesion() {
-		this.reanudarTrafico();
 		new DialogoSiNon("Esta seguro de que desexa cerrar a sesión?", new Runnable(){
 
 			@Override
@@ -775,7 +800,7 @@ public class VentanaBanco extends javax.swing.JFrame{
     private void setTablaCanles(Object[][] data){
     	tablacanles.setModel(new javax.swing.table.DefaultTableModel(
                 data,
-                new String [] {"Num. Canle", "Id. Ultimo Mensaxe"}
+                new String [] {"Num. Canle", "Id. Ultimo Mensaxe", "Ocupado"}
             ));
     }
     
@@ -869,11 +894,12 @@ public class VentanaBanco extends javax.swing.JFrame{
 
 	private Object[][] formatTaboaCanles(ArrayList<Canal> canales) {
 		int i=0;
- 		Object[][] res = new Object[canales.size()][2];
+ 		Object[][] res = new Object[canales.size()][3];
  		for(Canal c : canales){
  			
  			res[i][0] = c.numero;
  			res[i][1] = c.lastMsg;
+ 			res[i][2] = c.ocupado ? "SI" : "NON";
  			i++;
  		}
  		return res;

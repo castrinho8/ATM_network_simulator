@@ -246,7 +246,7 @@ public class ClienteBDBanco {
 
 	public int getTotalTraspasosSesion(int idSesion) {
 		try {
-			ResultSet s = this.statement.executeQuery("SELECT ttraspaso FROM Sesion WHERE scod = " + idSesion);
+			ResultSet s = this.statement.executeQuery("SELECT ttraspasos FROM Sesion WHERE scod = " + idSesion);
 			s.next();
 			return s.getInt(1);
 		} catch (SQLException e) {
