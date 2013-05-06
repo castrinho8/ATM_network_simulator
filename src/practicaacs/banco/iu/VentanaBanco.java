@@ -847,7 +847,7 @@ public class VentanaBanco extends javax.swing.JFrame{
     
     private Object[][] formatTaboaMovementos(ArrayList<Movemento> movementos) {
     	int i=0;
- 		Object[][] res = new Object[movementos.size()][2];
+ 		Object[][] res = new Object[movementos.size()][4];
  		for(Movemento m : movementos){
  			res[i][0] = new Integer(m.codigo);
  			res[i][1] = m.tipo;
