@@ -151,7 +151,7 @@ public class ClienteBDBanco {
 			ArrayList<Movemento> res = new ArrayList<Movemento>();
 			
 			while(resultSet.next()){
-				res.add(new Movemento(resultSet.getInt(1),resultSet.getInt(3),resultSet.getDate(2),resultSet.getString(4)));
+				res.add(new Movemento(resultSet.getInt(1),resultSet.getInt(3),resultSet.getDate(4),resultSet.getString(2)));
 			}
 			
 			return res;
@@ -246,7 +246,7 @@ public class ClienteBDBanco {
 
 	public int getTotalTraspasosSesion(int idSesion) {
 		try {
-			ResultSet s = this.statement.executeQuery("SELECT ttraspaso FROM Sesion WHERE scod = " + idSesion);
+			ResultSet s = this.statement.executeQuery("SELECT ttraspasos FROM Sesion WHERE scod = " + idSesion);
 			s.next();
 			return s.getInt(1);
 		} catch (SQLException e) {
@@ -288,9 +288,14 @@ public class ClienteBDBanco {
 	
 	private void addMovemento(int num_conta, int tipo_mensaxe, int importe) throws SQLException{
 		
-		//String date = new SimpleDateFormat("dd/MM/yyyy/HH/mm").format(new java.util.Date());	
-		this.statement.executeUpdate("INSERT INTO Movemento(ccod,importe,tmcod) values(" + num_conta +
-				", " + importe + ", " + tipo_mensaxe + ")");
+		ResultSet r = this.statement.executeQuery("select max(mcod) from Movemento where ccod = " + num_conta);
+		
+		r.next();
+		int num_mov = r.getInt(1); 
+		
+		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());	
+		this.statement.executeUpdate("INSERT INTO Movemento(mcod,ccod,data,importe,tmcod) values("+ (num_mov +1) + ", " + num_conta +
+				", '" + date + "', " + importe + ", " + tipo_mensaxe + ")");
 	}
 	
 	public void facerReintegro(int sesion, int num_conta, int importe) {

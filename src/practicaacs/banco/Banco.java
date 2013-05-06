@@ -26,8 +26,8 @@ public class Banco implements AnalizadorMensajes{
 	private String idbanco;
 	private String portBanco;
 	private int idSesion = -1;
-	private boolean responderMensaxes = true;
 	private int numCanales;
+	private int canalBloqueado = -1;
 	
 	/**
 	 * Constructor do banco a partir dun ficheiro de configuración.
@@ -329,15 +329,19 @@ public class Banco implements AnalizadorMensajes{
 		switch(cm){
 		case RESABRIRSESION:
 			s = "Error na apertura de sesion: " + ce.getMensaje();
+			this.cambEstado(SesNonAberta.instance());
 			break;
 		case RESDETENERTRAFICO:
 			s = "Error na solicitude de detencion de sesion: " + ce.getMensaje();
+			this.cambEstado(SesAberta.instance());
 			break;
 		case RESREANUDARTRAFICO:
-			s = "Error na solicitude de reanudación de sesion: " + ce.getMensaje() ;
+			s = "Error na solicitude de reanudación de sesion: " + ce.getMensaje();
+			this.cambEstado(SesDetida.instance());
 			break;
 		case RESCIERRESESION:
 			s = "Error no peche de sesion: " + ce.getMensaje();
+			this.cambEstado(SesDetida.instance());
 			break;
 		default:
 			assert(false);
@@ -779,9 +783,13 @@ public class Banco implements AnalizadorMensajes{
 	}
 
 	
-	public void setResponderMensaxes(boolean b) {
-		this.responderMensaxes = b;
-		this.iu.engadirLinhaLog("Non se responden as mensaxes.\n");
+	public void silenciarCanle(int canal) {
+		this.canalBloqueado = canal;
+		if(canal != -1){
+			this.iu.engadirLinhaLog("Non se responden as mensaxes da canle " + canal + ".\n");
+		}else{
+			this.iu.engadirLinhaLog("Respondense a todas as mensaxes.\n");
+		}
 	}
 
 
@@ -795,7 +803,7 @@ public class Banco implements AnalizadorMensajes{
 	}
 	
 	private void enviarMensaje(Mensaje m, String string) {
-		if (this.responderMensaxes){
+		if (this.responderMensaxe(m)){
 			try {
 				this.cs.enviarMensaje(m);
 				rexistrarMensaxe(m, m.toString());
@@ -804,6 +812,14 @@ public class Banco implements AnalizadorMensajes{
 				this.iu.engadirLinhaLog("Error:: " + e.getLocalizedMessage());
 			}
 		}
+	}
+
+
+	private boolean responderMensaxe(Mensaje m) {
+		if(!this.eMensaxeDatos(m)){
+			return true;
+		}
+		return ((MensajeDatos) m).getNumcanal() != this.canalBloqueado;
 	}
 
 
