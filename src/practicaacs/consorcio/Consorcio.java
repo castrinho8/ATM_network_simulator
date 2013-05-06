@@ -15,7 +15,7 @@ public class Consorcio {
 
 	static private int next_id_consorcio = 0;
 
-	private int id_consorcio;
+	private String id_consorcio;
 	private InetAddress address;
 	
 	private ServidorConsorcio_Cajeros cajeros_server;
@@ -45,7 +45,7 @@ public class Consorcio {
 		int puerto_cajeros = new Integer(prop.getProperty("consorcio.cash_server.port"));
 		int puerto_bancos = new Integer(prop.getProperty("consorcio.bank_server.port"));
 		
-		this.id_consorcio = next_id_consorcio++;
+		this.id_consorcio = Integer.toString(next_id_consorcio++);
 		this.cajeros_server = new ServidorConsorcio_Cajeros(this,puerto_cajeros);
 		this.bancos_server = new ServidorConsorcio_Bancos(this,puerto_bancos);
 	}
@@ -58,7 +58,7 @@ public class Consorcio {
 		return bancos_server;
 	}
 
-	public int getId_consorcio() {
+	public String getId_consorcio() {
 		return id_consorcio;
 	}
 
