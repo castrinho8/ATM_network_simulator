@@ -1,16 +1,15 @@
 package practicaacs.banco.bd;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import practicaacs.fap.Mensaje;
-import practicaacs.fap.RespSaldo;
 
 
 public class ClienteBDBanco {
 	private Connection con;
-	private Statement statement = null;
+	private Statement statement;
+	private int execucionId;
 	
 	public ClienteBDBanco(String urlbd) {
 		try {
@@ -23,8 +22,18 @@ public class ClienteBDBanco {
 			con = DriverManager.getConnection(urlbd);
 			statement = con.createStatement();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println("Error ao conectar ca BD");
 			System.exit(-1);
+		}
+		
+		
+		try {
+			this.statement.executeUpdate("INSERT INTO Execucion() values()");
+			ResultSet s = this.statement.executeQuery("SELECT max(ecod) FROM Execucion");	
+			s.next();
+			this.execucionId = s.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}	
 	}
 	
@@ -136,7 +145,6 @@ public class ClienteBDBanco {
 	public ArrayList<Movemento> getMovementos(int numeroconta) {
 		ResultSet resultSet;
 		try {
-			//TODO
 			resultSet = this.statement.executeQuery("SELECT mcod,tmnome,importe,data FROM Movemento JOIN" +
 					" TipoMovemento USING (tmcod) WHERE ccod = " + numeroconta);
 			
@@ -182,11 +190,11 @@ public class ClienteBDBanco {
 		try {
 			this.statement.executeUpdate("delete from Conta where true");
 			this.statement.executeUpdate("delete from Tarxeta where true");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 01')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 02')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 03')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 04')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42 05')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42001')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42002')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42003')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42004')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42005')");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (0,0000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (1,1000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (2,2000)");
@@ -197,37 +205,54 @@ public class ClienteBDBanco {
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (7,7000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (8,8000)");
 			this.statement.executeUpdate("INSERT INTO Conta VALUES (9,9000)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',1,1)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',2,2)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',3,3)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',1,1)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',2,3)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',1,4)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',2,5)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',3,6)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',1,7)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',2,8)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',1,0)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',3,9)");	
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',1,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',2,2)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',3,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',1,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',2,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',1,4)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',2,5)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',3,6)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',1,7)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',2,8)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',1,0)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',3,9)");	
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	public int getTotalReintegrosSesion(int idSesion) {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			ResultSet s = this.statement.executeQuery("SELECT treintegros FROM Sesion WHERE scod = " + idSesion);
+			s.next();
+			return s.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
 	}
 
 	public int getTotalAbonosSesion(int idSesion) {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			ResultSet s = this.statement.executeQuery("SELECT tabono FROM Sesion WHERE scod = " + idSesion);
+			s.next();
+			return s.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
 	}
 
 	public int getTotalTraspasosSesion(int idSesion) {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			ResultSet s = this.statement.executeQuery("SELECT ttraspaso FROM Sesion WHERE scod = " + idSesion);
+			s.next();
+			return s.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
 	}
 
 	public void setCanal(int sesionid, int ncanal, int nmsg, boolean ocupado){
@@ -256,19 +281,53 @@ public class ClienteBDBanco {
 		}
 	}
 
-	public void facerReintegro(int num_conta, int importe) {
-		// TODO Auto-generated method stub
+	private void updateConta(int num_conta, int importe) throws SQLException{
+		this.statement.executeUpdate("UPDATE Conta SET saldo = saldo " + (importe > 0 ? " + " + importe : " - " + (-importe)) + 
+					" WHERE ccod = " + num_conta);
+	}
+	
+	private void addMovemento(int num_conta, int tipo_mensaxe, int importe) throws SQLException{
+		
+		//String date = new SimpleDateFormat("dd/MM/yyyy/HH/mm").format(new java.util.Date());	
+		this.statement.executeUpdate("INSERT INTO Movemento(ccod,importe,tmcod) values(" + num_conta +
+				", " + importe + ", " + tipo_mensaxe + ")");
+	}
+	
+	public void facerReintegro(int sesion, int num_conta, int importe) {
+		try {
+			this.updateConta(num_conta, importe);
+			this.addMovemento(num_conta, 10, importe);
+			this.statement.executeUpdate("UPDATE Sesion SET treintegros = treintegros + " + importe +
+					" WHERE scod = " + sesion);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
 	}
-
-	public void facerAbono(int num_conta, int importe) {
-		// TODO Auto-generated method stub
-		
+	
+	public void facerAbono(int sesion, int num_conta, int importe) {
+		try {
+			this.updateConta(num_conta, -importe);
+			this.addMovemento(num_conta, 50, importe);
+			this.statement.executeUpdate("UPDATE Sesion SET tabono = tabono + " + importe +
+					" WHERE scod = " + sesion);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void facerTraspaso(int num_ori, int num_des, int importe) {
-		// TODO Auto-generated method stub
-		
+	public void facerTraspaso(int sesion, int num_ori, int num_des, int importe) {
+		try {
+			this.updateConta(num_ori, -importe);
+			this.addMovemento(num_ori, 11, importe);
+			this.updateConta(num_des, importe);
+			this.addMovemento(num_des, 12, importe);
+			this.statement.executeUpdate("UPDATE Sesion SET ttraspasos = ttraspasos + " + importe +
+					" WHERE scod = " + sesion);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public int crearTablasSesion(int numCanles) {
@@ -294,15 +353,14 @@ public class ClienteBDBanco {
 	public void registrarMensaje(String tipo, Integer codSesion, Integer numCanal, Integer numMsx, Integer codMsx, boolean esEnviado, String s) {
 		String sql;
 		if(codSesion == null){
-			sql = "INSERT INTO Mensaxe(tipo, enviado, texto) values ('" + tipo + "', "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
+			sql = "INSERT INTO Mensaxe(ecod, tipo, enviado, texto) values (" + this.execucionId + ", '" + tipo + "', "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
 		}else if (numCanal == null || numMsx == null || codMsx == null){
-			sql = "INSERT INTO Mensaxe(tipo, scod,enviado,texto) values ('" + tipo + "', " + codSesion + ", "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
+			sql = "INSERT INTO Mensaxe(ecod, tipo, scod,enviado,texto) values (" + this.execucionId + ", '" + tipo + "', " + codSesion + ", "  + (esEnviado ? "1" : "0") + ", '" + s + "')";
 		}else{
-			sql = "INSERT INTO Mensaxe(tipo, scod,cncod,msnum,enviado,texto) values ( '" + tipo + "', " + codSesion + ", "  + numCanal + ", "  + numMsx + ", "
+			sql = "INSERT INTO Mensaxe(ecod, tipo, scod,cncod,msnum,enviado,texto) values (" + this.execucionId + ", '" + tipo + "', " + codSesion + ", "  + numCanal + ", "  + numMsx + ", "
 					+ (esEnviado ? "1" : "0") + ", '" + s + "')";
-			
 		}
-		
+	
 		try {
 			this.statement.executeUpdate(sql);
 		} catch (SQLException e) {
@@ -313,7 +371,8 @@ public class ClienteBDBanco {
 
 	public ArrayList<Mensaxe> getMensaxesRecibidas() {
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 0 order by mscod");
+			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe WHERE enviado = 0  " +
+					"AND ecod = " + this.execucionId + " ORDER BY mscod");
 			
 			ArrayList<Mensaxe> res = new ArrayList<Mensaxe>();
 			
@@ -332,7 +391,8 @@ public class ClienteBDBanco {
 
 	public ArrayList<Mensaxe> getMensaxesEnviadas() {
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe where enviado = 1 order by mscod");
+			ResultSet resultSet = statement.executeQuery("SELECT tipo, cncod, msnum from Mensaxe WHERE enviado = 1  " +
+					"AND ecod = " + this.execucionId + " ORDER BY mscod");
 			
 			ArrayList<Mensaxe> res = new ArrayList<Mensaxe>();
 			
@@ -366,5 +426,5 @@ public class ClienteBDBanco {
 			return new ArrayList<Canal>();
 		}	
 	}
-	
+
 }

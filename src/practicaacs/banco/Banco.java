@@ -542,7 +542,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
 			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).\n");
 			this.iu.actualizar();
 			return;
 		}
@@ -561,7 +561,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		this.bd.facerReintegro(conta.getNumero(), importe);
+		this.bd.facerReintegro(this.idSesion, conta.getNumero(), importe);
 		r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").\n");
 		this.iu.actualizar();
@@ -594,7 +594,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
 			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).");
 			this.iu.actualizar();
 			return;
 		}
@@ -613,14 +613,14 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if(conta.getSaldo() < importe){
+		if(conta.getSaldo() < importe && online){
 			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Saldo insuficiente).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
-		this.bd.facerAbono(conta.getNumero(), importe);
+		this.bd.facerAbono(this.idSesion, conta.getNumero(), importe);
 		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()-importe);
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").\n");
 		this.iu.actualizar();
@@ -660,34 +660,33 @@ public class Banco implements AnalizadorMensajes{
 		}
 		
 		if(this.bd.getTarxeta(numtarx) == null){
-			//TODO CAMBIAR PARAMETROS DAS FUNCIONS
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.TARJETANVALIDA, false, 0, online, 0);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.TARJETANVALIDA, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Tarxeta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if((contaori = this.bd.getConta(numtarx, numContaOrigen)) == null){
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, online, 0);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Conta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
-		if(contaori.getSaldo() < importe){
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0, online, 0);
+		if(contaori.getSaldo() < importe && online){
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Saldo insuficiente).\n");
 			this.iu.actualizar();
 			return;}
 		
 		if((contades = this.bd.getConta(numtarx, numContaDestino)) == null){
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, online, 0);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Conta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
-		this.bd.facerTraspaso(contaori.getNumero(),contades.getNumero(),importe);
+		this.bd.facerTraspaso(this.idSesion, contaori.getNumero(),contades.getNumero(),importe);
 		r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA,
 				(contaori.getSaldo() - importe) >= 0, contaori.getSaldo() - importe, 
 				(contades.getSaldo() + importe) >= 0, contades.getSaldo() + importe);
