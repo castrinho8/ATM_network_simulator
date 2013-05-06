@@ -100,7 +100,10 @@ public class ServidorConsorcio_Cajeros {
      * @param respuesta El mensaje a enviar.
      */
     public void reply_message(MensajeDatos respuesta, InetAddress ip, int puerto){
-    	
+		
+    	//Guardamos el Mensaje en la BD (Tabla de MENSAJES)
+		Database_lib.getInstance().almacenar_mensaje(respuesta,true);
+		
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip,puerto);
 		
@@ -111,5 +114,6 @@ public class ServidorConsorcio_Cajeros {
 			System.out.println("Error al enviar");
 			System.exit ( 0 );
 		}
+    }
 }
 

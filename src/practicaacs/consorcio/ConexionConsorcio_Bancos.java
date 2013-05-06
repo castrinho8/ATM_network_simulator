@@ -25,6 +25,7 @@ import practicaacs.banco.estados.SesDetida;
 import practicaacs.banco.estados.SesNonAberta;
 import practicaacs.banco.estados.SesRecuperacion;
 import practicaacs.consorcio.aux.Sesion;
+import practicaacs.consorcio.aux.TipoAccion;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
@@ -40,18 +41,55 @@ public class ConexionConsorcio_Bancos extends Thread {
 	private Consorcio consorcio;
 	private ServidorConsorcio_Bancos servidor;
 	
+	private TipoAccion tipo_accion;
+	//CONEXION
 	private DatagramSocket output_socket;
 	private DatagramPacket input_packet;
+	
+	//RECUPERACION/FIN RECUPERACION
+	private String id_banco;
+	
+	//ENVIO
+	private MensajeDatos envio;
+	private InetAddress ip_envio;
+	private int puerto_envio;
+	
+	
+	/*---------------------------------------------
+	  --------------- CONSTRUCTORES ---------------
+	  ---------------------------------------------*/
 
-	public ConexionConsorcio_Bancos(DatagramPacket paquete,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
+	public ConexionConsorcio_Bancos(TipoAccion tipo, DatagramPacket paquete,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
 		this.consorcio = cons;
 		this.servidor = s;
 		
+		this.tipo_accion = tipo;
 		this.input_packet = paquete;
 		this.output_socket =  socket;
 	}
 
+	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,InetAddress ip, int puerto, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
+		super();
+		this.consorcio = cons;
+		this.servidor = s;
+		
+		this.tipo_accion = tipo;
+		this.envio = env;
+		this.ip_envio = ip;
+		this.puerto_envio = puerto;
+		this.output_socket =  socket;
+	}
+	
+	public ConexionConsorcio_Bancos(TipoAccion tipo,String id_b,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
+		super();
+		this.consorcio = cons;
+		this.servidor = s;
+		
+		this.tipo_accion = tipo;
+		this.id_banco = id_b;
+		this.output_socket =  socket;
+	}
 	
 	/**
 	 * Método que obtiene el Mensaje a partir del paquete y analiza dicho 
@@ -59,12 +97,29 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 */
 	public void run() {
 		try {
-			//Creamos el mensaje correspondiente al recibido
-			Mensaje recibido = Mensaje.parse(new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength()-1));
-			System.out.printf(recibido.toString());
-			
-			//Analizamos el mensaje y realizamos las acciones correspondientes
-			analizar_mensaje(recibido);
+			switch(this.tipo_accion){
+				case CONEXION:{
+					//Creamos el mensaje correspondiente al recibido
+					Mensaje recibido = Mensaje.parse(new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength()-1));
+					System.out.printf(recibido.toString());
+				
+					//Analizamos el mensaje y realizamos las acciones correspondientes
+					analizar_mensaje(recibido);
+					break;
+				}
+				case RECUPERACION:{
+					solicitar_iniciar_recuperacion(this.id_banco);
+					break;
+				}
+				case FIN_RECUPERACION:{
+					solicitar_finalizar_recuperacion(this.id_banco);
+					break;
+				}
+				case ENVIO:{
+					reenviarMensajeCajero(this.envio);
+					break;
+				}
+			}	
 		}
 		catch (Exception e) {
 	    // manipular las excepciones
@@ -73,12 +128,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	/**
 	 * Método que envia la respuesta del BANCO al CAJERO.
-	 * Cambia el origen/destino, guarda el mensaje en la BD, obtiene IP y puerto para el envio
+	 * Cambia el origen/destino, obtiene IP y puerto para el envio
 	 *  y delega en el Servidor de Cajeros para realizarlo.
 	 * BANCO->CONSORCIO->CAJERO
 	 * @param respuesta
 	 */
-	public void reply_message(MensajeDatos respuesta){
+	public void responderMensajeCajero(MensajeDatos respuesta){
 		
     	System.out.printf(respuesta.toString());
 
@@ -90,47 +145,66 @@ public class ConexionConsorcio_Bancos extends Thread {
 		respuesta.setDestino(destino);
 		respuesta.setOrigen(origen);
 		
-		//Guardamos el Mensaje en la BD (Tabla de MENSAJES)
-		Database_lib.getInstance().almacenar_mensaje(respuesta,true);
-		
 		//Obtenemos la direccion y el puerto a donde enviar
 		InetAddress ip = Database_lib.getInstance().getIpEnvio(id_banco,respuesta.getNumcanal());
 		int puerto = Database_lib.getInstance().getPortEnvio(id_banco,respuesta.getNumcanal());
 
-		
 		this.consorcio.getCajeros_server().reply_message(respuesta,ip,puerto);
 	}
 	
 	/**
 	 * Método que envia el mensaje introducido por parámetro a traves del socket de la conexión
 	 * que invoca el método.
+	 * ENVIA MENSAJES DE CONTROL -  CONSORCIO->BANCO
 	 * @param envio El mensaje a enviar.
 	 */
 	private void enviar_mensaje(Mensaje envio){
 		
 		System.out.printf(envio.toString());
-		int canal = Database_lib.getInstance().seleccionarCanal(envio.getDestino()); //escoger el canal
 		
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),this.input_packet.getAddress(),this.input_packet.getPort());
-		
-		//Guardamos el mensaje en la BD (Tabla de ULTIMOS ENVIOS)
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.input_packet.getAddress(),this.input_packet.getPort());
 
 		try{
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);
+		}catch (IOException e) {
+			System.out.println("Error al enviar");
+			System.exit ( 0 );
+		}
+
+	}
+	
+	/**
+	 * Metodo que reenvia el mensaje a la IP y puerto introducidos por parámetro
+	 * ENVIA MENSAJES DE DATOS - CONSORCIO->BANCO
+	 * @param envio
+	 */
+	private void reenviarMensajeCajero(MensajeDatos envio){
+		
+		//Seleccionamos el canal y se lo añadimos el mensaje
+		int canal = Database_lib.getInstance().seleccionarCanal(envio.getDestino());
+		envio.setNumcanal(canal);
+		
+		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.ip_envio,this.puerto_envio,canal);
+		
+		//Creamos el datagrama
+		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),this.ip_envio,this.puerto_envio);
+
+		try{
 			/*			
 			if(envio.es_datos()){
 				//Obtenemos la sesion y creamos un timer
 				Sesion s = servidor.getSesion(envio.getDestino());
 				s.setTimer(canal);
 			}*/
+			//Enviamos el mensaje
+			this.output_socket.send(enviarPaquete);
 		}catch (IOException e) {
 			System.out.println("Error al enviar");
 			System.exit ( 0 );
 		}
-
 	}
 	
 	/**
@@ -170,7 +244,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 				&& (Database_lib.getInstance().hasSesion(id_banco)))
 			return CodigosError.NOSESION;
 	
-		//	return CodigosError.OTRASCAUSAS;
+		//OPERACION ==CERRAR SESION y hay Mensajes sin responder
+		if((m.getTipoMensaje().equals(CodigosMensajes.SOLCIERRESESION)) 
+				&& (Database_lib.getInstance().hayMensajesSinResponder(id_banco)))
+			return CodigosError.OTRASCAUSAS;
 			
 		return CodigosError.CORRECTO;
 	}
@@ -251,34 +328,32 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 */
 	private void manejar_abrir_sesion(SolAperturaSesion recibido){
 
+		String id_banco = recibido.getOrigen();
 		//cabecera
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		//cuerpo
 		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
-		CodigosError cod_error = comprobar_errores(recibido,0,recibido.getNmsg()); //Comprueba si hay errores
+		CodigosError cod_error = comprobar_errores(recibido,0); //Comprueba si hay errores
 
 		if(cod_error.equals(CodigosError.CORRECTO)){ //Si no ha habido errores, realizar las tareas necesarias
 	    	Calendar time = Calendar.getInstance();
-	    	System.out.println("APERTURA: Enviada a las " + recibido.getTime());
-	    	System.out.println("APERTURA: Sesion servidor Banco: "+ recibido.getOrigen() +" comenzada a las " + time.getTime());
+	    	System.out.println("APERTURA: Enviada a las " + id_banco);
+	    	System.out.println("APERTURA: Sesion servidor Banco: "+ id_banco +" comenzada a las " + time.getTime());
 	
 	    	//Añadimos al hashmap de Sesiones abiertas
-	    	Sesion ses = new Sesion(destino,this.servidor,recibido.getNcanales());
+	    	Sesion ses = new Sesion(id_banco,this.servidor,recibido.getNcanales());
 	    	this.servidor.insertaSesion(ses);
 	    	
 			//Guardamos la sesion en la BD
-			Database_lib.getInstance().abrir_sesion(destino,recibido.getPuerto(),recibido.getNcanales(),SesAberta.instance());
-			
-			//Obtenemos los mensajes offline de este banco.
-			ArrayList<Mensaje> msj_offline = Database_lib.getInstance().getMensajesOffline(destino);
+			Database_lib.getInstance().abrir_sesion(id_banco,recibido.getPuerto(),recibido.getNcanales(),SesAberta.instance());
 			
 			//Envia la respuesta
 			this.enviar_mensaje(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
-	
+
 			//Enviamos los mensajes offline de este banco
-			while(msj_offline.iterator().hasNext()){
-				this.enviar_mensaje(msj_offline.iterator().next());
+			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
+				this.enviar_mensaje(m);
 			}
 		}
 		else{ //Si hay errores respondemos con el error correspondiente
@@ -287,57 +362,119 @@ public class ConexionConsorcio_Bancos extends Thread {
 		}
 	}
 	
+	
 	/**
-	 * Cierra la sesion con el banco
-	 * @param id_banco El identificador del banco que quiere cerrar sesion
-	 * @param reintegros El numero total de reintegros realizados por el banco en la sesión que se cierra.
-	 * @param abonos El numero total de abonos realizados por el banco en la sesión que se cierra.
-	 * @param traspasos El numero total de traspasos realizados por el banco en la sesión que se cierra.
-	 * @return Devuelve un HashMap<String,Long> con cada uno de los valores de reintegros, abonos,traspasos realizados por el consorcio.
-	 * 
-	 */
-	private HashMap<String,Long> cerrar_sesion(String id_banco,long reintegros,long abonos,long traspasos){
-    	Calendar time = Calendar.getInstance();
-    	System.out.println("CIERRE: Sesion servidor Banco: "+ id_banco +" finalizado a las " + time.getTime());
+	 * LLama a cerrar sesion y crea un mensaje respuesta para ello
+	 * @param recibido El mensaje recibido.
+	 */	
+	private RespCierreSesion manejar_cerrar_sesion(SolCierreSesion recibido){
+		
+		String id_banco = recibido.getOrigen();
+		//Datos recibidos
+		long total_reintegros = recibido.getTotal_reintegros();
+		long total_abonos = recibido.getAbonos();
+		long total_traspasos = recibido.getTraspasos();
+		
+		//cabecera
+		String origen = this.consorcio.getId_consorcio();
+		String destino = recibido.getOrigen();
+		//cuerpo
+		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
+		CodigosError cod_error =  comprobar_errores(recibido,0);
+		
+    	long reintegros_consorcio;
+    	long abonos_consorcio;
+    	long traspasos_consorcio;
+    	
+		if(cod_error.equals(CodigosError.CORRECTO)){ //Ejecuta las tareas necesarias
+		   	Calendar time = Calendar.getInstance();
+	    	System.out.println("CIERRE: Sesion servidor Banco: "+ id_banco +" finalizado a las " + time.getTime());
+	    	
+	    	//Obtenemos la suma de los ultimos movimientos de la BD
+	    	reintegros_consorcio = Database_lib.getInstance().getNumReintegros(id_banco);
+	    	abonos_consorcio = Database_lib.getInstance().getNumAbonos(id_banco);
+	    	traspasos_consorcio = Database_lib.getInstance().getNumTraspasos(id_banco);
 
-    	//while(/*aun queden mensajes*/){
-    		//consultar ultimos envios en BD
-    	//}
-    	
-    	//Obtenemos la suma de los ultimos movimientos
-    	HashMap<String,Long> movimientos = new HashMap<String,Long>();
-    	movimientos.put("Reintegros",Database_lib.getInstance().getNumReintegros(id_banco));
-    	movimientos.put("Abonos",Database_lib.getInstance().getNumAbonos(id_banco));
-    	movimientos.put("Traspasos",Database_lib.getInstance().getNumTraspasos(id_banco));
-    	
-    	//Eliminamos la sesion del hashmap de sesiones.
-    	this.servidor.eliminarSesion(id_banco);
-    	//Eliminar la sesion BD
-    	Database_lib.getInstance().cerrar_sesion(id_banco);
-    	
-    	return movimientos;
+	    	//En el caso de que no coincidan se imprime/avisa a la IU
+	    	if(reintegros_consorcio!=total_reintegros || abonos_consorcio!=total_abonos || traspasos_consorcio!=total_traspasos){
+	    		System.out.println("TOTALES RECIBIDOS: Reintegros: " + total_reintegros + ". Abonos: " + total_abonos + 
+	    			". Traspasos: " + total_traspasos);
+	    		System.out.println("TOTALES CONSORCIO: Reintegros: " + reintegros_consorcio + ". Abonos: " + abonos_consorcio + 
+	    			". Traspasos: " + traspasos_consorcio);
+	    	}
+	    	
+	    	//Eliminamos la sesion del hashmap de sesiones.
+	    	this.servidor.eliminarSesion(id_banco);
+	    	//Cerrar la sesion en la BD
+	    	Database_lib.getInstance().cerrar_sesion(id_banco);
+	    	
+		}
+    	this.enviar_mensaje(new RespCierreSesion(origen,destino,
+    			cod_resp,cod_error,
+    			reintegros_consorcio,abonos_consorcio,traspasos_consorcio));
 	}
 	
 	/**
-	 * Detiene el trafico con el banco
-	 * @param id_banco El identificador del banco a detener.
-	 */
-	public void detener_trafico(String id_banco){
-		Calendar time = Calendar.getInstance();
-    	System.out.println("TRAFICO DETENIDO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
-   
-    	Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesDetida.instance());
-	}
+	 * LLama a detener trafico y crea un mensaje respuesta para ello
+	 * @param recibido El mensaje recibido.
+	 */	
+	private void manejar_detener_trafico(SolDetTrafico recibido){
+
+		String id_banco = recibido.getOrigen();
+		//cabecera
+		String origen = this.consorcio.getId_consorcio();
+		String destino = recibido.getOrigen();
+		//cuerpo
+		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
+		CodigosError cod_error =  comprobar_errores(recibido,0);
+		
+		if(cod_error.equals(CodigosError.CORRECTO)){
+			Calendar time = Calendar.getInstance();
+	    	System.out.println("TRAFICO DETENIDO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
+	   
+    		//Settear el estado a DETIDA
+	    	Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesDetida.instance());
+		}
+		this.enviar_mensaje(new RespDetTrafico(origen,destino,cod_resp,cod_error));
+	}	
 	
 	/**
-	 * Reanuda el trafico con el banco
-	 * @param id_banco El identificador del banco con el que reanudar el trafico.
+	 * LLama a reanudar trafico y crea un mensaje respuesta para ello
+	 * @param recibido El mensaje recibido.
 	 */
-	private void reanudar_trafico(String id_banco){
-		Calendar time = Calendar.getInstance();
-    	System.out.println("TRAFICO REANUDADO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
+	private void manejar_reanudar_trafico(SolReanTrafico recibido){
+		
+		String id_banco = recibido.getOrigen();
+    	//cabecera
+		String origen = this.consorcio.getId_consorcio();
+		String destino = recibido.getOrigen();
+		//cuerpo
+		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
+		CodigosError cod_error =  comprobar_errores(recibido,0);
+		
+		if(cod_error.equals(CodigosError.CORRECTO)){ //realiza las acciones necesarias
+			Calendar time = Calendar.getInstance();
+    		System.out.println("TRAFICO REANUDADO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
     	
-    	Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesAberta.instance());
+    		//Settear el estado a ABERTA
+    		Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesAberta.instance());
+
+    		//Enviar el mensaje confirmando la apertura
+    		this.enviar_mensaje(new RespReanTrafico(origen,destino,cod_resp,cod_error));
+    		
+			//Enviamos los mensajes offline de este banco
+			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
+				this.enviar_mensaje(m);
+			}
+			
+		}else{
+			//En caso de error, enviamos el error
+			this.enviar_mensaje(new RespReanTrafico(origen,destino,cod_resp,cod_error));
+		}
+	}
+	
+	private void solicitar_iniciar_recuperacion(String id_banco){
+		
 	}
 	
 	/**
@@ -345,14 +482,25 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * @param recibido El mensaje recibido.
 	 */
 	public void iniciar_recuperacion(String id_banco){
+		
+		//Obtenemos los datos
+		String origen = this.consorcio.getId_consorcio();
+		String destino = id_banco;
+		
+		//Setear el estado de la conexion a RECUPERACION
 		Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesRecuperacion.instance());
 
-		//consultar ultimos envios en la BD y reenviarlos
+		//Enviamos la solicitud de recuperacion
+		SolIniTraficoRec envio = new SolIniTraficoRec(origen,destino); 
+		
+		//Consultar ultimos envios en la BD y reenviarlos
 		for(Mensaje m : Database_lib.getInstance().recupera_ultimos_mensajes(id_banco)){
-			//marcar en la BD el mensaje como enviado y no respondido
 			this.enviar_mensaje(m);
 		}
-		// enviar SOLFINTRADICOREC (solicitud fin de trafico en recuperacion)
+	}
+	
+	private void solicitar_finalizar_recuperacion(String id_banco){
+		
 	}
 	
 	/**
@@ -364,70 +512,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 		Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesAberta.instance());
 		return null;
-	}
-	
-	
-	/**
-	 * LLama a cerrar sesion y crea un mensaje respuesta para ello
-	 * @param recibido El mensaje recibido.
-	 */	
-	private RespCierreSesion manejar_cerrar_sesion(SolCierreSesion recibido){
-		
-		//Datos recibidos
-		long total_reintegros = recibido.getTotal_reintegros();
-		long total_abonos = recibido.getAbonos();
-		long total_traspasos = recibido.getTraspasos();
-		
-		//cabecera
-		String origen = this.consorcio.getId_consorcio();
-		String destino = recibido.getOrigen();
-		//cuerpo
-		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
-		CodigosError cod_error =  comprobar_errores(recibido,0,recibido.getNmsg());
-		
-		if(cod_error.equals(CodigosError.CORRECTO)) //Ejecuta las tareas necesarias
-			this.cerrar_sesion(recibido.getOrigen(),recibido.getTotal_reintegros(),recibido.getAbonos(),recibido.getTraspasos()); 
-
-    	this.enviar_mensaje(new RespCierreSesion(origen,destino,cod_resp,cod_error,total_reintegros,total_abonos,total_traspasos));
-	}
-	
-	/**
-	 * LLama a detener trafico y crea un mensaje respuesta para ello
-	 * @param recibido El mensaje recibido.
-	 */	
-	private void manejar_detener_trafico(SolDetTrafico recibido){
-
-		//cabecera
-		String origen = this.consorcio.getId_consorcio();
-		String destino = recibido.getOrigen();
-		//cuerpo
-		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
-		CodigosError cod_error =  comprobar_errores(recibido,0,recibido.getNmsg());
-		
-		if(cod_error.equals(CodigosError.CORRECTO))
-			this.detener_trafico(recibido.getOrigen()); //Ejecuta las tareas necesarias
-
-		this.enviar_mensaje(new RespDetTrafico(origen,destino,cod_resp,cod_error));
-	}	
-	
-	
-	/**
-	 * LLama a reanudar trafico y crea un mensaje respuesta para ello
-	 * @param recibido El mensaje recibido.
-	 */
-	private void manejar_reanudar_trafico(SolReanTrafico recibido){
-		
-    	//cabecera
-		String origen = this.consorcio.getId_consorcio();
-		String destino = recibido.getOrigen();
-		//cuerpo
-		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
-		CodigosError cod_error =  comprobar_errores(recibido,0,recibido.getNmsg());
-		
-		if(cod_error.equals(CodigosError.CORRECTO))
-			this.reanudar_trafico(recibido.getOrigen());//Ejecuta las tareas necesarias
-		
-    	this.enviar_mensaje(new RespReanTrafico(origen,destino,cod_resp,cod_error));
 	}
 	
 	private void maneja_consulta_saldo(RespSaldo recibido){

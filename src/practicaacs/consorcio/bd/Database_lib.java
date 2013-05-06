@@ -279,7 +279,7 @@ public class Database_lib {
 	/**
 	 * Getter en CANALES del siguiente numero de mensaje para el banco y canal indicado
 	 */
-	public int getNext_num_message(String id_banco,int id_canal){
+	private int getNext_num_message(String id_banco,int id_canal){
 		//Obtiene el ultimo numero de mensaje para el id.
 		return 0;
 	}
@@ -288,7 +288,7 @@ public class Database_lib {
 	 * Getter en CANALES del siguiente numero de mensaje para el banco y canal indicado.
 	 * Ademas, suma 1 al número del ultimo mensaje y lo vuelve a guardar.
 	 */
-	public int next_num_message(String id_banco,int id_canal){
+	private int next_num_message(String id_banco,int id_canal){
 		//Obtiene el ultimo numero de mensaje para el id.
 		
 		//Le suma 1 al ultimo numero de mensaje y lo vuelve a guardar.
@@ -298,7 +298,7 @@ public class Database_lib {
 	/**
 	 * Getter en del siguiente numero de canal libre para el banco indicado
 	 */
-	public int getNext_canal(String id_banco){
+	private int getNext_canal(String id_banco){
 		//Obtiene el ultimo canal libre para el id.
 		
 		return 0;
@@ -308,7 +308,7 @@ public class Database_lib {
 	 * Getter en del siguiente numero de canal libre para el banco indicado
 	 * Ademas, suma 1 al número del ulitmo canal y lo vuelve a guardar.
 	 */
-	public int next_canal(String id_banco){
+	private int next_canal(String id_banco){
 		//Obtiene el ultimo canal libre para el id.
 		
 		//Le suma 1 al ultimo canal y lo vuelve a guardar.
@@ -322,7 +322,7 @@ public class Database_lib {
 
 	
 	public boolean isCanal_ocupado(String id_banco, int canal){
-		//Devuelve true si contestado=false 
+		//Devuelve true si contestado=false && bloqueado==false
 		return false;
 	}
 
@@ -331,6 +331,10 @@ public class Database_lib {
 		return null;
 	}
 	
+	public boolean hayMensajesSinResponder(String id_banco){
+		return false;
+	}
+
 	/**
 	 * Devuelve los ultimos mensajes enviados hacia el banco introducido
 	 * por parámetro, por todos los canales.
@@ -372,12 +376,14 @@ public class Database_lib {
 	/**
 	 * Cambia el ultimo envio del canal indicado por el pasado por parametro.
 	 * Tambien añade el mensaje a la tabla de MENSAJES del consorcio.
+	 * Si el canal esta ocupado no se inserta como ultimo envio.
 	 */
-	public void anhadir_ultimo_envio(Mensaje message, InetAddress ip, int port){
-		int id_canal = Database_lib.getInstance().getNext_canal(id_banco);
+	public void anhadir_ultimo_envio(Mensaje message, InetAddress ip, int port,int canal){
 		String id_banco = message.getDestino();
+		//if canal==0->mensaje de control sin canal
+		/*si el canal esta ocupado, no se inserta como ultimo envio de forma que se pueda seguir la ejecucion*/
 		//aceder a la tabla Sesion con id_banco, a la tabla Canal con id_canal y por ultimo a envios añadir el envio
-		
+		//borra el envio que habia antes en ese canal y pone el nuevo
 		//Guardar en la tabla de mensajes 
 		this.almacenar_mensaje(message,true);
 	}

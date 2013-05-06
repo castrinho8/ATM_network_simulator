@@ -30,6 +30,10 @@ public abstract class MensajeDatos extends Mensaje {
 				String.format("%02d%05d%1d", numcanal, nmsg, codonline ? 1 : 0);
 	}
 
+	public void setNumcanal(int numcanal) {
+		this.numcanal = numcanal;
+	}
+
 	public int getNumcanal() {
 		return numcanal;
 	}

@@ -21,6 +21,7 @@ import java.util.Iterator;
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.banco.estados.SesAberta;
 import practicaacs.consorcio.aux.Sesion;
+import practicaacs.consorcio.aux.TipoAccion;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
@@ -105,7 +106,7 @@ public class ServidorConsorcio_Bancos {
     				socketServidor.receive(inputPacket);
     				
     				//Crea una conexión para analizar el datagrama
-    				ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(inputPacket,this.consorcio,this,this.socketServidor);
+    				ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(TipoAccion.CONEXION,inputPacket,this.consorcio,this,this.socketServidor);
     				t.start();
     				
     			}catch (SocketTimeoutException e){
@@ -139,7 +140,8 @@ public class ServidorConsorcio_Bancos {
      * @param id_banco 
      */
     public void solicitar_recuperacion(String id_banco){
-    	
+    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.RECUPERACION, id_banco, consorcio, this, socketServidor);
+    	c.start();
     }
     
     /**
@@ -147,47 +149,20 @@ public class ServidorConsorcio_Bancos {
      * @param id_banco
      */
     public void solicitar_fin_recuperacion(String id_banco){
-    	
+    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.FIN_RECUPERACION,id_banco, consorcio, this, socketServidor);
+    	c.start();
     }
-    
-    /**
-     * Recupera los mensajes del banco
-     */
-    public void realiza_recuperacion(String banco){
-    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(null, consorcio, this, socketServidor);
-    	c.iniciar_recuperacion(banco);
-    }
-    
     
     /**
      * Método que envia el mensaje pasado por parámetro.
      * CAJERO->CONSORCIO->BANCOS
      * @param message El mensaje a enviar.
      */
-    public void send_message(Mensaje message){
+    public void send_message(Mensaje message,InetAddress ip, int puerto){
     	
-    	//CAMBIAR TODOOOO PARA CREAR UN THREAD QUE HAGA EL ENVIO y acordarse de poner los timers
-    	
-    	//asignar canal
-    	//poner timer
-    	
-    	//Obtiene el banco al que enviar
-    	String id_banco = message.getDestino();
-    	
-    	//Obtiene de la base de datos la IP y PUERTO del banco al que enviar
-    	InetAddress dir = Database_lib.getInstance().getDestinationAddress(id_banco);
-    	int puerto = Database_lib.getInstance().getPuerto(id_banco);
-    	
-		//Creamos el datagrama
-		DatagramPacket enviarPaquete = new DatagramPacket(message.getBytes(),message.size(),dir,puerto);
-		
-		try{
-			//Enviamos el mensaje
-			this.socketServidor.send(enviarPaquete);
-		}catch (IOException e) {
-			System.out.println("Error al enviar");
-			System.exit ( 0 );
-		}
+    	//Crea un Thread y envia el mensaje
+    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,ip,puerto,consorcio,this,socketServidor);
+    	c.start();
     }
     
 }

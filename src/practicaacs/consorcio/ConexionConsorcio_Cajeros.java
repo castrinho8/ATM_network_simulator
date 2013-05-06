@@ -96,12 +96,9 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		String origen = this.consorcio.getId_consorcio(); //Id_consorcio
 		message.setDestino(destino);
 		message.setOrigen(origen);
-		
-		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(message,this.output_socket.getInetAddress(),this.output_socket.getPort());
 
 		//Delegar en el ServidorBancos para el reenvio
-		this.consorcio.getBancos_server().send_message(message);
+		this.consorcio.getBancos_server().send_message(message,this.output_socket.getInetAddress(),this.output_socket.getPort());
 	}
 	
 	/**
@@ -173,7 +170,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),0);
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLABONO,0);
 
 		RespSaldo respuesta = null;
 		
@@ -202,7 +199,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	public void consultar_movimientos(SolMovimientos recibido){
 
 		//cabecera
-		String origen = Integer.toString(this.consorcio.getId_consorcio());
+		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		//subcabecera
 		int numcanal = 0;
@@ -210,7 +207,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		//cuerpo
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),0);
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLMOVIMIENTOS,0);
 		
 		RespMovimientos respuesta = null;
 		
@@ -238,13 +235,13 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void realizar_reintegro(SolReintegro recibido){
 		
-		String origen = Integer.toString(this.consorcio.getId_consorcio());
+		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),0);
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLREINTEGRO,recibido.getImporte());
 
 		RespReintegro respuesta = null;
 		
@@ -284,13 +281,13 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void realizar_abono(SolAbono recibido){
 		
-		String origen = Integer.toString(this.consorcio.getId_consorcio());
+		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),0);
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLABONO,recibido.getImporte());
 		
 		RespAbono respuesta = null;
 		
@@ -329,13 +326,13 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void realizar_traspaso(SolTraspaso recibido){
 		
-		String origen = Integer.toString(this.consorcio.getId_consorcio());
+		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino());
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),CodigosMensajes.SOLTRASPASO,recibido.getImporte());
 		
 		RespTraspaso respuesta = null;
 		
