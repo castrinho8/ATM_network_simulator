@@ -10,12 +10,11 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Calendar;
 import java.util.Properties;
 
-import practicaacs.banco.bd.ClienteBDBanco;
-import practicaacs.banco.bd.Conta;
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.fap.*;
@@ -33,7 +32,9 @@ public class Database_lib {
     	//Obtenemos los datos del fichero properties
 		Properties prop = new Properties();
 		InputStream is;
-		String file = ""; //LA SITUACION DEL FICHERO DE CONFIGURACION
+		//LA SITUACION DEL FICHERO DE CONFIGURACION
+		String file = "/home/castrinho8/Escritorio/UNI/ACS/res/consorcioBD.properties";
+		
 		try {
 			is = new FileInputStream(file);
 		    prop.load(is);
@@ -52,6 +53,7 @@ public class Database_lib {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
+			System.err.println("Error creando o driver.");
 			e.printStackTrace();
 		}
 
@@ -59,6 +61,7 @@ public class Database_lib {
 			con = DriverManager.getConnection("jdbc:mysql://" + bdadd + "/" + bdname + "?user=" + bduser + "&password=" + bdpass);
 			statement = con.createStatement();
 		} catch (SQLException e) {
+			System.err.println("Error ao conectar ca BD. " + e.getMessage());
 			e.printStackTrace();
 		}	
 	}
@@ -79,15 +82,22 @@ public class Database_lib {
 	 ---------------- CONSULTAS EN CUENTAS -----------------------
 	 ----------------------------------------------------*/	
 	
-	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino,CodigosMensajes tipo, int importe){
+	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino,
+			CodigosMensajes tipo, int importe){
+		
 		if (this.consultarGastoOffline(tarjeta) > 1000)
 			return CodigosRespuesta.IMPORTEEXCLIMITE;
+
+		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (importe > 9999))
+			return CodigosRespuesta.IMPORTEEXCLIMITE;
+
 		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (cuenta_origen == cuenta_destino))
 			return CodigosRespuesta.TRANSCUENTASIGUALES;
-		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (this.consultar_saldo(tarjeta, cuenta_origen) < importe))
+
+		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (this.consultar_saldo(cuenta_origen) < importe))
 			return CodigosRespuesta.TRANSSINFONDOS;
-		
-		return CodigosRespuesta.CONSACEPTADA;
+
+			return CodigosRespuesta.CONSACEPTADA;
 /*		CONSDEN(10,"Consulta Denegada."), 
 		CAPTARJ(11,"Consulta Denegada con Captura de Tarjeta."), 
 		TARJETANVALIDA(12,"Consulta Denegada, Tarjeta no Válida."),
@@ -97,60 +107,177 @@ public class Database_lib {
 	*/	
 	}
 	
+	
 	/**
-	 * Consulta que hace un SELECT en la tabla CUENTA y devuelve la indicada.
-	 * @param tarjeta La tarjeta a la que pertenece la cuenta.
+	 * Actualiza el gasto offline para la tarjeta indicada.
+	 * @param tarjeta La tarjeta para actualizar.
+	 * @param importe El importe a sumar.
+	 */
+	public void actualiza_GastoOffline(String tarjeta,int importe){
+		try {
+			this.statement.executeUpdate("UPDATE Tarjeta SET tagastoOffline=tagastoOffline+" + importe +  
+				" WHERE codTarjeta LIKE '" + tarjeta + "'");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	/**
+	 * Recalcula el saldo actual de la cuenta indicada.
+	 * @param cuenta La cuenta a actualizar el saldo.
+	 * @param importe El importe a modificar.
+	 * @param signo El signo que indica si se debe sumar o restar.
+	 */
+	public void recalcular_saldoActual(int cuenta, int importe, char signo){
+		try {
+			this.statement.executeUpdate("UPDATE Cuenta SET cusaldo = cusaldo"+ signo + importe +
+				" WHERE codCuenta = " + cuenta);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
+	 * Obtiene el saldo a partir del atributo que hay en cuenta.
 	 * @param cuenta La cuenta a consultar.
 	 * @return Devuelve el saldo actual de la cuenta y null en caso de error
 	 */
-	public int consultar_saldo(String tarjeta, int cuenta){
+	public int consultar_saldo(int cuenta){
+		
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT ncuenta,saldo FROM ContaTarxeta JOIN Conta" +
-					" USING (ccod) where tcod = " + tarjeta + " AND " + " cnum = " + cuenta);
-			resultSet.next();
-			return resultSet.getInt(2);
+			resultSet = this.statement.executeQuery("SELECT cusaldo FROM Cuenta " +
+					"WHERE codCuenta=" + cuenta);
+			return resultSet.getInt(3);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
 			return (Integer) null;
 		}
-		this
 	}
 
-	public ArrayList<Movimiento> consultar_movimientos(String tarjeta,int cuenta){
-		return null;
-	}
-
-	/**
-	 * 	Reintegro
-		En general se aplica al pago o devolución de lo que se debe.
-		En el contexto de cuentas bancarias se aplica a una disposición de efectivo. 
-	*/
-	public int realizar_reintegro(String tarjeta,int cuenta,int importe){
-		return 0; //devuelve el nuevo saldo
-	}
 	
 	/**
-	 *  Traspaso de efectivo
-		Traspaso de dinero entre cuentas de un mismo titular, situadas en entidades distintas, 
-		que se formaliza mediante una orden dada por el cliente a la entidad que ha de recibir el dinero, 
-		para que esta la transmita a aquella de la que proceden los fondos. 
-		El importe máximo de la orden de traspaso será de 150.000€ por cuenta de cargo y día. 
+	 * Método que realiza una consulta de movimientos para la cuenta indicada.
+	 * @param tarjeta La tarjeta a consultar.
+	 * @param cuenta La cuenta a consultar.
+	 * @return Un arrayList con los movimientos existentes.
 	 */
-	public int realizar_traspaso(String tarjeta,int cuenta_origen,int cuenta_destino,int importe){
-		return 0; //Devuelve el nuevo saldo del destino
+	public ArrayList<Movimiento> consultar_movimientos(String tarjeta,int cuenta){
+		
+		ResultSet resultSet;
+		try{
+			resultSet = this.statement.executeQuery("SELECT codMovimiento,moimporte,mofecha,codTMovimiento" +
+					" FROM Movimiento " +
+					"WHERE ((codCuentaOrig = " + cuenta +
+					") || (codCuentaDest = " + cuenta + "))");
+			
+			ArrayList<Movimiento> res = new ArrayList<Movimiento>();
+			
+			//Obtiene el tipo
+			CodigosMovimiento tipo = null;
+			try {
+				tipo = CodigosMovimiento.getTipoMovimiento(resultSet.getInt(4));
+			} catch (CodigoNoValidoException e) {
+				System.out.println("Codigo de movimiento no valido");
+				e.printStackTrace();
+			}
+			
+			while(resultSet.next()){
+				res.add(new Movimiento(resultSet.getInt(1),resultSet.getInt(2),resultSet.getDate(3),tipo));
+			}
+			return res;
+		}catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
+	
 	/**
-	 *  Abono en cuenta
-		Asiento o anotación en el haber de una cuenta, que aumenta el saldo de la misma.
-		Los cheques con la mención "para abonar en cuenta" o expresión similar en el anverso sólo se podrán hacer
-		efectivos si previamente se realiza su ingreso en una cuenta corriente, nunca directamente en ventanilla. 
+	 * Método que realiza un reintegro en la BD.
+	 * Añade el movimiento a la tabla MOVIMIENTO, actualiza el saldo actual de la CUENTA y 
+	 * si es offline
+	 * @param tarjeta La tarjeta en la que realizar la operacion.
+	 * @param cuenta La cuenta en la que realizar la operacion.
+	 * @param importe El importe del que realizar el reintegro.
+	 * @param codonline Valor booleano que indica true si es online y false si es offline
+	 * @return El saldo actual de la cuenta despues de realizar la operacion.
 	 */
-	public int realizar_abono(String tarjeta, int cuenta,int importe){
-		return 0;
+	public int realizar_reintegro(String tarjeta,int cuenta,int importe,boolean codonline){
+
+		//Actualizamos el gasto offline si es Offline
+		if(!codonline)
+			this.actualiza_GastoOffline(tarjeta, importe);
+		
+		//Insertamos en la tabla MOVIMIENTO
+		this.insertar_movimiento(null,Integer.toString(cuenta),Integer.toString(10),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+
+		//Recalculamos el saldo actual de la CUENTA
+		this.recalcular_saldoActual(cuenta, importe,'-');
+		
+		//Devolvemos el saldo actual de la cuenta
+		int res = this.consultar_saldo(cuenta);
+		
+		return res;
 	}
+	
+	
+	/**
+	 * Método que realiza un traspaso entre dos cuentas en la BD
+	 * @param tarjeta La tarjeta correspondiente a la cuenta que realiza el movimiento.
+	 * @param cuenta_origen La cuenta que realiza el traspaso.
+	 * @param cuenta_destino La cuenta que recibe el traspaso.
+	 * @param importe El importe a traspasar.
+	 * @return El nuevo saldo de la cuenta destino.
+	 */
+	public int realizar_traspaso(String tarjeta,int cuenta_origen,int cuenta_destino,boolean codonline,int importe){
+		
+		//Actualizamos el gasto offline si es Offline
+		if(!codonline)
+			this.actualiza_GastoOffline(tarjeta, importe);
+		
+		//Insertamos en la tabla MOVIMIENTO
+		this.insertar_movimiento(Integer.toString(cuenta_origen),Integer.toString(cuenta_destino),Integer.toString(11),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+	
+		//Recalculamos el saldo actual de la CUENTA
+		this.recalcular_saldoActual(cuenta_origen, importe,'-');
+		
+		//Devolvemos el saldo actual de la cuenta
+		int res = this.consultar_saldo(cuenta_destino);
+		
+		return res;
+	}
+	
+	
+
+	/**
+	 * Método que realiza un abono en la cuenta indicada. 
+	 * @param tarjeta La tarjeta que realiza el abono.
+	 * @param cuenta La cuenta en la que se abona el importe.
+	 * @param importe La cantidad a abonar.
+	 * @return El nuevo saldo actual de la cuenta despues de realizar el abono.
+	 */
+	public int realizar_abono(String tarjeta, int cuenta,boolean codonline,int importe){
+		
+		//Actualizamos el gasto offline si es Offline
+		if(!codonline)
+			this.actualiza_GastoOffline(tarjeta, importe);
+		
+		//Insertamos en la tabla MOVIMIENTO
+		this.insertar_movimiento(null,Integer.toString(cuenta),Integer.toString(50),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+
+		//Recalculamos el saldo actual de la CUENTA
+		this.recalcular_saldoActual(cuenta, importe,'+');
+		
+		//Devolvemos el saldo actual de la cuenta
+		int res = this.consultar_saldo(cuenta);
+		
+		return res;
+	}
+	
 	
 	/*---------------------------------------------------
 	 ---------------- MOVIMIENTOS -----------------------
@@ -163,6 +290,7 @@ public class Database_lib {
 	 * @return El resultado de la suma de todos los reintegros
 	 */
 	public int getNumReintegros(String id_banco) {
+		
 		return 0;
 	}
 
@@ -194,19 +322,47 @@ public class Database_lib {
 	 * @return Un entero con el gasto oofline.
 	 */
 	public int consultarGastoOffline(String tarjeta){
-		//obtener la cuenta a partir de la tarjeta
-		//para la cuenta recorrer todos los movimientos y calcular
+
+		ResultSet resultSet;
+		try{
+			resultSet = this.statement.executeQuery("SELECT tagastoOffline FROM Tarjeta WHERE codTarjeta = '" + tarjeta + "'");
+			
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		}catch (SQLException e) {
+				e.printStackTrace();
+				return 0;
+		}
 		return 0;
 	}
 	
 	/**
-	 * Método que añade un movimiento a la tabla MOVIMIENTO
-	 * @param tipo El tipo de movimiento
-	 * @param cantidad La cantidad.
-	 * @param offline Y un valor booleano, True si es offline y False si es online.
+	 * Método que inserta un movimiento en la tabla MOVIMIENTO.
+	 * Admite nulos en cualquier campo excepto en el codigo online.
+	 * @param cuenta_orig La cuenta origen.
+	 * @param cuenta_dest La cuenta destino. 
+	 * @param cod_tmovimiento El tipo del movimiento.
+	 * @param importe El importe del movimiento.
+	 * @param codonline El booleando que indica si es online o offline.
+	 * @param banco El número del banco.
 	 */
-	private void anhadir_movimiento(CodigosMovimiento tipo,int cantidad,boolean offline){
+	private void insertar_movimiento(String cuenta_orig,String cuenta_dest,String cod_tmovimiento,
+			String importe,boolean codonline,String banco){
 		
+	  	Calendar time = Calendar.getInstance();
+    	time.getTime();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		
+		try {
+			this.statement.executeUpdate("INSERT INTO Movimiento" +
+				"(codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
+				" VALUES (" + cuenta_orig + "," + cuenta_dest + "," + cod_tmovimiento + "," + sdf.format(time) + "," +
+				importe + "," + ((codonline)? 0:1) + "," + banco + ")");
+		} catch (SQLException e) {
+			System.out.println("Error insertando movimiento.");
+			e.printStackTrace();
+		}
 	}
 	
 	

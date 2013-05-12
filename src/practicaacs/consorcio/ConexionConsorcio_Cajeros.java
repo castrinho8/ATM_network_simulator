@@ -3,11 +3,8 @@ package practicaacs.consorcio;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.ArrayList;
 
 import practicaacs.consorcio.aux.EstadoEnvio;
-import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
@@ -256,7 +253,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			}
 			case ALMACENAMIENTO:{
 				//REALIZA EL REINTEGRO
-				int saldo = Database_lib.getInstance().realizar_reintegro(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),recibido.getImporte());
+				int saldo = Database_lib.getInstance().realizar_reintegro(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),recibido.getImporte(),codonline);
 				boolean signo = saldo >= 0;
 				
 				//Creamos la respuesta correcta
@@ -302,7 +299,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			}
 			case ALMACENAMIENTO:{
 				//REALIZA EL ABONO
-				int saldo = Database_lib.getInstance().realizar_abono(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),recibido.getImporte());
+				int saldo = Database_lib.getInstance().realizar_abono(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),codonline,recibido.getImporte());
 				boolean signo = saldo >= 0;
 				
 				//Creamos la respuesta correcta
@@ -348,11 +345,11 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			case ALMACENAMIENTO:{
 				//REALIZA EL TRASPASO
 				int saldoDestino = Database_lib.getInstance().realizar_traspaso(recibido.getNum_tarjeta(),
-						recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),recibido.getImporte());
+						recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),codonline,recibido.getImporte());
 				boolean signoDestino = (saldoDestino>=0);
 				
 				//Obtiene el nuevo saldo en el origen
-				int saldoOrigen = Database_lib.getInstance().consultar_saldo(recibido.getNum_tarjeta(), recibido.getNum_cuenta_origen());
+				int saldoOrigen = Database_lib.getInstance().consultar_saldo(recibido.getNum_cuenta_origen());
 				boolean signoOrigen = (saldoOrigen>=0);
 				
 				//Creamos la respuesta correcta
