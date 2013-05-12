@@ -197,6 +197,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 		int canal = Database_lib.getInstance().seleccionarCanal(envio.getDestino());
 		envio.setNumcanal(canal);
 		
+		//Seleccionamos el numero de mensaje siguiente en el canal
+		int n_mensaje = Database_lib.getInstance().selecciona_num_mensaje(envio.getDestino(),canal);
+		
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
 		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.ip_envio,this.puerto_envio,canal);
 		
@@ -345,7 +348,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	    	this.servidor.insertaSesion(ses);
 	    	
 			//Guardamos la sesion en la BD
-			Database_lib.getInstance().abrir_sesion(id_banco,this.input_packet.getAddress(),recibido.getPuerto(),recibido.getNcanales(),SesAberta.instance());
+			Database_lib.getInstance().abrir_sesion(id_banco,this.input_packet.getAddress(),recibido.getPuerto(),recibido.getNcanales());
 			
 			//Envia la respuesta
 			this.enviar_mensaje(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
