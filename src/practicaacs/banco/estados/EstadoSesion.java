@@ -44,4 +44,28 @@ public abstract class EstadoSesion {
 		return null;
 	}
 	
+	/**
+	 * Método que transforma el valor EstadoSesion indicado por parámetro en el valor
+	 * del estado correspondiente para que la BD lo interprete (en formato de int)
+	 * @param valor EL valor en EstadoSesion.
+	 * @return El entero correspondiente al EstadoSesion introducido por parámetro.
+	 */
+	static public int getInt_fromEstadoSesion(EstadoSesion valor){
+	
+		if(valor.equals(SesAberta.instance()))
+			return 1;
+		if(!valor.equals(SesNonAberta.instance()))
+			return 2;
+		if(!valor.equals(SesDetida.instance()))
+			return 3;
+		if(valor.equals(SesRecuperacion.instance()))
+			return 4;
+		return 0;
+	}
+		
 }
+
+
+
+
+
