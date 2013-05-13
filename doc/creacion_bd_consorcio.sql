@@ -111,7 +111,7 @@ CREATE TABLE Mensaje(
 --	++++++++++++++++ mensaje
 CREATE TABLE UltimoEnvio(
 	codUltimoEnvio INTEGER,
-	uecontestado BOOLEAN DEFAULT 0,
+	uecontestado BOOLEAN DEFAULT 1,
 	uecodCajero INTEGER,
 	uepuerto INTEGER,
 	ueip VARCHAR(20),
@@ -207,9 +207,30 @@ INSERT INTO Canal(codBanco,codCanal) VALUES (1,2);
 INSERT INTO Canal(codBanco,codCanal) VALUES (1,3);
 
 
+-- Ultimos envios
+INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
+VALUES (1,1,90,'192.168.0.1',1,'pastor42 01',0000);
 
+INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
+VALUES (2,1,90,'192.168.0.1',1,'pastor42 01',0000);
 
+INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
+VALUES (3,2,91,'192.168.0.2',1,'pastor42 01',0001);
 
+CREATE TABLE UltimoEnvio(
+	codUltimoEnvio INTEGER,
+	uecontestado BOOLEAN DEFAULT 0,
+	uecodCajero INTEGER,
+	uepuerto INTEGER,
+	ueip VARCHAR(20),
+	codBanco INTEGER,
+	codTarjeta VARCHAR(11),
+	codCuenta INTEGER,
+
+	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codBanco) ON DELETE NO ACTION,
+	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE NO ACTION,
+
+	CONSTRAINT ue_pk PRIMARY KEY (codUltimoEnv
 
 
 
