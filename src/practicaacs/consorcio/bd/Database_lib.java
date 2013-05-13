@@ -99,7 +99,7 @@ public class Database_lib {
 		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (cuenta_origen == cuenta_destino))
 			return CodigosRespuesta.TRANSCUENTASIGUALES;
 
-		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (this.consultar_saldo(cuenta_origen) < importe))
+		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (this.consultar_saldo(tarjeta,cuenta_origen) < importe))
 			return CodigosRespuesta.TRANSSINFONDOS;
 
 			return CodigosRespuesta.CONSACEPTADA;
@@ -149,7 +149,7 @@ public class Database_lib {
 	 * @param cuenta La cuenta a consultar.
 	 * @return Devuelve el saldo actual de la cuenta y null en caso de error
 	 */
-	public int consultar_saldo(int cuenta, String tarjeta){
+	public int consultar_saldo(String tarjeta,int cuenta){
 		
 		ResultSet resultSet;
 		try{
@@ -218,13 +218,12 @@ public class Database_lib {
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(null,Integer.toString(cuenta),Integer.toString(10),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
-
+		this.insertar_movimiento(tarjeta,null,Integer.toString(cuenta),Integer.toString(10),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'-');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(cuenta,tarjeta);
+		int res = this.consultar_saldo(tarjeta,cuenta);
 		
 		return res;
 	}
@@ -245,13 +244,13 @@ public class Database_lib {
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(Integer.toString(cuenta_origen),Integer.toString(cuenta_destino),Integer.toString(11),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+		this.insertar_movimiento(tarjeta,Integer.toString(cuenta_origen),Integer.toString(cuenta_destino),Integer.toString(11),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
 	
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta_origen,tarjeta, importe,'-');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(cuenta_destino,tarjeta);
+		int res = this.consultar_saldo(tarjeta,cuenta_destino);
 		
 		return res;
 	}
@@ -272,13 +271,13 @@ public class Database_lib {
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(null,Integer.toString(cuenta),Integer.toString(50),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+		this.insertar_movimiento(tarjeta,null,Integer.toString(cuenta),Integer.toString(50),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
 
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'+');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(cuenta,tarjeta);
+		int res = this.consultar_saldo(tarjeta,cuenta);
 		
 		return res;
 	}
@@ -634,21 +633,12 @@ public class Database_lib {
 			//Obtiene el valor a introducir en la BD del estado correspondiente.
 			int state = EstadoSesion.getInt_fromEstadoSesion(estado);
 			
-			this.statement.executeUpdate("UPDATE Banco SET codEbanco = " + id_banco + 
-					" WHERE codBanco = " + state );
+			this.statement.executeUpdate("UPDATE Banco SET codEbanco = " + state + 
+					" WHERE codBanco = " + id_banco);
 			
 		} catch (SQLException e) {
 			System.err.println(e);
 		}
-	}
-	
-	/**
-	 * Setter en BANCO del numero de canales
-	 * @param id_banco El banco al que cambiar el numero de canales.
-	 * @param canales El nuevo número de canales.
-	 */
-	public void setNum_canales(String id_banco,int canales){
-		
 	}
 	
 	/**
@@ -657,7 +647,17 @@ public class Database_lib {
 	 * @param puerto El nuevo puerto.
 	 */
 	public void setPuertoBanco(String id_banco, String puerto){
-		Integer.getInteger(puerto);
+
+		try {
+			int port = Integer.getInteger(puerto);
+
+			this.statement.executeUpdate("UPDATE Banco SET bapuerto = " + port + 
+					" WHERE codBanco = " + id_banco);
+			
+		} catch (SQLException e) {
+			System.err.println(e);
+		}
+		
 	}
 	
 	
@@ -692,8 +692,24 @@ public class Database_lib {
 	 */
 	public int seleccionarCanal(String id_banco){
 		//selecciona el primero de( envio == null || envio.contestado=false)
+
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codCanal FROM Canal c JOIN UltimoEnvio eu " +
+					"WHERE c.codBanco = " + id_banco + " AND c.cabloqueado = 0 AND ue.uecontestado = 1" );
+			
+			if(resultSet.next())
+				return resultSet.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
 		return 0;
 	}
+	
+	SELECT codCanal 
+	FROM Canal c JOIN UltimoEnvio ue
+	WHERE c.codBanco = 1 AND c.cabloqueado = 0 AND ue.uecontestado = 1;
 	
 	/**
 	 * Obtiene en CANAL el siguiente numero de mensaje para el banco y canal indicado 
@@ -863,6 +879,7 @@ public class Database_lib {
 	 * @param canal El canal correspondiente.
 	 */
 	public void anhadir_ultimo_envio(Mensaje message, InetAddress ip, int port,int canal){
+		//hay que controlar el id_mensaje que es la clave primarya en la BD.
 		String id_banco = message.getDestino();
 		//if canal==0->mensaje de control sin canal
 		/*si el canal esta ocupado, no se inserta como ultimo envio de forma que se pueda seguir la ejecucion*/
