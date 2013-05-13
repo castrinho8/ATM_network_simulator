@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,7 +16,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Properties;
 
+import bd_app.LinaFactura;
+
 import practicaacs.banco.estados.EstadoSesion;
+import practicaacs.banco.estados.SesAberta;
+import practicaacs.banco.estados.SesNonAberta;
 import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.fap.*;
 
@@ -116,7 +121,7 @@ public class Database_lib {
 	public void actualiza_GastoOffline(String tarjeta,int importe){
 		try {
 			this.statement.executeUpdate("UPDATE Tarjeta SET tagastoOffline=tagastoOffline+" + importe +  
-				" WHERE codTarjeta LIKE '" + tarjeta + "'");
+				" WHERE codTarjeta = '" + tarjeta + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -129,10 +134,10 @@ public class Database_lib {
 	 * @param importe El importe a modificar.
 	 * @param signo El signo que indica si se debe sumar o restar.
 	 */
-	public void recalcular_saldoActual(int cuenta, int importe, char signo){
+	public void recalcular_saldoActual(int cuenta,String tarjeta, int importe, char signo){
 		try {
 			this.statement.executeUpdate("UPDATE Cuenta SET cusaldo = cusaldo"+ signo + importe +
-				" WHERE codCuenta = " + cuenta);
+				" WHERE codCuenta = " + cuenta + " AND codTarjeta = '" + tarjeta + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -144,12 +149,12 @@ public class Database_lib {
 	 * @param cuenta La cuenta a consultar.
 	 * @return Devuelve el saldo actual de la cuenta y null en caso de error
 	 */
-	public int consultar_saldo(int cuenta){
+	public int consultar_saldo(int cuenta, String tarjeta){
 		
 		ResultSet resultSet;
 		try{
 			resultSet = this.statement.executeQuery("SELECT cusaldo FROM Cuenta " +
-					"WHERE codCuenta=" + cuenta);
+					"WHERE codCuenta=" + cuenta + " AND codTarjeta = '" + tarjeta + "'");
 			return resultSet.getInt(3);
 		}
 		catch (SQLException e) {
@@ -171,8 +176,8 @@ public class Database_lib {
 		try{
 			resultSet = this.statement.executeQuery("SELECT codMovimiento,moimporte,mofecha,codTMovimiento" +
 					" FROM Movimiento " +
-					"WHERE ((codCuentaOrig = " + cuenta +
-					") || (codCuentaDest = " + cuenta + "))");
+					"WHERE ((codCuentaOrig = " + cuenta + " AND codTarjeta = '" + tarjeta + 
+					"') || (codCuentaDest = " + cuenta + " AND codTarjeta = '" + tarjeta + "'))");
 			
 			ArrayList<Movimiento> res = new ArrayList<Movimiento>();
 			
@@ -216,10 +221,10 @@ public class Database_lib {
 		this.insertar_movimiento(null,Integer.toString(cuenta),Integer.toString(10),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
 
 		//Recalculamos el saldo actual de la CUENTA
-		this.recalcular_saldoActual(cuenta, importe,'-');
+		this.recalcular_saldoActual(cuenta,tarjeta, importe,'-');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(cuenta);
+		int res = this.consultar_saldo(cuenta,tarjeta);
 		
 		return res;
 	}
@@ -243,10 +248,10 @@ public class Database_lib {
 		this.insertar_movimiento(Integer.toString(cuenta_origen),Integer.toString(cuenta_destino),Integer.toString(11),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
 	
 		//Recalculamos el saldo actual de la CUENTA
-		this.recalcular_saldoActual(cuenta_origen, importe,'-');
+		this.recalcular_saldoActual(cuenta_origen,tarjeta, importe,'-');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(cuenta_destino);
+		int res = this.consultar_saldo(cuenta_destino,tarjeta);
 		
 		return res;
 	}
@@ -270,10 +275,10 @@ public class Database_lib {
 		this.insertar_movimiento(null,Integer.toString(cuenta),Integer.toString(50),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
 
 		//Recalculamos el saldo actual de la CUENTA
-		this.recalcular_saldoActual(cuenta, importe,'+');
+		this.recalcular_saldoActual(cuenta,tarjeta, importe,'+');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(cuenta);
+		int res = this.consultar_saldo(cuenta,tarjeta);
 		
 		return res;
 	}
@@ -282,6 +287,27 @@ public class Database_lib {
 	/*---------------------------------------------------
 	 ---------------- MOVIMIENTOS -----------------------
 	 ----------------------------------------------------*/
+
+	/**
+	 * Método general que obtiene la suma de todos los importes para el tipo de movimiento introducido.
+	 * @param codigo_mov El codigo correspondiente al tipo de movimiento.
+	 * @param id_banco El banco del cual obtener la suma de los movimientos.
+	 * @return Un int con el sumatorio de los importes de todos los movimientos.
+	 */
+	private int get_sumaTipoMovimiento(int codigo_mov, String id_banco){
+		ResultSet resultSet;
+		try{
+			resultSet = this.statement.executeQuery("SELECT SUM(moimporte) FROM Movimiento " +
+				"WHERE codTMovimiento = " + codigo_mov + " AND codBanco = "+ id_banco);
+		
+			if(resultSet.next())
+				return resultSet.getInt(1);
+		}catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 0;
+	}
 	
 	/**
 	 * Recorre la tabla de movimientos sumando los reintegros para el banco 
@@ -290,8 +316,7 @@ public class Database_lib {
 	 * @return El resultado de la suma de todos los reintegros
 	 */
 	public int getNumReintegros(String id_banco) {
-		
-		return 0;
+		return get_sumaTipoMovimiento(10,id_banco);
 	}
 
 	/**
@@ -301,7 +326,7 @@ public class Database_lib {
 	 * @return El resultado de la suma de todos los traspasos
 	 */
 	public int getNumTraspasos(String id_banco) {
-		return 0;
+		return get_sumaTipoMovimiento(11,id_banco);// o 12?
 	}
 
 	/**
@@ -311,7 +336,7 @@ public class Database_lib {
 	 * @return El resultado de la suma de todos los abonos
 	 */
 	public int getNumAbonos(String id_banco) {
-		return 0;
+		return get_sumaTipoMovimiento(50,id_banco);
 	}
 	
 	/**
@@ -347,17 +372,18 @@ public class Database_lib {
 	 * @param codonline El booleando que indica si es online o offline.
 	 * @param banco El número del banco.
 	 */
-	private void insertar_movimiento(String cuenta_orig,String cuenta_dest,String cod_tmovimiento,
-			String importe,boolean codonline,String banco){
+	private void insertar_movimiento(String tarjeta,String cuenta_orig,String cuenta_dest,String cod_tmovimiento,
+		String importe,boolean codonline,String banco){
 		
+		//Obtiene el tiempo actual y lo añade con el formato indicado
 	  	Calendar time = Calendar.getInstance();
     	time.getTime();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		
 		try {
 			this.statement.executeUpdate("INSERT INTO Movimiento" +
-				"(codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
-				" VALUES (" + cuenta_orig + "," + cuenta_dest + "," + cod_tmovimiento + "," + sdf.format(time) + "," +
+				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
+				" VALUES ('" + tarjeta + "'," + cuenta_orig + "," + cuenta_dest + "," + cod_tmovimiento + "," + sdf.format(time) + "," +
 				importe + "," + ((codonline)? 0:1) + "," + banco + ")");
 		} catch (SQLException e) {
 			System.out.println("Error insertando movimiento.");
@@ -375,12 +401,34 @@ public class Database_lib {
 	 * Comprueba si ya esta, en ese caso setea el estado a ACTIVA, sino añade una linea a la tabla
 	 * de BANCO.
 	 * @param id_banco El identificador a añadir.
-	 * @param ip La ip en la que se encuentra el servidor del banco.
+	 * @param ip La ip en la que se encuentra el servidor del banco. Ej:'127.0.0.1'
 	 * @param puerto El puerto en el que se encuentra el servidor del banco.
 	 * @param num_canales El número de canales máximo que el banco puede usar.
 	 */
-	public void abrir_sesion(String id_banco, InetAddress ip, String puerto, int num_canales){
-		//Comprueba si ya esta la sesión, si está se reempleza y si no se inserta una nueva
+	public void abrir_sesion(String id_banco, String ip, int puerto, int num_canales){
+		
+		ResultSet resultSet;
+		try{
+			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco " +
+					"WHERE codbanco = " + id_banco);
+			
+			if(resultSet.next()){
+				//Si hay ya un banco, settear la sesion
+				if(resultSet.getInt(1)==1){
+					this.setEstado_conexion_banco(id_banco,SesAberta.instance());
+				}
+			}else{
+				//Añadir BANCO a la BD
+				insertar_banco(id_banco,1,puerto,ip,num_canales);
+				
+				int id_canal = 0;
+				//Añadir todos los CANALES del BANCO
+				for(id_canal=0;id_canal<num_canales;id_canal++)
+					anhadir_canal(id_banco,id_canal);
+			}
+		}catch (SQLException e) {
+				e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -389,7 +437,28 @@ public class Database_lib {
 	 * @param id_banco El identificador del banco a cerrar.
 	 */
 	public void cerrar_sesion(String id_banco){
-		//Comprueba si esta la sesión y si esta la elimina.
+
+		ResultSet resultSet;
+		try{
+			resultSet = this.statement.executeQuery("SELECT count(*),bamaxCanales FROM Banco " +
+					"WHERE codbanco = " + id_banco);
+			
+			if(resultSet.next()){
+				//Si hay ya un banco, settear la sesion a cerrada
+				if(resultSet.getInt(1)==1){
+					this.setEstado_conexion_banco(id_banco,SesNonAberta.instance());
+				}
+				
+				//Obtenemos el numero de canales a cerrar
+				int num_canales = resultSet.getInt(2);
+				int id_canal = 0;
+				//Eliminamos todos los CANALES del BANCO
+				for(id_canal=0;id_canal<num_canales;id_canal++)
+					eliminar_canal(id_banco,id_canal);
+			}
+		}catch (SQLException e) {
+				e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -398,7 +467,21 @@ public class Database_lib {
 	 * @return True si la sesion es ACTIVA y False en caso contrario.
 	 */
 	public boolean hasSesion(String id_banco){
-		return true;
+		
+		ResultSet resultSet;
+		int res = 0;
+		try {
+			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco" +
+					" WHERE codBanco = " + id_banco + " AND (codEBanco = " + 1);
+			
+			if(resultSet.next())
+				res = resultSet.getInt(1);
+			
+			return (res==1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	/**
@@ -407,8 +490,21 @@ public class Database_lib {
 	 * @return True si los admite y False en caso contrario (si el estado es trafico detenido o cerrada)
 	 */
 	public boolean consultar_protocolo(String id_banco){
-		//si es trafico detenido o sesion cerrada return false
-		return true;
+
+		ResultSet resultSet;
+		int res = 0;
+		try {
+			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco" +
+					" WHERE codBanco = " + id_banco + " AND ((codEBanco = " + 1 + ") || (codEBanco = " + 4 + "))");
+			
+			if(resultSet.next())
+				res = resultSet.getInt(1);
+			
+			return (res==1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	//------GETTERS Y SETTERS
@@ -419,7 +515,21 @@ public class Database_lib {
 	 * @return El estado de la conexion correspondiente.
 	 */
 	public EstadoSesion getEstado_conexion_banco(String id_banco){
-		return null;
+		
+		ResultSet resultSet;
+		int codEBanco = 0;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codEBanco FROM Banco" +
+					" WHERE codBanco = " + id_banco);
+			
+			if(resultSet.next())
+				codEBanco = resultSet.getInt(1);
+			
+			return EstadoSesion.getEstadoSesion_fromInt(codEBanco);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
@@ -428,26 +538,65 @@ public class Database_lib {
 	 * @return El número máximo de canales del banco.
 	 */
 	public int getNum_canales(String id_banco){
-		//accede a la tabla de Sesion y obtiene el num canales para el id
+		
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT bamaxCanales FROM Banco" +
+					" WHERE codBanco = " + id_banco);
+			
+			if(resultSet.next())
+				return resultSet.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
 		return 0;
 	}
 	
 	/**
 	 * Getter en BANCO del puerto del banco
 	 * @param id_banco El banco a buscar.
-	 * @return El puerto correspondiente.
+	 * @return El puerto correspondiente. 
 	 */
 	public int getPortBanco(String id_banco){
+
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT bapuerto FROM Banco" +
+					" WHERE codBanco = " + id_banco);
+			
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
 		return 0;
 	}
 	
 	/**
 	 * Getter en BANCO de la ip del banco.
 	 * @param id_banco El banco a buscar.
-	 * @return La ip correspondiente.
+	 * @return La ip correspondiente. 
+	 * @throws UnknownHostException 
 	 */
-	public InetAddress getIpBanco(String id_banco) {
-		return null;
+	public InetAddress getIpBanco(String id_banco) throws UnknownHostException {
+		
+		ResultSet resultSet;
+		String temp = "";
+		try {
+			resultSet = this.statement.executeQuery("SELECT baip FROM Banco" +
+					" WHERE codBanco = " + id_banco);
+			
+			if(resultSet.next())
+				temp = resultSet.getString(1);
+				
+			return InetAddress.getByName(temp);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	/**
@@ -455,6 +604,23 @@ public class Database_lib {
 	 * @return Un array list de String con los id de todos los BANCOS que tienen sesion abierta.
 	 */
 	public ArrayList<String> getSesiones() {
+		
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codBanco FROM Banco " +
+					"WHERE codEBanco = " + 1);
+			
+			ArrayList<String> res = new ArrayList<String>();
+			
+			while(resultSet.next()){
+				res.add(resultSet.getString(1));
+			}
+			
+			return res;
+		} catch (SQLException e) {
+			System.err.println(e);
+			return null;
+		}
 		return null;
 	}
 	
@@ -464,7 +630,16 @@ public class Database_lib {
 	 * @param estado El nuevo estado.
 	 */
 	public void setEstado_conexion_banco(String id_banco,EstadoSesion estado){
-		
+		try {
+			//Obtiene el valor a introducir en la BD del estado correspondiente.
+			int state = EstadoSesion.getInt_fromEstadoSesion(estado);
+			
+			this.statement.executeUpdate("UPDATE Banco SET codEbanco = " + id_banco + 
+					" WHERE codBanco = " + state );
+			
+		} catch (SQLException e) {
+			System.err.println(e);
+		}
 	}
 	
 	/**
@@ -485,6 +660,25 @@ public class Database_lib {
 		Integer.getInteger(puerto);
 	}
 	
+	
+	/**
+	 * Método que inserta un BANCO
+	 * @param id_banco El id del banco
+	 * @param estado El estado en el que se encuentra.
+	 * @param puerto El puerto en el que escucha el banco.
+	 * @param ip La ip en la que se encuentra el banco.
+	 * @param num_canales El numero maximo de canales.
+	 */
+	private void insertar_banco(String id_banco, int estado ,int puerto,String ip,int num_canales){
+		
+		try {
+			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
+			" VALUES(" + id_banco + "," + estado + "," + puerto + "," + ip + "," + num_canales);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
 	
 	/*---------------------------------------------------
 	 -------------------- CANALES -----------------------
@@ -582,6 +776,36 @@ public class Database_lib {
 	 */
 	public boolean isContestado(String id_banco, int canal){
 		return true;
+	}
+	
+	
+	
+	/**
+	 * Método que añade un CANAL a la BD.
+	 * @param id_banco El banco en el que añadir.
+	 * @param canal El numero de canal.
+	 */
+	public void anhadir_canal(String id_banco, int canal){
+		
+		try {
+			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES (" + id_banco + "," + canal + ")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Metodo que elimina un CANAL de la BD.
+	 * @param id_banco El id del banco en el que se encuentra.
+	 * @param canal El numero de canal a borrar.
+	 */
+	public void eliminar_canal(String id_banco, int canal){
+		
+		try {
+			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = " + id_banco + " AND codCanal = " + canal);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
