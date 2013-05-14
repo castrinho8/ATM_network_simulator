@@ -131,6 +131,7 @@ CREATE TABLE Canal(
 	codCanal INTEGER,
 	cabloqueado BOOLEAN DEFAULT 0,
 	codUltimoEnvio INTEGER DEFAULT NULL,
+	canext_numMensaje INTEGER DEFAULT 1,
 	CONSTRAINT me_codUltimoEnvio_fk FOREIGN KEY (codUltimoEnvio) REFERENCES UltimoEnvio(codUltimoEnvio) ON DELETE CASCADE,
 	CONSTRAINT ca_pk PRIMARY KEY (codBanco,codCanal)
 );
