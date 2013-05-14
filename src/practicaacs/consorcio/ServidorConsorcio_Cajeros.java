@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Calendar;
 
+import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
@@ -102,8 +103,8 @@ public class ServidorConsorcio_Cajeros {
     public void reply_message(MensajeDatos respuesta, InetAddress ip, int puerto){
 		
     	//Guardamos el Mensaje en la BD (Tabla de MENSAJES)
-		Database_lib.getInstance().almacenar_mensaje(respuesta,true);
-		
+		Database_lib.getInstance().almacenar_mensaje(respuesta,TipoOrigDest.CONSORCIO,respuesta.getOrigen(),TipoOrigDest.CAJERO,respuesta.getDestino());
+
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip,puerto);
 		

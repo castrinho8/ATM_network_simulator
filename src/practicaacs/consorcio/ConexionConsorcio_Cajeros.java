@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 import practicaacs.consorcio.aux.EstadoEnvio;
+import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
@@ -47,7 +48,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			System.out.printf(recibido.toString());
 			
 			//Guardamos el mensaje en la BD (Tabla de MENSAJES)
-			Database_lib.getInstance().almacenar_mensaje(recibido,false);
+			Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
 			
 			//Analizamos el mensaje y realizamos las acciones correspondientes
 			analizar_mensaje(recibido);
@@ -67,8 +68,8 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		System.out.printf(respuesta.toString());
 
 		//Guardamos el Mensaje en la BD (Tabla de MENSAJES)
-		Database_lib.getInstance().almacenar_mensaje(respuesta,true);
-		
+		Database_lib.getInstance().almacenar_mensaje(respuesta,TipoOrigDest.CONSORCIO,respuesta.getOrigen(),TipoOrigDest.CAJERO,respuesta.getDestino());
+
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),this.output_socket.getInetAddress(),this.output_socket.getPort());
 		
@@ -349,7 +350,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				boolean signoDestino = (saldoDestino>=0);
 				
 				//Obtiene el nuevo saldo en el origen
-				int saldoOrigen = Database_lib.getInstance().consultar_saldo(recibido.getNum_cuenta_origen());
+				int saldoOrigen = Database_lib.getInstance().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen());
 				boolean signoOrigen = (saldoOrigen>=0);
 				
 				//Creamos la respuesta correcta

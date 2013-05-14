@@ -22,6 +22,7 @@ import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.banco.estados.SesAberta;
 import practicaacs.banco.estados.SesNonAberta;
 import practicaacs.consorcio.aux.Movimiento;
+import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.fap.*;
 
 //Libreria de acceso a la base de datos
@@ -404,7 +405,7 @@ public class Database_lib {
 	 * @param puerto El puerto en el que se encuentra el servidor del banco.
 	 * @param num_canales El número de canales máximo que el banco puede usar.
 	 */
-	public void abrir_sesion(String id_banco, String ip, int puerto, int num_canales){
+	public void abrir_sesion(String id_banco, String ip, String puerto, int num_canales){
 		
 		ResultSet resultSet;
 		try{
@@ -418,7 +419,7 @@ public class Database_lib {
 				}
 			}else{
 				//Añadir BANCO a la BD
-				insertar_banco(id_banco,1,puerto,ip,num_canales);
+				insertar_banco(id_banco,1,Integer.parseInt(puerto),ip,num_canales);
 				
 				int id_canal = 0;
 				//Añadir todos los CANALES del BANCO
@@ -580,7 +581,7 @@ public class Database_lib {
 	 * @return La ip correspondiente. 
 	 * @throws UnknownHostException 
 	 */
-	public InetAddress getIpBanco(String id_banco) throws UnknownHostException {
+	public InetAddress getIpBanco(String id_banco){
 		
 		ResultSet resultSet;
 		String temp = "";
@@ -594,6 +595,9 @@ public class Database_lib {
 			return InetAddress.getByName(temp);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return null;
+		} catch (UnknownHostException ex){
+			ex.printStackTrace();
 			return null;
 		}
 	}
@@ -789,16 +793,17 @@ public class Database_lib {
 	public ArrayList<Mensaje> recupera_ultimos_mensajes(String id_banco){
 		
 		ResultSet resultSet;
+		String str_mensaje;
+		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
-			//EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE NOVAAAA FALTA IMPLEMENTAR MENSAJES EN LA BD
-			resultSet = this.statement.executeQuery("SELECT mensaje FROM UltimoEnvio " +
-					"WHERE codEBanco = " + 1);
-			
-			ArrayList<Mensaje> res = new ArrayList<Mensaje>();
+			resultSet = this.statement.executeQuery("SELECT uestringMensaje FROM UltimoEnvio " +
+					"WHERE codBanco = " + id_banco);
 			
 			while(resultSet.next()){
-				res.add(resultSet.getString(1));
+				Mensaje m = Mensaje.parse(resultSet.getString(1));
+				res.add(m);
 			}
+			
 			return res;
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -985,16 +990,25 @@ public class Database_lib {
 	
 	/**
 	 * Método que pone el atributo "contestado" del ULTIMOENVIO a True.
+	 * En caso de que no haya ultimo movimiento para el canal indicado, no hace nada.
 	 * @param id_banco El banco que identifica al envio.
 	 * @param num_canal El canal que identifica al envio.
 	 */
 	public void setContestadoEnvio(String id_banco, int canal){
 		
+		ResultSet resultSet;
 		try {
-			this.statement.executeUpdate("UPDATE UltimoEnvio SET ue.uecontestado = 1 " +
-					" FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+			int codigo=0;
+			
+			resultSet = this.statement.executeQuery("SELECT ue.codUltimoEnvio " +
+					"FROM UltimoEnvio ue JOIN Canal c ON ue.codUltimoEnvio = c.codUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+		
+			if(resultSet.next()){
+				codigo = resultSet.getInt(1);
+				this.statement.executeUpdate("UPDATE UltimoEnvio SET uecontestado = 1 " + codigo);
+			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1010,7 +1024,7 @@ public class Database_lib {
 	 * @param canal El canal correspondiente.
 	 */
 	public void anhadir_ultimo_envio(Mensaje message, InetAddress ip, int port,int canal){
-		//hay que controlar el id_mensaje que es la clave primarya en la BD.
+		//hay que controlar el id_mensaje que es la clave primaria en la BD.
 		String id_banco = message.getDestino();
 		//if canal==0->mensaje de control sin canal
 		/*si el canal esta ocupado, no se inserta como ultimo envio de forma que se pueda seguir la ejecucion*/
@@ -1027,12 +1041,28 @@ public class Database_lib {
 	 * @return El mensaje correspondiente al ULTIMOENVIO realizado por el canal indicado.
 	 */
 	public Mensaje obtener_ultimo_envio(String id_banco, int canal){
-		//aceder a la tabla Sesion con id_banco, a la tabla Canal con id_canal y por ultimo a envios para obtener el envio
-		//con el id_envio mayor.
-		return null;
-	}
 	
+		String str_mensaje;
+		ResultSet resultSet;
+		Mensaje res = null;
+		try {
+			resultSet = this.statement.executeQuery("SELECT ue.uestringMensaje " +
+					"FROM UltimoEnvio ue JOIN Canal c ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+			
+			if(resultSet.next()){
+				str_mensaje = resultSet.getString(1);
+				res = Mensaje.parse(str_mensaje);
+			}
+			
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
+	
 	/*---------------------------------------------------
 	 --------------------- MENSAJE ---------------------
 	 ----------------------------------------------------*/
@@ -1045,7 +1075,28 @@ public class Database_lib {
 	 */
 	public ArrayList<Mensaje> getMensajesOffline(String id_banco){
 		//ponerles offline a false
-		return null;
+		
+		ResultSet resultSet;
+		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
+		try {
+			//Obtenemos todos los mensajes OFFLINE
+			this.statement.executeQuery("SELECT mestringMensaje " +
+					"FROM Mensaje " +
+					"WHERE codBanco = " + id_banco + " AND (meoffline IS NOT NULL || meoffline != 0)");
+			
+			while(resultSet.next()){
+				Mensaje m = Mensaje.parse(resultSet.getString(1));
+				res.add(m);
+			}
+			
+			//Ponemos OFFLINE a false para todos los mensajes del id_banco
+			this.statement.executeUpdate("UPDATE Mensaje SET meoffline = 0 WHERE codBanco = " + id_banco);
+			
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 
@@ -1053,8 +1104,23 @@ public class Database_lib {
 	 * Añade una linea en la tabla MENSAJE
 	 * @param es_envio Valor booleano inidica si es un envio o una recepcion
 	 */
-	public void almacenar_mensaje(Mensaje message,boolean es_envio){
+	public void almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
+
+		int num_mensaje = 0;
+		boolean offline = false;
 		
+		//Si el mensaje es de datos obtenemos el numero de mensaje y 
+		if(message.es_datos()){
+			num_mensaje = ((MensajeDatos) message).getNmsg();
+			offline = ((MensajeDatos) message).getCodonline();
+		}
+		
+		try {
+			this.statement.executeUpdate("INSERT INTO Mensaje(codMensaje,meoffline,meorigen,medestino,mestringMensaje) " +
+					"VALUES (" + num_mensaje + "," + ((offline)? 1:0) + "," + torigen.getNum() +
+					"," + origen + "," + tdestino.getNum() + "," + destino + "," + message.toString() +")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
-	
 }

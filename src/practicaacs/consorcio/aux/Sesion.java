@@ -39,7 +39,7 @@ public class Sesion {
 		this.cronos = new HashMap<Integer,Timer>(this.n_canales);
 		this.manejador = new TimerTask(){
 							public void run(){
-								servidor.realiza_recuperacion(id_banco);
+								servidor.solicitar_recuperacion(id_banco);
 							}
 						};
 		this.delay = 1000; //Asignar un minuto
