@@ -687,6 +687,8 @@ public class Database_lib {
 
 	/**
 	 * Obtiene en CANAL el siguiente canal disponible para realizar un envio.
+	 * El algoritmo de selección consiste simplemente en obtener el que tenga el número 
+	 * mínimo de canal de los que están libres.
 	 * @param id_banco El banco de donde obtener un nuevo canal.
 	 * @return Un entero con el canal correspondiente.
 	 */
@@ -695,8 +697,8 @@ public class Database_lib {
 
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codCanal FROM Canal c JOIN UltimoEnvio eu " +
-					"WHERE c.codBanco = " + id_banco + " AND c.cabloqueado = 0 AND ue.uecontestado = 1" );
+			resultSet = this.statement.executeQuery("SELECT MIN(codCanal) FROM Canal c JOIN UltimoEnvio ue " +
+					"ON c.codBanco = " + id_banco + " WHERE c.cabloqueado = 0 AND ue.uecontestado = 1" );
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -707,10 +709,6 @@ public class Database_lib {
 		return 0;
 	}
 	
-	SELECT codCanal 
-	FROM Canal c JOIN UltimoEnvio ue
-	WHERE c.codBanco = 1 AND c.cabloqueado = 0 AND ue.uecontestado = 1;
-	
 	/**
 	 * Obtiene en CANAL el siguiente numero de mensaje para el banco y canal indicado 
 	 * y le suma 1.
@@ -719,7 +717,21 @@ public class Database_lib {
 	 * @return Un entero con el número de mensaje a utilizar.
 	 */
 	public int selecciona_num_mensaje(String id_banco,int id_canal){
-		//Obtiene el ultimo numero de mensaje para el id y le suma 1
+
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT canext_numMensaje FROM Canal " +
+					"WHERE codBanco = " + id_banco + " AND codCanal = " + id_canal);
+			
+			this.statement.executeUpdate("UPDATE Canal SET canext_numMensaje = canext_numMensaje+1" +
+					" WHERE codBanco = " + id_banco + " AND codCanal = " + id_canal);
+			
+			if(resultSet.next())
+				return resultSet.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
 		return 0;
 	}
 	
@@ -730,8 +742,21 @@ public class Database_lib {
 	 * @return True si el canal esta ocupado o False en caso contrario.
 	 */
 	public boolean isCanal_ocupado(String id_banco, int canal){
-		//Devuelve true si canal.ultimo_envio.contestado=false && canal.bloqueado==false
-		return false;
+		
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT c.cabloqueado || (ue.uecontestado=0)" +
+					" FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codUltimoEnvio" +
+					"WHERE c.codBanco = " + id_banco +" AND c.codCanal = " + canal);
+
+			if(resultSet.next())
+				return (resultSet.getInt(1) == 1);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return true;
+		}
+		return true;
 	}
 
 	/**
@@ -741,7 +766,18 @@ public class Database_lib {
 	 * @return True si hay algun mensaje sin responder y False en caso contrario.
 	 */
 	public boolean hayMensajesSinResponder(String id_banco){
-		return false;
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT COUNT(codUltimoEnvio) FROM UltimoEnvio " +
+					"WHERE codBanco = " + id_banco + " AND uecontestado = 0");
+
+			if(resultSet.next())
+				return (resultSet.getInt(1) != 0);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return true;
+		}
+		return true;
 	}
 
 	/**
@@ -751,6 +787,23 @@ public class Database_lib {
 	 * @return Un ArrayList con todos los ultimos mensajes de cada canal.
 	 */
 	public ArrayList<Mensaje> recupera_ultimos_mensajes(String id_banco){
+		
+		ResultSet resultSet;
+		try {
+			//EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE NOVAAAA FALTA IMPLEMENTAR MENSAJES EN LA BD
+			resultSet = this.statement.executeQuery("SELECT mensaje FROM UltimoEnvio " +
+					"WHERE codEBanco = " + 1);
+			
+			ArrayList<Mensaje> res = new ArrayList<Mensaje>();
+			
+			while(resultSet.next()){
+				res.add(resultSet.getString(1));
+			}
+			return res;
+		} catch (SQLException e) {
+			System.err.println(e);
+			return null;
+		}
 		return null;
 	}
 
@@ -760,7 +813,12 @@ public class Database_lib {
 	 * @param canal El canal concreto a bloquear.
 	 */
 	public void bloquearCanal(String id_banco, int canal){
-		
+		try {
+			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 1 " +
+					"WHERE codBanco = " + id_banco + " AND codCanal = " + canal);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -781,7 +839,12 @@ public class Database_lib {
 	 * @param id_banco El banco para el cual desbloquear todos los canales.
 	 */
 	public void desbloquearCanales(String id_banco){
-		
+		try {
+			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 0 " +
+					"WHERE codBanco = " + id_banco);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -791,6 +854,20 @@ public class Database_lib {
 	 * @return El valor booleando del atributo "contestado" del último envio del canal.
 	 */
 	public boolean isContestado(String id_banco, int canal){
+		
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT uecontestado " +
+					"FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco +" AND c.codCanal = " + canal);
+
+			if(resultSet.next())
+				return (resultSet.getInt(1) == 1);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return true;
+		}
 		return true;
 	}
 	
@@ -836,19 +913,50 @@ public class Database_lib {
 	 * @param num_canal El canal del que obtener.
 	 * @return La ip correspondiente.
 	 */
-	public InetAddress getIpEnvio(String id_banco, int num_canal){
-		return null;
+	public InetAddress getIpEnvio(String id_banco, int canal){
+	
+		ResultSet resultSet;
+		String temp = "";
+		try {
+			resultSet = this.statement.executeQuery("SELECT ue.ueip FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal );
+			
+			if(resultSet.next())
+				temp = resultSet.getString(1);
+				
+			return InetAddress.getByName(temp);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
-
+		
+		
 	/**
 	 * Getter del puerto del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
 	 * @param id_banco El banco correspondiente.
 	 * @param num_canal El canal del que obtener.
 	 * @return La puerto correspondiente.
 	 */
-	public int getPortEnvio(String id_banco, int num_canal){
-		return 0;
-	}	
+	public int getPortEnvio(String id_banco, int canal){
+		
+		ResultSet resultSet;
+		int res = 0;
+		try {
+			resultSet = this.statement.executeQuery("SELECT ue.uepuerto FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+			
+			if(resultSet.next())
+				res = resultSet.getInt(1);
+				
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
 	
 	/**
 	 * Getter del id del Cajero del ULTIMOENVIO.
@@ -856,8 +964,23 @@ public class Database_lib {
 	 * @param num_canal El canal en el que se encuentra el Envio con la id del cajero que lo realizó.
 	 * @return Un string que identifica al cajero que realizó el envio.
 	 */
-	public String getIdCajero(String id_banco, int num_canal){
-		return null;
+	public String getIdCajero(String id_banco, int canal){
+		
+		ResultSet resultSet;
+		int res = 0;
+		try {
+			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+			
+			if(resultSet.next())
+				res = resultSet.getInt(1);
+				
+			return Integer.toString(res);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}	
 	}
 	
 	/**
@@ -865,8 +988,16 @@ public class Database_lib {
 	 * @param id_banco El banco que identifica al envio.
 	 * @param num_canal El canal que identifica al envio.
 	 */
-	public void setContestadoEnvio(String id_banco, int num_canal){
+	public void setContestadoEnvio(String id_banco, int canal){
 		
+		try {
+			this.statement.executeUpdate("UPDATE UltimoEnvio SET ue.uecontestado = 1 " +
+					" FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
