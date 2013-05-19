@@ -103,7 +103,8 @@ public class Banco implements AnalizadorMensajes{
 	//------------------------  FUNCIÓNS DE INTERACIÓN CA INTERFACE  ---------------------------//
 	//------------------------------------------------------------------------------------------//
 	
-	/** Metodo que engade unha nova conta ó banco.
+	/** 
+	 * Metodo que engade unha nova conta ó banco.
 	 * @param Numero de conta.
 	 * @param Saldo da conta.
 	 */
@@ -238,6 +239,49 @@ public class Banco implements AnalizadorMensajes{
 	}
 
 	
+	/**
+	 * 
+	 * @param canal
+	 */
+	public void silenciarCanle(int canal) {
+		this.canalBloqueado = canal;
+		if(canal != -1){
+			this.iu.engadirLinhaLog("Non se responden as mensaxes da canle " + canal + ".\n");
+		}else{
+			this.iu.engadirLinhaLog("Respondense a todas as mensaxes.\n");
+		}
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean sesionAberta() {
+		return this.estado.sesionAberta();
+	}
+
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean traficoActivo() {
+		return this.estado.traficoActivo();
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean recuperacion() {
+		return this.estado.recuperacion();
+	}
+
+
+	
+	
 	//------------------------------------------------------------------------------------------//
 	//------------------------  FUNCIÓNS DE INTERACIÓN CO CONSORCIO  ---------------------------//
 	//------------------------------------------------------------------------------------------//
@@ -265,8 +309,6 @@ public class Banco implements AnalizadorMensajes{
 	}
 
 	
-
-
 	/**
 	 * Metodo que solicita a apertura dunha sesion.
 	 * @param canales Canles cas que se abre a sesion.
@@ -698,6 +740,49 @@ public class Banco implements AnalizadorMensajes{
 		this.iu.actualizar();
 	}
 
+	/**
+	 * Megodo que envia unha resposta as peticións que se efectúan cando a sesión esta detida.
+	 * @param tipoMensaje Tipo da mensaxe recibida.
+	 * @param numcanal Numero de canle no caso de ser unha mensaxe de datos.
+	 * @param nmsg Numero da mensaxe no caso de ser unha mensaxe de datos.
+	 */
+	public void sesionDetidaResp(CodigosMensajes tipoMensaje,
+			int numcanal, int nmsg) {
+		Mensaje m;
+		switch(tipoMensaje){
+		case SOLSALDO:
+			 m = new RespSaldoError(this.idbanco, this.idconsorcio, numcanal,nmsg,true, CodigosError.OTRASCAUSAS);
+			 this.enviarMensaje(m, m.toString());
+			 break;
+		case SOLMOVIMIENTOS:
+			m = new RespMovimientosError(this.idbanco, this.idconsorcio, numcanal,nmsg,true, CodigosError.OTRASCAUSAS);
+			this.enviarMensaje(m, m.toString());
+			break;
+		case SOLREINTEGRO:
+			m = new RespReintegroError(this.idbanco, this.idconsorcio, numcanal,nmsg,true, CodigosError.OTRASCAUSAS);
+			this.enviarMensaje(m, m.toString());
+			break;
+		case SOLABONO:
+			m = new RespAbonoError(this.idbanco, this.idconsorcio, numcanal,nmsg,true, CodigosError.OTRASCAUSAS);
+			this.enviarMensaje(m, m.toString());
+			break;
+		case SOLTRASPASO:
+			m = new RespTraspasoError(this.idbanco, this.idconsorcio, numcanal,nmsg,true, CodigosError.OTRASCAUSAS);
+			this.enviarMensaje(m, m.toString());
+			break;
+		case SOLINIREC:
+			m = new RespIniTraficoRec(this.idbanco,this.idconsorcio, false, CodigosError.OTRASCAUSAS);
+			this.enviarMensaje(m, m.toString());
+			break;
+		default:
+			break;
+		}
+		
+	}
+	
+	//---------------------------------------------------------------------------------//
+	//------------------------------  MÉTODOS PRIVADOS  -------------------------------//
+	//---------------------------------------------------------------------------------//
 
 	private boolean esEnviado(Mensaje msx) {
 		if(msx.getTipoMensaje().equals(CodigosMensajes.RESABONO)) return true;
@@ -713,7 +798,6 @@ public class Banco implements AnalizadorMensajes{
 		if(msx.getTipoMensaje().equals(CodigosMensajes.RESINIREC)) return true;
 		return false;
 	}
-
 
 	private boolean eMensaxeDatos(Mensaje msx) {
 		if(msx.getTipoMensaje().equals(CodigosMensajes.RESABONO)) return true;
@@ -739,6 +823,13 @@ public class Banco implements AnalizadorMensajes{
 				return ! m.getCod_resp().equals(CodigosRespuesta.CONSDEN);
 		}
 		return false;
+	}
+	
+	private boolean responderMensaxe(Mensaje m) {
+		if(!this.eMensaxeDatos(m)){
+			return true;
+		}
+		return ((MensajeDatos) m).getNumcanal() != this.canalBloqueado;
 	}
 	
 	private void rexistrarMensaxe(Mensaje m, String s){
@@ -781,26 +872,6 @@ public class Banco implements AnalizadorMensajes{
 	private void cambEstado(EstadoSesion nuevoEstado) {
 		this.estado = nuevoEstado;
 	}
-
-	
-	public void silenciarCanle(int canal) {
-		this.canalBloqueado = canal;
-		if(canal != -1){
-			this.iu.engadirLinhaLog("Non se responden as mensaxes da canle " + canal + ".\n");
-		}else{
-			this.iu.engadirLinhaLog("Respondense a todas as mensaxes.\n");
-		}
-	}
-
-
-	public boolean sesionAberta() {
-		return this.estado.sesionAberta();
-	}
-
-
-	public boolean traficoActivo() {
-		return this.estado.traficoActivo();
-	}
 	
 	private void enviarMensaje(Mensaje m, String string) {
 		if (this.responderMensaxe(m)){
@@ -815,16 +886,7 @@ public class Banco implements AnalizadorMensajes{
 	}
 
 
-	private boolean responderMensaxe(Mensaje m) {
-		if(!this.eMensaxeDatos(m)){
-			return true;
-		}
-		return ((MensajeDatos) m).getNumcanal() != this.canalBloqueado;
-	}
+	
 
-
-	public boolean recuperacion() {
-		return this.estado.recuperacion();
-	}
 
 }
