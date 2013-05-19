@@ -29,15 +29,23 @@ CREATE TABLE Movemento(
 	ccod INTEGER,
 	mcod INTEGER,
 	importe INTEGER,
-	data DATE,
+	data DATETIME,
 	tmcod INTEGER,
 	CONSTRAINT m_ccod_fk FOREIGN KEY (ccod) REFERENCES Conta(ccod) ON DELETE CASCADE,
 	CONSTRAINT m_tmcod_fk FOREIGN KEY (tmcod) REFERENCES TipoMovemento(tmcod) ON DELETE SET NULL,
 	CONSTRAINT m_pk PRIMARY KEY (ccod,mcod)
 );
 
+CREATE TABLE Execucion(
+	ecod INTEGER AUTO_INCREMENT,
+	CONSTRAINT e_pk PRIMARY KEY (scod)
+);
+
 CREATE TABLE Sesion(
 	scod INTEGER AUTO_INCREMENT,
+	treintegros INTEGER DEFAULT 0,
+	tabono INTEGER DEFAULT 0,
+	ttraspasos INTEGER DEFAULT 0,
 	CONSTRAINT s_pk PRIMARY KEY (scod)
 );
 
@@ -58,17 +66,23 @@ CREATE TABLE Mensaxe (
 	tipo VARCHAR(20),
 	enviado BOOLEAN,
 	texto VARCHAR(100),
+	ecod INTEGER NOT NULL,
 	CONSTRAINT ms_pk PRIMARY KEY (mscod),
 	CONSTRAINT ms_fk_canle FOREIGN KEY (scod,cncod) REFERENCES Canle(scod,cncod) ON DELETE CASCADE,
+	CONSTRAINT ms_fk_execucion FOREIGN KEY (ecod) REFERENCES Execucion(ecod) ON DELETE CASCADE
 );
+
+
+
+
 
 -- Valores iniciales das contas do banco.
 
-INSERT INTO Tarxeta VALUES ('pastor42 01');
-INSERT INTO Tarxeta VALUES ('pastor42 02');
-INSERT INTO Tarxeta VALUES ('pastor42 03');
-INSERT INTO Tarxeta VALUES ('pastor42 04');
-INSERT INTO Tarxeta VALUES ('pastor42 05');
+INSERT INTO Tarxeta VALUES ('pastor42001');
+INSERT INTO Tarxeta VALUES ('pastor42002');
+INSERT INTO Tarxeta VALUES ('pastor42003');
+INSERT INTO Tarxeta VALUES ('pastor42004');
+INSERT INTO Tarxeta VALUES ('pastor42005');
 
 INSERT INTO Conta(ccod,saldo) VALUES (0,0000);
 INSERT INTO Conta(ccod,saldo) VALUES (1,1000);
