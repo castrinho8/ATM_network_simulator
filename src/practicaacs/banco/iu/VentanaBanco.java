@@ -6,6 +6,7 @@ package practicaacs.banco.iu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -852,7 +853,7 @@ public class VentanaBanco extends javax.swing.JFrame{
  			res[i][0] = new Integer(m.codigo);
  			res[i][1] = m.tipo;
  			res[i][2] = new Float(m.importe);
- 			res[i][3] = m.data;
+ 			res[i][3] = new SimpleDateFormat("HH:mm").format(m.data);
  			i++;
  		}
  		return res;
