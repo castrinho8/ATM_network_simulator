@@ -145,13 +145,13 @@ public class ClienteBDBanco {
 	public ArrayList<Movemento> getMovementos(int numeroconta) {
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT mcod,tmnome,importe,data FROM Movemento JOIN" +
+			resultSet = this.statement.executeQuery("SELECT mcod,tmnome,importe,data,tmcod FROM Movemento JOIN" +
 					" TipoMovemento USING (tmcod) WHERE ccod = " + numeroconta);
 			
 			ArrayList<Movemento> res = new ArrayList<Movemento>();
 			
 			while(resultSet.next()){
-				res.add(new Movemento(resultSet.getInt(1),resultSet.getInt(3),resultSet.getDate(4),resultSet.getString(2)));
+				res.add(new Movemento(resultSet.getInt(1),resultSet.getInt(3),resultSet.getDate(4),resultSet.getString(2),resultSet.getInt(5)));
 			}
 			
 			return res;
@@ -166,7 +166,8 @@ public class ClienteBDBanco {
 		try {
 			resultSet = this.statement.executeQuery("SELECT ccod,saldo FROM ContaTarxeta JOIN Conta" +
 					" USING (ccod) where tcod = '" + numtarx + "' AND " + " cnum = " + numConta);
-			resultSet.next();
+			if(!resultSet.next())
+				return null;
 			return new Conta(resultSet.getInt(1),resultSet.getInt(2));
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -255,10 +256,12 @@ public class ClienteBDBanco {
 		}
 	}
 
-	public void setCanal(int sesionid, int ncanal, int nmsg, boolean ocupado){
+	public void setCanal(int sesionid, int ncanal, int nmsg, boolean ocupado, boolean recuperado){
 		try {
 			this.statement.executeUpdate("UPDATE Canle SET lastmsg = " + nmsg + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
 			this.statement.executeUpdate("UPDATE Canle SET ocupado = " + (ocupado ? "1" : "0") + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
+			this.statement.executeUpdate("UPDATE Canle SET recuperado = " + (ocupado ? "1" : "0") + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -266,11 +269,11 @@ public class ClienteBDBanco {
 	
 	public Canal getCanal(int sesionid, int ncanal) {
 		try {
-			ResultSet r = this.statement.executeQuery("SELECT lastmsg, ocupado FROM Canle WHERE scod = " + sesionid +  " AND cncod = " + ncanal);
+			ResultSet r = this.statement.executeQuery("SELECT lastmsg, ocupado, recuperado FROM Canle WHERE scod = " + sesionid +  " AND cncod = " + ncanal);
 			
 			if(r.next()){
 				int lastmsx = r.getInt(1);
-				return  new Canal(ncanal, lastmsx == 0 ? null : lastmsx, r.getBoolean(2));
+				return  new Canal(ncanal, lastmsx == 0 ? null : lastmsx, r.getBoolean(2),r.getBoolean(3));
 			}else{
 				return null;
 			}
@@ -418,12 +421,12 @@ public class ClienteBDBanco {
 		if(sesionId == -1) return new ArrayList<Canal>();
 		
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT cncod, lastmsg FROM Canle WHERE scod = " + sesionId + " ORDER BY cncod");
+			ResultSet resultSet = statement.executeQuery("SELECT cncod, lastmsg, ocupado, recuperado FROM Canle WHERE scod = " + sesionId + " ORDER BY cncod");
 			
 			ArrayList<Canal> res = new ArrayList<Canal>();
 			
 			while(resultSet.next()){
-				res.add(new Canal(resultSet.getInt(1),resultSet.getInt(2)));
+				res.add(new Canal(resultSet.getInt(1),resultSet.getInt(2),resultSet.getBoolean(3), resultSet.getBoolean(4)));
 			}
 			return res;
 		} catch (SQLException e) {

@@ -800,7 +800,7 @@ public class VentanaBanco extends javax.swing.JFrame{
     private void setTablaCanles(Object[][] data){
     	tablacanles.setModel(new javax.swing.table.DefaultTableModel(
                 data,
-                new String [] {"Num. Canle", "Id. Ultimo Mensaxe", "Ocupado"}
+                new String [] {"Num. Canle", "Id. Ultimo Mensaxe", "Ocupado", "Recuperado"}
             ));
     }
     
@@ -894,12 +894,13 @@ public class VentanaBanco extends javax.swing.JFrame{
 
 	private Object[][] formatTaboaCanles(ArrayList<Canal> canales) {
 		int i=0;
- 		Object[][] res = new Object[canales.size()][3];
+ 		Object[][] res = new Object[canales.size()][4];
  		for(Canal c : canales){
  			
  			res[i][0] = c.numero;
  			res[i][1] = c.lastMsg;
  			res[i][2] = c.ocupado ? "SI" : "NON";
+ 			res[i][3] = c.recuperado ? "SI" : "NON";
  			i++;
  		}
  		return res;

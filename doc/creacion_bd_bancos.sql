@@ -54,6 +54,7 @@ CREATE TABLE Canle(
 	cncod INTEGER,
 	lastmsg INTEGER DEFAULT NULL,
 	ocupado BOOLEAN DEFAULT 0,
+	recuperado BOOLEAN DEFAULT 0,
 	CONSTRAINT cn_scod_fk FOREIGN KEY (scod) REFERENCES Sesion(scod) ON DELETE CASCADE,
 	CONSTRAINT s_pk PRIMARY KEY (scod,cncod)	
 );

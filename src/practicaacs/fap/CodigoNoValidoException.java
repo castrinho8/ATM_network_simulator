@@ -6,4 +6,10 @@ public class CodigoNoValidoException extends Exception {
 
 	public CodigoNoValidoException() {}
 
+	public CodigoNoValidoException(String message) {
+		super(message);
+	}
+
+	
+	
 }

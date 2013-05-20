@@ -17,7 +17,6 @@ public class ClienteServidorConsorcio extends Thread {
 	private BlockingQueue<Mensaje> mensajesAEnviar;
 	private AnalizadorMensajes analizador;
 	private DatagramSocket socketServidor;
-	private String hostBanco;
 	private int puertoBanco;
 	private String hostConsorcio;
 	private int puertoConsorcio;

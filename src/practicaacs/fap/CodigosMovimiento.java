@@ -27,12 +27,11 @@ public enum CodigosMovimiento {
 		case 99:
 			return OTRO;
 		default:
-			throw new CodigoNoValidoException();
+			throw new CodigoNoValidoException("" + valor);
 		}
 	}
 
 	public int getNum() {
-		// TODO Auto-generated method stub
 		return numero;
 	}
 }

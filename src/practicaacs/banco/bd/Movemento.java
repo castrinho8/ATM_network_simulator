@@ -7,6 +7,7 @@ public class Movemento {
 	public int importe;
 	public Date data;
 	public String tipo;
+	public int numtipo;
 	
 	public Movemento(int codigo, int importe, Date data, String tipo) {
 		super();
@@ -14,6 +15,15 @@ public class Movemento {
 		this.importe = importe;
 		this.data = data;
 		this.tipo = tipo;
+	}
+	
+	public Movemento(int codigo, int importe, Date data, String tipo, int numtipo) {
+		super();
+		this.codigo = codigo;
+		this.importe = importe;
+		this.data = data;
+		this.tipo = tipo;
+		this.numtipo = numtipo;
 	}
 	
 }
