@@ -1,16 +1,23 @@
+package practicaacs.consorcio.iu;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package consorcio_iu;
+import java.io.IOException;
+
+import practicaacs.consorcio.Consorcio;
 
 public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
 
+	Consorcio consorcio;
+	
     /**
      * Creates new form PantallaInicial
      */
     public PantallaInicialConsorcio_IU() {
+    	try {
+			this.consorcio = new Consorcio("/home/castrinho8/Escritorio/UNI/ACS/res/configuracion");
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
         initComponents();
         this.setLocationRelativeTo(null);
         this.DisponibleButton.setActionCommand("activado");
@@ -168,7 +175,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
      */
     private void SolButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SolButtonActionPerformed
         this.setVisible(false);
-        new SolRecuperacion_IU(this).setVisible(true);
+        new SolRecuperacion_IU(this,this.consorcio).setVisible(true);
     }//GEN-LAST:event_SolButtonActionPerformed
 
     /**
@@ -176,17 +183,20 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
      */
     private void FinButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FinButtonActionPerformed
         this.setVisible(false);
-        new FinRecuperacion_IU(this).setVisible(true);
+        new FinRecuperacion_IU(this,this.consorcio).setVisible(true);
     }//GEN-LAST:event_FinButtonActionPerformed
 
     /**
-     * Menu salir
+     * Menu SALIR
      * @param evt 
      */
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         this.dispose();
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
+    /**
+     * Menu ACERCA DE
+     */
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         new Acerca_de_IU(this,false);
     }//GEN-LAST:event_jMenuItem2ActionPerformed

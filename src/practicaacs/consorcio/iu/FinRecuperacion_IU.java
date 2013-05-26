@@ -1,20 +1,25 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package consorcio_iu;
+package practicaacs.consorcio.iu;
+
+
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
 
+import practicaacs.consorcio.Consorcio;
+import practicaacs.consorcio.bd.Database_lib;
+
 public class FinRecuperacion_IU extends javax.swing.JFrame {
 
     JFrame parent;
+    Consorcio consorcio;
+    
     /**
      * Creates new form FinRecuperacion_IU
      */
-    public FinRecuperacion_IU(JFrame padre) {
+    public FinRecuperacion_IU(JFrame padre,Consorcio cons) {
         this.parent = padre;
+        this.consorcio = cons;
         initComponents();
         this.recargar_bancos();
         this.setLocationRelativeTo(null);
@@ -143,7 +148,7 @@ public class FinRecuperacion_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FinRecuperacion_IU(null).setVisible(true);
+                new FinRecuperacion_IU(null,null).setVisible(true);
             }
         });
     }
@@ -159,18 +164,14 @@ public class FinRecuperacion_IU extends javax.swing.JFrame {
      * Método que obtiene los bancos de la BD y los añade al ScrollPane
      */
     public void recargar_bancos(){
-        //Database_lib. obtener bancos con sesion activa
-        String categories[] = { "Household", "Office", "Extended Family",
-            "Company (US)", "Company (World)", "Team", "Will",
-            "Birthday Card List", "High School", "Country", "Continent",
-            "Planet" };
-        JList list = new JList(categories);
+    	ArrayList<String> sesiones_abiertas = Database_lib.getInstance().getSesiones();
+        JList list = new JList(sesiones_abiertas.toArray());
         this.jScrollPane1.setViewportView(list);
-    }    
+    }
 
     public void finalizar_recuperacion(String id_banco){
-        //llamar a finalizar recuperacion
-        System.out.println(id_banco);
+    	//this.consorcio.realizar_finRecuperacion(id_banco);
+    	System.out.println(id_banco);
     }
     
 }

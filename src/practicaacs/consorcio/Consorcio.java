@@ -65,6 +65,14 @@ public class Consorcio {
 	public InetAddress getAddress() {
 		return address;
 	}
+	
+	public void realizar_recuperacion(String id_banco){
+		this.bancos_server.solicitar_recuperacion(id_banco);
+	}
+	
+	public void realizar_finRecuperacion(String id_banco){
+		this.bancos_server.solicitar_fin_recuperacion(id_banco);
+	}
     
 }
 

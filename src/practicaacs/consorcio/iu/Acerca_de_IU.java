@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package consorcio_iu;
+package practicaacs.consorcio.iu;
 
 public class Acerca_de_IU extends javax.swing.JDialog {
 
