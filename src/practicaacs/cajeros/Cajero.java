@@ -15,22 +15,32 @@ import java.util.Properties;
 
 import practicaacs.fap.*;
 
+/**
+ * Clase que representa a un cajero.
+ * Es un Singleton
+ *
+ */
 public class Cajero{
 
 	static private int next_id_cajero = 0;
 	static private int next_number_message = 0;
+	static private Cajero instancia;
 	
 	private String id_cajero;
+	private InetAddress cajero_address;
+	private int cajero_port;
+	
 	private String id_consorcio;
 	private int consorcio_port;
 	private InetAddress consorcio_address;
+	
 	private DatagramSocket socketCajero;
 		
 	/**
 	 * Constructor de la clase Cajero
 	 * @param file Un string con el path del archivo de propiedades.
 	 */
-    public Cajero(String file) throws UnknownHostException {
+    private Cajero(String file) throws UnknownHostException {
     	
     	//Obtenemos los datos del fichero properties
 		Properties prop = new Properties();
@@ -52,16 +62,32 @@ public class Cajero{
 		this.id_consorcio = prop.getProperty("consorcio.id");
 		this.consorcio_address = InetAddress.getByName(prop.getProperty("consorcio.address"));
 		this.consorcio_port = new Integer(prop.getProperty("consorcio.cash_server.port"));
+		this.cajero_address = InetAddress.getByName(prop.getProperty("cajero.address"));
+		this.cajero_port = new Integer(prop.getProperty("cajero.port"));
 		this.id_cajero = Integer.toString(next_id_cajero++);
 
 		try {
-			socketCajero = new DatagramSocket(this.consorcio_port);
+			socketCajero = new DatagramSocket(this.cajero_port);
 		 }catch (IOException e) {
 			 System.out.println("Error al crear el objeto socket cliente");
 			 System.exit(-1);
 		 }
 	}
 
+    /**
+     * Método del singleton que obtiene o crea la instancia del cajero segun sea necesario.
+     * @return La instancia del Cajero
+     */
+    public static Cajero instance(){
+    	if(instancia == null)
+			try {
+				instancia = new Cajero("/home/castrinho8/Escritorio/UNI/ACS/res/configuracion");
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+    	return instancia;
+    }
     
     /**
      * Método recibe el Envio creado por la IU y genera el mensaje correspondiente a 
@@ -76,25 +102,25 @@ public class Cajero{
 	    	case SOLSALDO:{
 	        	envio = new SolSaldo(this.id_cajero,this.id_consorcio,
 	        			0,next_number_message++,
-	        			true,env.getNum_tarjeta(),env.getNum_cuenta_destino());
+	        			true,env.getNum_tarjeta(),env.getNum_cuenta_origen());
 	    		break;
 	    	}
 	    	case SOLMOVIMIENTOS:{
 	    		envio = new SolMovimientos(this.id_cajero,this.id_consorcio,
 	    				env.getTipoMensaje(),0,next_number_message++,
-	    				true,env.getNum_tarjeta(),env.getNum_cuenta_destino());
+	    				true,env.getNum_tarjeta(),env.getNum_cuenta_origen());
 	    		break;
 	    	}
 	    	case SOLREINTEGRO:{
 	    		envio = new SolReintegro(this.id_cajero,this.id_consorcio,
 	    				0,next_number_message++,
-	    				true,env.getNum_tarjeta(),env.getNum_cuenta_destino(),env.getImporte());
+	    				true,env.getNum_tarjeta(),env.getNum_cuenta_origen(),env.getImporte());
 	    		break;
 	    	}
 	    	case SOLABONO:{
 	    		envio = new SolAbono(this.id_cajero,this.id_consorcio,
 	    				0,next_number_message++,
-	    				true,env.getNum_tarjeta(),env.getNum_cuenta_destino(),env.getImporte());
+	    				true,env.getNum_tarjeta(),env.getNum_cuenta_origen(),env.getImporte());
 	    		break;
 	    	}
 	    	case SOLTRASPASO:{

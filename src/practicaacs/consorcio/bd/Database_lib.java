@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Properties;
 
-import bd_app.LinaFactura;
-
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.banco.estados.SesAberta;
 import practicaacs.banco.estados.SesNonAberta;
@@ -624,7 +622,6 @@ public class Database_lib {
 			System.err.println(e);
 			return null;
 		}
-		return null;
 	}
 	
 	/**
@@ -805,11 +802,10 @@ public class Database_lib {
 			}
 			
 			return res;
-		} catch (SQLException e) {
+		} catch (SQLException | MensajeNoValidoException e) {
 			System.err.println(e);
 			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -934,6 +930,9 @@ public class Database_lib {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 		
@@ -1031,7 +1030,7 @@ public class Database_lib {
 		//aceder a la tabla Sesion con id_banco, a la tabla Canal con id_canal y por ultimo a envios añadir el envio
 		//borra el envio que habia antes en ese canal y pone el nuevo
 		//Guardar en la tabla de mensajes 
-		this.almacenar_mensaje(message,true);
+		this.almacenar_mensaje(message,TipoOrigDest.BANCO,message.getOrigen(),TipoOrigDest.CONSORCIO,message.getDestino());
 	}
 	
 	/**
@@ -1059,6 +1058,9 @@ public class Database_lib {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
+		} catch (MensajeNoValidoException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -1076,7 +1078,7 @@ public class Database_lib {
 	public ArrayList<Mensaje> getMensajesOffline(String id_banco){
 		//ponerles offline a false
 		
-		ResultSet resultSet;
+		ResultSet resultSet = null;
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			//Obtenemos todos los mensajes OFFLINE
@@ -1094,6 +1096,9 @@ public class Database_lib {
 			
 			return res;
 		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} catch (MensajeNoValidoException e) {
 			e.printStackTrace();
 			return null;
 		}

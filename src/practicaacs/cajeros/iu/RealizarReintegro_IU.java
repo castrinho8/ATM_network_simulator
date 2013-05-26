@@ -1,23 +1,26 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package cajero_iu;
+package practicaacs.cajeros.iu;
+
+import java.io.IOException;
 
 import javax.swing.JFrame;
 
-/**
- *
- * @author castrinho8
- */
+import practicaacs.cajeros.Cajero;
+import practicaacs.cajeros.Envio;
+import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.Mensaje;
+import practicaacs.fap.RespAbono;
+
 public class RealizarReintegro_IU extends javax.swing.JFrame {
 
     JFrame parent;
+    Envio envio;
+
     /**
      * Creates new form RealizarReintegro_IU
      */
-    public RealizarReintegro_IU(JFrame padre) {
+    public RealizarReintegro_IU(JFrame padre,Envio env) {
         this.parent = padre;
+        this.envio = env;
         initComponents();
         inicializa_visibilidades();
         this.setLocationRelativeTo(null);
@@ -29,7 +32,25 @@ public class RealizarReintegro_IU extends javax.swing.JFrame {
         this.SaldoText.setVisible(false);
         this.ErrorLabel.setVisible(false);
     }
-        
+    
+    private void enviar_solicitud(){
+    	//Inicializar el mensaje
+    	Mensaje message = Cajero.instance().crear_mensaje(this.envio);
+    	
+    	//Realizar el envio
+    	RespAbono respuesta;
+		try {
+			respuesta = (RespAbono) Cajero.instance().enviar_mensaje(message);
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+    	//Mostrar respuesta
+    	this.ImporteText.setText(String.valueOf(respuesta.getSaldo()));
+    }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -139,17 +160,35 @@ public class RealizarReintegro_IU extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_ImporteTextActionPerformed
 
+    /**
+     * Metodo que se ejecuta cuando se pulsa el boton aceptar
+     * @param evt El evento.
+     */
     private void AceptarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AceptarButtonActionPerformed
-        inicializa_visibilidades();
-        String importe = this.ImporteText.getText();
-        if(importe.equals("")){
+    	try{
+	    	inicializa_visibilidades();
+	        String importe = this.ImporteText.getText();
+	        
+	        //Comprobamos si no se ha introducido el importe
+	        if(importe.equals("")){
+	        	throw new NumberFormatException();
+	        }
+	        int importe_reintegro = Integer.parseInt(importe);
+	        this.EsperandoRespuestaLabel.setVisible(true);
+	
+	        //Añadimos los componentes del envio
+	        this.envio.setTipoMensaje(CodigosMensajes.SOLREINTEGRO);
+	        this.envio.setImporte(importe_reintegro);
+	        //enviar_solicitud();
+	        
+	        this.EsperandoRespuestaLabel.setVisible(false);
+	        this.SaldoLabel.setVisible(true);
+	        this.SaldoText.setVisible(true);
+    	}catch(NumberFormatException nfe){
             this.ErrorLabel.setVisible(true);
             return;
-        }
-        this.EsperandoRespuestaLabel.setVisible(true);
-       //enviar el mensaje y esperar respuesta
-        this.SaldoLabel.setVisible(true);
-        this.SaldoText.setVisible(true);
+    	}
+    	
     }//GEN-LAST:event_AceptarButtonActionPerformed
 
     private void FinalizarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FinalizarButtonActionPerformed
@@ -188,7 +227,7 @@ public class RealizarReintegro_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new RealizarReintegro_IU(null).setVisible(true);
+                new RealizarReintegro_IU(null,null).setVisible(true);
             }
         });
     }

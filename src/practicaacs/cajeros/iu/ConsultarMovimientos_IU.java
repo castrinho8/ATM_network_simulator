@@ -4,24 +4,51 @@
  */
 package practicaacs.cajeros.iu;
 
+import java.io.IOException;
+
 import javax.swing.JFrame;
 
-/**
- *
- * @author castrinho8
- */
+import practicaacs.cajeros.Cajero;
+import practicaacs.cajeros.Envio;
+import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.Mensaje;
+import practicaacs.fap.RespMovimientos;
+
 public class ConsultarMovimientos_IU extends javax.swing.JFrame {
 
     JFrame parent;
+    
     /**
      * Creates new form ConsultarMovimientos_IU
      */
-    public ConsultarMovimientos_IU(JFrame padre) {
+    public ConsultarMovimientos_IU(JFrame padre,Envio env) {
         this.parent = padre;
         initComponents();
+        this.ConsultandoLabel.setVisible(false);
+       // envia_consulta(env);
         this.setLocationRelativeTo(null);
     }
 
+    private void envia_consulta(Envio env){
+    	//Inicializar mensaje
+    	env.setTipoMensaje(CodigosMensajes.SOLMOVIMIENTOS);
+    	Mensaje envio = Cajero.instance().crear_mensaje(env);
+    	this.ConsultandoLabel.setVisible(true);
+    	
+    	//Realizar el envio
+    	RespMovimientos respuesta;
+		try {
+			respuesta = (RespMovimientos) Cajero.instance().enviar_mensaje(envio);
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		//Mostrar respuesta
+		this.ConsultandoLabel.setVisible(false);
+    	this.jTextArea1.setText(respuesta.toString());
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -35,6 +62,7 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
         AceptarButton = new javax.swing.JButton();
+        ConsultandoLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Movimientos");
@@ -54,6 +82,9 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
             }
         });
 
+        ConsultandoLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        ConsultandoLabel.setText("Consultando...");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -65,7 +96,8 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
                     .addComponent(jScrollPane1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(AceptarButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(AceptarButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(ConsultandoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -73,8 +105,10 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ConsultandoLabel)
+                .addGap(3, 3, 3)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(AceptarButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -119,12 +153,13 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ConsultarMovimientos_IU(null).setVisible(true);
+                new ConsultarMovimientos_IU(null,null).setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AceptarButton;
+    private javax.swing.JLabel ConsultandoLabel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;

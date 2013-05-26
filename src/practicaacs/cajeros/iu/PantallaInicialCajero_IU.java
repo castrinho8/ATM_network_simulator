@@ -1,24 +1,27 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package cajero_iu;
+package practicaacs.cajeros.iu;
 
-/**
- *
- * @author castrinho8
- */
+import java.net.UnknownHostException;
+
+import practicaacs.cajeros.Cajero;
+import practicaacs.cajeros.Envio;
+
+
 public class PantallaInicialCajero_IU extends javax.swing.JFrame {
 
     /**
      * Creates new form Ventana_principal
      */
     public PantallaInicialCajero_IU() {
+    	//Instanciamos el cajero por primera vez
+    	Cajero.instance();
         initComponents();
         inicializa_visibilidades();
         this.setLocationRelativeTo(null);
     }
 
+    /**
+     * Funcion que inicializa las visibilidades
+     */
     private void inicializa_visibilidades(){
         this.TarjetaTextField.setText("");
         this.CuentaTextFIeld.setText("");
@@ -122,7 +125,6 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void TarjetaTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TarjetaTextFieldActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_TarjetaTextFieldActionPerformed
 
     private void CancelarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelarButtonActionPerformed
@@ -130,19 +132,31 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
     }//GEN-LAST:event_CancelarButtonActionPerformed
 
     private void CuentaTextFIeldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CuentaTextFIeldActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_CuentaTextFIeldActionPerformed
 
     private void ContinuarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ContinuarButtonActionPerformed
-        String tarjeta = this.TarjetaTextField.getText();
-        String cuenta = this.CuentaTextFIeld.getText();
-        if(tarjeta.equals("") | cuenta.equals("")){
+        
+    	try{
+	    	String tarjeta = this.TarjetaTextField.getText();
+	        String cuenta = this.CuentaTextFIeld.getText();
+	        inicializa_visibilidades();
+
+	        //Comprueba si esta bien escrito
+	        if(tarjeta.equals("") | cuenta.equals("")){
+	        	throw new NumberFormatException();
+	        }
+	        int num_cuenta = Integer.parseInt(cuenta);
+	        
+	        //Crea el envio y se lo pasa a la siguiente pantalla
+	        Envio envio = new Envio(tarjeta,num_cuenta);
+	        this.setVisible(false);
+	        new SeleccionAccion_IU(this,envio).setVisible(true);
+    	}
+    	catch (NumberFormatException nfe){
+    		//Si hay errores, mostramos el label correspondiente.
             this.IncorrectosLabel.setVisible(true);
             return;
-        }
-        inicializa_visibilidades();
-        this.setVisible(false);
-        new SeleccionAccion_IU(this).setVisible(true);
+    	}
     }//GEN-LAST:event_ContinuarButtonActionPerformed
 
     /**

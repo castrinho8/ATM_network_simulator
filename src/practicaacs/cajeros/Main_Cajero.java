@@ -10,7 +10,7 @@ import practicaacs.fap.SolSaldo;
 public class Main_Cajero {
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
-		Cajero caj = new Cajero("/home/castrinho8/Escritorio/UNI/ACS/res/configuracion");
+		Cajero caj = Cajero.instance();
 		Envio env = new Envio("2111111112",CodigosMensajes.SOLSALDO,100,
 				3333,4444);
 		SolSaldo enviado = (SolSaldo) caj.crear_mensaje(env);

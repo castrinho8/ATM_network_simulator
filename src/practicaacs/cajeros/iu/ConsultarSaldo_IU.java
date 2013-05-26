@@ -1,27 +1,54 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package cajero_iu;
+package practicaacs.cajeros.iu;
+
+import java.io.IOException;
 
 import javax.swing.JFrame;
 
-/**
- *
- * @author castrinho8
- */
+import practicaacs.cajeros.Cajero;
+import practicaacs.cajeros.Envio;
+import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.Mensaje;
+import practicaacs.fap.RespSaldo;
+
 public class ConsultarSaldo_IU extends javax.swing.JFrame {
 
     JFrame parent;
     /**
      * Creates new form ConsultarSaldo
      */
-    public ConsultarSaldo_IU(JFrame padre) {
+    public ConsultarSaldo_IU(JFrame padre,Envio env) {
         this.parent = padre;
         initComponents();
+		this.ConsultandoLabel.setVisible(false);
+	//	enviar_consulta(env);
         this.setLocationRelativeTo(null);
     }
 
+    /**
+     * Método que crea el mensaje a enviar y lo envia
+     * @param env El envio
+     * @throws InterruptedException 
+     */
+    private void enviar_consulta(Envio env){
+    	//Inicializar el mensaje
+    	env.setTipoMensaje(CodigosMensajes.SOLSALDO);
+    	Mensaje envio = Cajero.instance().crear_mensaje(env);
+    	this.ConsultandoLabel.setVisible(true);
+    	
+    	//Realizar el envio
+    	RespSaldo respuesta;
+		try {
+			respuesta = (RespSaldo) Cajero.instance().enviar_mensaje(envio);
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+    	//Mostrar respuesta
+		this.ConsultandoLabel.setVisible(false);
+    	this.jTextField1.setText(String.valueOf(respuesta.getSaldo()));
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -35,6 +62,7 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         AceptarButton = new javax.swing.JButton();
+        ConsultandoLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Saldo");
@@ -53,6 +81,9 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
             }
         });
 
+        ConsultandoLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        ConsultandoLabel.setText("Consultando...");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -65,7 +96,8 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(AceptarButton)))
+                        .addComponent(AceptarButton))
+                    .addComponent(ConsultandoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -73,7 +105,9 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addGap(31, 31, 31)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(ConsultandoLabel)
+                .addGap(1, 1, 1)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -121,12 +155,13 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ConsultarSaldo_IU(null).setVisible(true);
+                new ConsultarSaldo_IU(null,null).setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AceptarButton;
+    private javax.swing.JLabel ConsultandoLabel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField jTextField1;
