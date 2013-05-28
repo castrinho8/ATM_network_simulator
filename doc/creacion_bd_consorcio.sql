@@ -229,9 +229,37 @@ INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTar
 VALUES (3,2,91,'192.168.0.2',1,'pastor42 01',0001);
 
 
+--	TipoOrigDest
+INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
+VALUES (1,'Banco');
+INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
+VALUES (2,'Consorcio');
+INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
+VALUES (3,'Cajero');
+
 
 -- Mensajes 
--- A inicializar por el programa
+
+-- BANCO-> CONSORCIO
+INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (1,1,'ID_BAN:11',2,'ID_CONS:21',0,'CODIGO MENSAJE:1 BANCO->CONSORCIO');
+
+-- CONSORCIO->BANCO
+INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (2,2,'ID_CONS:21',1,'ID_BAN:11',0,'CODIGO MENSAJE:2 CONSORCIO->BANCO');
+
+-- CAJERO->CONSORCIO
+INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (3,3,'ID_CAJERO:01',2,'ID_CONS:21',0,'CODIGO MENSAJE:3 CAJERO->CONSORCIO');
+
+-- CAJERO->CONSORCIO
+INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (4,3,'ID_CAJERO:31',2,'ID_CONS:21',0,'CODIGO MENSAJE:4 CAJERO->CONSORCIO');
+
+-- CONSORCIO->CAJERO
+INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (5,2,'ID_CONS:21',3,'ID_CAJERO:31',1,'CODIGO MENSAJE:5 CONSORCIO->CAJERO offline');
+
 
 
 

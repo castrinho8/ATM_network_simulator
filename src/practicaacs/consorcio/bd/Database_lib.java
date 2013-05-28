@@ -790,7 +790,6 @@ public class Database_lib {
 	public ArrayList<Mensaje> recupera_ultimos_mensajes(String id_banco){
 		
 		ResultSet resultSet;
-		String str_mensaje;
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT uestringMensaje FROM UltimoEnvio " +
@@ -1076,13 +1075,12 @@ public class Database_lib {
 	 * @return Un arraylist con los Mensajes que han sido offline.
 	 */
 	public ArrayList<Mensaje> getMensajesOffline(String id_banco){
-		//ponerles offline a false
 		
 		ResultSet resultSet = null;
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			//Obtenemos todos los mensajes OFFLINE
-			this.statement.executeQuery("SELECT mestringMensaje " +
+			resultSet = this.statement.executeQuery("SELECT mestringMensaje " +
 					"FROM Mensaje " +
 					"WHERE codBanco = " + id_banco + " AND (meoffline IS NOT NULL || meoffline != 0)");
 			
@@ -1128,4 +1126,73 @@ public class Database_lib {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Método que obtiene todos los mensajes hacia/desde el CAJERO.
+	 * Devuelve un arraylist con los Strings a mostrar en la interfaz grafica.
+	 * @return Un arraylist de strings.
+	 */
+	public ArrayList<String> MensajesCajeroToString(){
+		
+		ResultSet resultSet = null;
+		ArrayList<String> res = new ArrayList<String>();
+		try {
+			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
+					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
+					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
+					" WHERE ta.todnombre='Cajero' || tb.todnombre='Cajero'");
+
+			while(resultSet.next()){
+				String str1 = resultSet.getString(1);
+				String str2 = resultSet.getString(2);
+				Mensaje m = Mensaje.parse(resultSet.getString(3));
+				
+				String elemento = str1 + "->" + str2 + ": " + m.toString();
+				res.add(elemento);
+			}
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} catch (MensajeNoValidoException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * Método que obtiene todos los mensajes hacia/desde el BANCO.
+	 * Devuelve un arraylist con los Strings a mostrar en la interfaz grafica.
+	 * @return Un arraylist de strings.
+	 */
+	public ArrayList<String> MensajesBancoToString(){
+		
+		ResultSet resultSet = null;
+		ArrayList<String> res = new ArrayList<String>();
+		try {
+			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
+					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
+					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
+					" WHERE ta.todnombre='Banco' || tb.todnombre='Banco'");
+
+			while(resultSet.next()){
+				String str1 = resultSet.getString(1);
+				String str2 = resultSet.getString(2);
+				Mensaje m = Mensaje.parse(resultSet.getString(3));
+				
+				String elemento = str1 + "->" + str2 + ": " + m.toString();
+				res.add(elemento);
+			}
+			return res;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} catch (MensajeNoValidoException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
+	
 }
