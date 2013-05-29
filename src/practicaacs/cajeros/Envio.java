@@ -5,7 +5,6 @@ import practicaacs.fap.CodigosMensajes;
 public class Envio {
 
 	private String num_tarjeta;
-
 	private CodigosMensajes tipoMensaje;
 	private int importe;
 	

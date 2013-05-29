@@ -181,7 +181,7 @@ public class RealizarReintegro_IU extends javax.swing.JFrame {
 	        //Añadimos los componentes del envio
 	        this.envio.setTipoMensaje(CodigosMensajes.SOLREINTEGRO);
 	        this.envio.setImporte(importe_reintegro);
-	        //enviar_solicitud();
+	        enviar_solicitud();
 	        
 	        this.EsperandoRespuestaLabel.setVisible(false);
 	        this.SaldoLabel.setVisible(true);

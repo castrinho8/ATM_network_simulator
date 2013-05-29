@@ -33,8 +33,8 @@ public class ServidorConsorcio_Bancos extends Thread{
 	
 	private boolean abierto_serv_bancos;
 	private DatagramSocket socketServidor;
-	//Banco,sesion
-	private HashMap<String,Sesion> sesiones;
+	
+	private HashMap<String,Sesion> sesiones; //Banco,sesion
 	
 	/**
 	 * Constructor de la clase ServidorConsorcio_Cajeros
@@ -188,9 +188,8 @@ public class ServidorConsorcio_Bancos extends Thread{
      * CAJERO->CONSORCIO->BANCOS
      * @param message El mensaje a enviar.
      */
-    public void send_message(MensajeDatos message,InetAddress ip, int puerto){
-    	//Crea un Thread y envia el mensaje
-    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,ip,puerto,consorcio,this,socketServidor);
+    public void sendToBanco(MensajeDatos message,InetAddress ip_cajero, int puerto_cajero){
+    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,ip_cajero,puerto_cajero,consorcio,this,socketServidor);
     	c.start();
     }
     

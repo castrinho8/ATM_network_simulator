@@ -69,7 +69,7 @@ public class Cajero{
 		try {
 			socketCajero = new DatagramSocket(this.cajero_port);
 		 }catch (IOException e) {
-			 System.out.println("Error al crear el objeto socket cliente");
+			 System.out.println("Error al crear el objeto socketCajero");
 			 System.exit(-1);
 		 }
 	}
@@ -82,7 +82,6 @@ public class Cajero{
     public Mensaje crear_mensaje(Envio env){
     	MensajeDatos envio = null;
     	
-    	//Llama a un metodo de la iu que o tiene los datos y generamos el mensaje
     	switch(env.getTipoMensaje()){	
 	    	case SOLSALDO:{
 	        	envio = new SolSaldo(this.id_cajero,this.id_consorcio,
@@ -132,7 +131,7 @@ public class Cajero{
     public Mensaje enviar_mensaje(Mensaje envio) throws IOException, ClassNotFoundException{
     	
     	Calendar time = Calendar.getInstance();
-    	System.out.println("ENVIO: Cajero: " + this.id_cajero + " a las " + time.getTime());
+    	System.out.println("ENVIO: Cajero: " + this.id_cajero + " a las " + time.getTime() + " \n" + envio.toString());
 
     	//Crea el Datagrama a enviar
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),this.consorcio_address,this.consorcio_port);
@@ -153,6 +152,7 @@ public class Cajero{
 			//Recibe datos
 			socketCajero.receive(inputPacket);
 		}catch (SocketTimeoutException e){
+			System.out.println("Timeout");
 		}catch (IOException e) {
 			System.out.println("Error al recibir.");
 			System.exit ( 0 );

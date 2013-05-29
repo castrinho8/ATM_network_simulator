@@ -21,7 +21,6 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     	actualizarListaCajeros();
     	actualizarListaBancos();
     	this.setLocationRelativeTo(null);
-        //this.DisponibleButton.setActionCommand("activado");
     }
 
     /**
@@ -37,7 +36,6 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         SolButton = new javax.swing.JButton();
         FinButton = new javax.swing.JButton();
         DisponibleButton = new javax.swing.JButton();
-//        DisponibleButton = new javax.swing.JRadioButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         cajerosList = new javax.swing.JList();
         jScrollPane4 = new javax.swing.JScrollPane();
@@ -68,7 +66,6 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
             }
         });
 
-       // DisponibleButton.setSelected(true);
         DisponibleButton.setText("Cambiar Estado");
         DisponibleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -209,9 +206,6 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
      * @param evt 
      */
     private void DisponibleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisponibleButtonActionPerformed
-        if(evt.getActionCommand().equals("activado")){
-            System.out.println("MARCADO");
-        }
         this.consorcio.getBancos_server().cambiar_estado();
     }//GEN-LAST:event_DisponibleButtonActionPerformed
 
@@ -251,7 +245,6 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList BancosLIst;
-    //private javax.swing.JRadioButton DisponibleButton;
     private javax.swing.JButton DisponibleButton;
     private javax.swing.JButton FinButton;
     private javax.swing.JButton SolButton;

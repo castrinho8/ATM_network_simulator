@@ -4,9 +4,9 @@ import java.io.*;
 import java.net.*;
 import java.util.Calendar;
 
+import practicaacs.consorcio.aux.TipoAccion;
 import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.consorcio.bd.Database_lib;
-import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 
 /**
@@ -31,21 +31,23 @@ public class ServidorConsorcio_Cajeros extends Thread{
 		this.port = puerto;
 		this.abierto_serv_cajeros = false;
 		
+		//Establece el servidor
 		try {
 			 socketServidor = new DatagramSocket(this.port);
 		 }catch (IOException e) {
 			 System.out.println("Error al crear el objeto socket servidor Consorcio_Cajeros");
 			 System.exit(-1);
 		 }
-		try { //Establece un timeout
+		//Establece un timeout
+		try {
 			socketServidor.setSoTimeout(100000);
 		} catch (SocketException e) {
-			e.printStackTrace();
+			 System.out.println("Error estableciendo el timeout");
+			 e.printStackTrace();
+			 System.exit(-1);
 		}
 	}
 	
-	
-	//-------GETTERS & SETTERS-------
 	public int getPuerto() {
 		return port;
 	}
@@ -53,25 +55,23 @@ public class ServidorConsorcio_Cajeros extends Thread{
     public boolean isOnline() {
 		return abierto_serv_cajeros;
 	}
-	//-------END GETTERS & SETTERS-------
 
+    /**
+     * Método RUN que ejecuta el thread del Servidor.
+     */
 	@Override
 	public void run() {
 		abrir_servidorCajeros();
 		while(true){
-			try {
-				if(isOnline())
-					recibir_servidorCajeros();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			if(isOnline())
+				recibir_servidorCajeros();
 		}
 	}
 	
 	/**
-     * Levanta el servidorCajeros
+     * Prepara el servidorCajeros para recibir un envio.
      */
-    public void recibir_servidorCajeros() throws IOException{
+    public void recibir_servidorCajeros(){
     	
 		byte [] recibirDatos = new byte[1024];
 		
@@ -82,7 +82,7 @@ public class ServidorConsorcio_Cajeros extends Thread{
 			socketServidor.receive(inputPacket);
 
 			//Crea un thread para tratar el Datagrama recibido
-			Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this.socketServidor);
+			Thread t = new ConexionConsorcio_Cajeros(TipoAccion.CONEXION,inputPacket,this.consorcio,this.socketServidor);
 			t.start();
 
 		}catch (SocketTimeoutException e){
@@ -118,21 +118,9 @@ public class ServidorConsorcio_Cajeros extends Thread{
      * BANCOS->CONSORCIO->CAJERO
      * @param respuesta El mensaje a enviar.
      */
-    public void reply_message(MensajeDatos respuesta, InetAddress ip, int puerto){
-		
-    	//Guardamos el Mensaje en la BD (Tabla de MENSAJES)
-		Database_lib.getInstance().almacenar_mensaje(respuesta,TipoOrigDest.CONSORCIO,respuesta.getOrigen(),TipoOrigDest.CAJERO,respuesta.getDestino());
-
-		//Creamos el datagrama
-		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip,puerto);
-		
-		try{
-			//Enviamos el mensaje
-			this.socketServidor.send(enviarPaquete);
-		}catch (IOException e) {
-			System.out.println("Error al enviar");
-			System.exit ( 0 );
-		}
+    public void sendToCajero(MensajeDatos respuesta, InetAddress ip_destino, int puerto_destino){
+		ConexionConsorcio_Cajeros c = new ConexionConsorcio_Cajeros(TipoAccion.ENVIO,respuesta,this.consorcio,socketServidor,ip_destino,puerto_destino);
+    	c.start();
     }
 }
 

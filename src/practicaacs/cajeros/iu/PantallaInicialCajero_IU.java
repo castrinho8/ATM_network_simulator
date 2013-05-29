@@ -1,7 +1,5 @@
 package practicaacs.cajeros.iu;
 
-import java.net.UnknownHostException;
-
 import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 
@@ -14,7 +12,6 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
      * Creates new form Ventana_principal
      */
     public PantallaInicialCajero_IU(Cajero caj) {
-    	//Instanciamos el cajero por primera vez
     	this.cajero = caj;
     	initComponents();
         inicializa_visibilidades();
@@ -22,7 +19,7 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
     }
 
     /**
-     * Funcion que inicializa las visibilidades
+     * Funcion que inicializa las visibilidades y los campos de texto
      */
     private void inicializa_visibilidades(){
         this.TarjetaTextField.setText("");

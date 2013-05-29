@@ -189,6 +189,7 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
 	    	inicializa_visibilidades();
 	        String importe = this.ImporteText.getText();
 	        String cdestino = this.CuentaText.getText();
+	        
 	        //Comprobamos si se ha introducido la cuenta y el importe
 	        if(importe.equals("") | cdestino.equals("")){
 	        	throw new NumberFormatException();
@@ -201,7 +202,7 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
 	        this.envio.setTipoMensaje(CodigosMensajes.SOLTRASPASO);
 	        this.envio.setImporte(importe_traspaso);
 	        this.envio.setNum_cuenta_destino(cuenta_destino);
-	       // enviar_solicitud();
+	        enviar_solicitud();
 	        
 	        this.EsperandoRespuestaLabel.setVisible(false);
 	        this.ErrorLabel.setVisible(false);

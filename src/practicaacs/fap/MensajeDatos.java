@@ -24,6 +24,10 @@ public abstract class MensajeDatos extends Mensaje {
 	
 	public MensajeDatos(){}
 
+	public void setNmsg(int nmsg) {
+		this.nmsg = nmsg;
+	}
+
 	@Override
 	protected String printCabecera() {
 		return super.printCabecera() + 

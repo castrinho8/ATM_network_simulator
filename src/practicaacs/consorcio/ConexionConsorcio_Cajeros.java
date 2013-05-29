@@ -3,8 +3,10 @@ package practicaacs.consorcio;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import practicaacs.consorcio.aux.EstadoEnvio;
+import practicaacs.consorcio.aux.TipoAccion;
 import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
@@ -20,58 +22,97 @@ import practicaacs.fap.*;
 public class ConexionConsorcio_Cajeros extends Thread{
 	
 	private Consorcio consorcio;
-	
+	private TipoAccion tipo_accion;
+
 	private DatagramPacket input_packet;
 	private DatagramSocket output_socket;
 	
+	private MensajeDatos respuesta;
+	private InetAddress ip_envio;
+	private int puerto_envio;
+
+	
+	/*--------------------------------------
+	  ----------- CONSTRUCTORES ------------
+	  --------------------------------------*/
+
 	/**
 	 * Constructor de la clase ConexionConsorcio_Cajeros.
-	 * @param paquete El paquete a enviar.
-	 * @param cons El consorcio correspondiente.
-	 * @param socket El socket para la conexión creada.
 	 */
-	public ConexionConsorcio_Cajeros(DatagramPacket paquete,Consorcio cons, DatagramSocket socket) {
-		super();
+	public ConexionConsorcio_Cajeros(TipoAccion tipo,DatagramPacket paquete,Consorcio cons, DatagramSocket socket) {
 		this.consorcio = cons;
-		
+		this.tipo_accion = tipo;
+
 		this.input_packet = paquete;
 		this.output_socket = socket;
 	}
+	
+	/**
+	 * Constructor de la clase.
+	 */
+	public ConexionConsorcio_Cajeros(TipoAccion tipo, MensajeDatos resp,Consorcio cons, DatagramSocket socket,InetAddress ip,int port){
+		this.consorcio = cons;
+		this.tipo_accion = tipo;
+
+		this.respuesta = resp;
+		this.output_socket = socket;
+		this.puerto_envio = port;
+		this.ip_envio = ip;
+	}
+
+	
+	/*--------------------------------------
+	  --------------- RUN ------------------
+	  --------------------------------------*/
 	
 	/**
 	 * Método que se ejecuta cuando se inicia la ejecución del thread.
 	 */
 	public void run() {
 		try {
-			//Creamos el mensaje correspondiente al recibido
-			Mensaje recibido = Mensaje.parse(new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength()-1));
-			System.out.printf(recibido.toString());
-			
-			//Guardamos el mensaje en la BD (Tabla de MENSAJES)
-			Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
-			
-			//Analizamos el mensaje y realizamos las acciones correspondientes
-			analizar_mensaje(recibido);
+			switch(this.tipo_accion){
+				//RECEPCION DE MENSAJE DE CAJERO -> BANCO
+				case CONEXION:{
+					//Creamos el mensaje correspondiente al recibido
+					Mensaje recibido = Mensaje.parse(new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength()-1));
+					System.out.printf(recibido.toString());
+					
+					//Guardamos el mensaje en la BD (Tabla de MENSAJES)
+					Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
+					
+					//Analizamos el mensaje y realizamos las acciones correspondientes
+					analizar_mensaje(recibido);
+					break;
+				}
+				//REENVIO DE MENSAJE DEL BANCO -> CAJERO
+				case ENVIO:{
+					this.sendToCajero(respuesta,this.ip_envio,this.puerto_envio);
+					break;
+				}
+			}
 		}
 		catch (Exception e) {
 	    // manipular las excepciones
 		}
 	}
 	
+
+	/*-----------------------------------------------
+	------------FUNCIONES DE ENVIO DE DATOS-----------
+	-------------------------------------------------*/
+
 	/**
 	 * Funcion que envia el mensaje pasado por parámetro con los datos de la conexion.
 	 * Por lo tanto, solo sirve para responder el envio hacia el Cajero.
 	 * @param respuesta El mensaje a enviar
 	 */
-	public void reply_message(MensajeDatos respuesta){
+	public void sendToCajero(MensajeDatos respuesta,InetAddress ip_cajero,int port_cajero){
 		
-		System.out.printf(respuesta.toString());
-
 		//Guardamos el Mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(respuesta,TipoOrigDest.CONSORCIO,respuesta.getOrigen(),TipoOrigDest.CAJERO,respuesta.getDestino());
 
 		//Creamos el datagrama
-		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),this.output_socket.getInetAddress(),this.output_socket.getPort());
+		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip_cajero,port_cajero);
 		
 		try{
 			//Enviamos el mensaje
@@ -89,15 +130,24 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * @param message El mensaje a enviar.
 	 * @param numTarjeta El número de tarjeta, necesario para cambiar el destino.
 	 */
-	public void reenviar_mensaje(MensajeDatos message,String numTarjeta){
+	public void sendToBanco(MensajeDatos message,String numTarjeta){
+		
+		//Cambiamos origen y destino
 		String destino = numTarjeta.substring(0, 8); //Id_banco
 		String origen = this.consorcio.getId_consorcio(); //Id_consorcio
 		message.setDestino(destino);
 		message.setOrigen(origen);
 
 		//Delegar en el ServidorBancos para el reenvio
-		this.consorcio.getBancos_server().send_message(message,this.output_socket.getInetAddress(),this.output_socket.getPort());
+		this.consorcio.getBancos_server().sendToBanco(message,this.output_socket.getInetAddress(),this.output_socket.getPort());
 	}
+	
+	
+
+	/*--------------------------------------
+	  ------- METODOS DE ANALISIS ----------
+	  --------------------------------------*/
+	
 	
 	/**
 	 * Función que selecciona la accion a realizar en funcion del tipo de mensaje recibido.
@@ -156,6 +206,12 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		}
 	}
 	
+
+	/*--------------------------------------
+	  ----- METODOS DE COMPORTAMIENTO ------
+	  --------------------------------------*/
+
+	
 	/**
 	 * Función que implementa el comportamiento de la consulta de saldo.
 	 * @param recibido El mensaje de consulta de saldo recibido
@@ -180,7 +236,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -218,7 +274,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 						0,CodigosMovimiento.OTRO,true,0,null/*Fecha*/);
 			
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -251,7 +307,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespReintegro(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0); 
 						
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ALMACENAMIENTO:{
@@ -263,7 +319,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespReintegro(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo); 
 
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -297,7 +353,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespAbono(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 						
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ALMACENAMIENTO:{
@@ -309,7 +365,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespAbono(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo);
 	
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -342,7 +398,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespTraspaso(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0,true,0);
 						
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ALMACENAMIENTO:{
@@ -360,7 +416,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 						signoOrigen,saldoOrigen,signoDestino,saldoDestino);
 	
 				//Enviamos el mensaje
-				reply_message(respuesta);
+				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{

@@ -22,7 +22,7 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
         this.parent = padre;
         this.cajero = caj;
         initComponents();
-		this.ConsultandoLabel.setVisible(false);
+		this.ConsultandoLabel.setVisible(true);
 		enviar_consulta(env);
         this.setLocationRelativeTo(null);
     }
@@ -36,7 +36,6 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
     	//Inicializar el mensaje
     	env.setTipoMensaje(CodigosMensajes.SOLSALDO);
     	Mensaje envio = this.cajero.crear_mensaje(env);
-    	this.ConsultandoLabel.setVisible(true);
     	
     	//Realizar el envio
     	RespSaldo respuesta;

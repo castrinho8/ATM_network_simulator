@@ -51,8 +51,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	//ENVIO
 	private MensajeDatos envio;
-	private InetAddress ip_envio;
-	private int puerto_envio;
+	private InetAddress ip_cajero;
+	private int puerto_cajero;
 	
 	
 	/*---------------------------------------------
@@ -76,8 +76,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		this.tipo_accion = tipo;
 		this.envio = env;
-		this.ip_envio = ip;
-		this.puerto_envio = puerto;
+		this.ip_cajero = ip;
+		this.puerto_cajero = puerto;
 		this.output_socket =  socket;
 	}
 	
@@ -90,6 +90,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 		this.id_banco_rec = id_b;
 		this.output_socket =  socket;
 	}
+	
+	
+	/*--------------------------------------
+	  --------------- RUN ------------------
+	  --------------------------------------*/
+
 	
 	/**
 	 * Método que obtiene el Mensaje a partir del paquete y analiza dicho 
@@ -116,7 +122,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 					break;
 				}
 				case ENVIO:{
-					reenviarMensajeCajero(this.envio);
+					resendToBanco(this.envio);
 					break;
 				}
 			}	
@@ -138,10 +144,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * BANCO->CONSORCIO->CAJERO
 	 * @param respuesta
 	 */
-	public void responderMensajeCajero(MensajeDatos respuesta){
+	public void sendToCajero(MensajeDatos respuesta){
 		
-    	System.out.printf(respuesta.toString());
-
     	String id_banco = respuesta.getOrigen();
     	
     	//Cambiar origen y destino
@@ -151,10 +155,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 		respuesta.setOrigen(origen);
 		
 		//Obtenemos la direccion y el puerto a donde enviar
-		InetAddress ip = Database_lib.getInstance().getIpEnvio(id_banco,respuesta.getNumcanal());
-		int puerto = Database_lib.getInstance().getPortEnvio(id_banco,respuesta.getNumcanal());
+		InetAddress ip_dest = Database_lib.getInstance().getIpEnvio(id_banco,respuesta.getNumcanal());
+		int puerto_dest = Database_lib.getInstance().getPortEnvio(id_banco,respuesta.getNumcanal());
 
-		this.consorcio.getCajeros_server().reply_message(respuesta,ip,puerto);
+		//Delegar en el ServidorCajeros para el reenvio
+		this.consorcio.getCajeros_server().sendToCajero(respuesta,ip_dest,puerto_dest);
 	}
 	
 	/**
@@ -163,16 +168,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * ENVIA MENSAJES DE CONTROL -  CONSORCIO->BANCO
 	 * @param envio El mensaje a enviar.
 	 */
-	private void enviar_mensaje(Mensaje envio){
-		
-		System.out.printf(envio.toString());
+	private void sendToBanco(Mensaje envio){
 		
     	String id_banco = envio.getDestino();
 
 		//Obtenemos la direccion y el puerto a donde enviar
 		InetAddress ip = Database_lib.getInstance().getIpBanco(id_banco);
 		int puerto = Database_lib.getInstance().getPortBanco(id_banco);
-		
+
+		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,ip_local,puerto_local,canal);
+
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
 
@@ -191,7 +197,13 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * ENVIA MENSAJES DE DATOS - CONSORCIO->BANCO
 	 * @param envio
 	 */
-	private void reenviarMensajeCajero(MensajeDatos envio){
+	private void resendToBanco(MensajeDatos envio){
+		
+    	String id_banco = envio.getDestino();
+
+		//Obtenemos la direccion y el puerto a donde enviar
+		InetAddress ip = Database_lib.getInstance().getIpBanco(id_banco);
+		int puerto = Database_lib.getInstance().getPortBanco(id_banco);
 		
 		//Seleccionamos el canal y se lo añadimos el mensaje
 		int canal = Database_lib.getInstance().seleccionarCanal(envio.getDestino());
@@ -199,12 +211,13 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Seleccionamos el numero de mensaje siguiente en el canal
 		int n_mensaje = Database_lib.getInstance().selecciona_num_mensaje(envio.getDestino(),canal);
+		envio.setNmsg(n_mensaje);
 		
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.ip_envio,this.puerto_envio,canal);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.ip_cajero,this.puerto_cajero,canal);
 		
 		//Creamos el datagrama
-		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),this.ip_envio,this.puerto_envio);
+		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
 
 		try{
 			/*			
@@ -223,7 +236,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	
 	/*-----------------------------------------------
-	------------- FUNCIONES AUXILIARES -------------
+	--------------- MÉTODOS DE ANALISIS -------------
 	-------------------------------------------------*/
 	
 	
@@ -320,9 +333,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 		}
 	}
 
+	
 	/*------------------------------------------------
-	----------- ANALIZADORES DE SOLICITUDES ----------
+	----------- METODOS DE COMPORTAMIENTO ----------
 	-------------------------------------------------*/
+	
 	
 	/**
 	 * LLama a abrir sesion y crea un mensaje respuesta para ello
@@ -351,16 +366,16 @@ public class ConexionConsorcio_Bancos extends Thread {
 			Database_lib.getInstance().abrir_sesion(id_banco,this.input_packet.getAddress().toString(),recibido.getPuerto(),recibido.getNcanales());
 			
 			//Envia la respuesta
-			this.enviar_mensaje(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
+			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
 
 			//Enviamos los mensajes offline de este banco
 			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
-				this.enviar_mensaje(m);
+				this.sendToBanco(m);
 			}
 		}
 		else{ //Si hay errores respondemos con el error correspondiente
 			//Envia la respuesta
-			this.enviar_mensaje(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
+			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
 		}
 	}
 	
@@ -412,7 +427,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	    	
 		}
 		//Envia la respuesta
-    	this.enviar_mensaje(new RespCierreSesion(origen,destino,
+    	this.sendToBanco(new RespCierreSesion(origen,destino,
     			cod_resp,cod_error,
     			reintegros_consorcio,abonos_consorcio,traspasos_consorcio));
 	}
@@ -439,7 +454,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	    	Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesDetida.instance());
 		}
 		//Envia la respuesta
-		this.enviar_mensaje(new RespDetTrafico(origen,destino,cod_resp,cod_error));
+		this.sendToBanco(new RespDetTrafico(origen,destino,cod_resp,cod_error));
 	}	
 	
 	/**
@@ -464,21 +479,21 @@ public class ConexionConsorcio_Bancos extends Thread {
     		Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesAberta.instance());
 
     		//Enviar el mensaje confirmando la apertura
-    		this.enviar_mensaje(new RespReanTrafico(origen,destino,cod_resp,cod_error));
+    		this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error));
     		
 			//Enviamos los mensajes offline de este banco
 			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
-				this.enviar_mensaje(m);
+				this.sendToBanco(m);
 			}
 			
 		}else{
 			//En caso de error, enviamos el error
-			this.enviar_mensaje(new RespReanTrafico(origen,destino,cod_resp,cod_error));
+			this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error));
 		}
 	}
 	
 	/**
-	 * 
+	 * Metodo que inicia la recuperacion
 	 * @param recibido El mensaje recibido.
 	 */
 	public void manejar_iniciar_recuperacion(RespIniTraficoRec recibido){
@@ -493,7 +508,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 			//Consultar ultimos envios en la BD y reenviarlos
 			for(Mensaje m : Database_lib.getInstance().recupera_ultimos_mensajes(id_banco)){
-				this.enviar_mensaje(m);
+				this.sendToBanco(m);
 			}
 		}else{
 			System.out.println("Error iniciando a recuperación: " + cod_error.getMensaje());
@@ -502,7 +517,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 	
 	/**
-	 * 
+	 * Método que finaliza la recuperacion
 	 * @param recibido El mensaje recibido.
 	 */
 	private void manejar_finalizar_recuperacion(RespFinTraficoRec recibido){
@@ -524,10 +539,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 	}
 	
 	
-	/*
-	 ----------------------------------------
-	 ------------ SOLICITUDES ---------------
-	 ----------------------------------------*/
+	/*-----------------------------------------------
+	------------------- SOLICITUDES -----------------
+	-------------------------------------------------*/
+
 	
 	/**
 	 * Genera y envia un mensaje de solicitud de inicio de trafico en recuperacion:
@@ -541,6 +556,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 		//Enviamos la solicitud de recuperacion
 		SolIniTraficoRec envio = new SolIniTraficoRec(origen,destino); 
+		this.sendToBanco(envio);
 	}
 	
 	/**
@@ -554,12 +570,18 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String destino = id_banco;
 		
 		SolFinTraficoRec envio = new SolFinTraficoRec(origen,destino);
+		this.sendToBanco(envio);
 	}
+	
 	
 	/*-----------------------------------------------
 	--------------- MENSAJES DE DATOS ---------------
 	-------------------------------------------------*/
 	
+	/**
+	 * Método que se ejecuta para dar respuesta a los mensajes de datos recibidos por el banco.
+	 * @param recibido El mensaje recibido.
+	 */
 	private void maneja_mensajes_datos(MensajeRespDatos recibido){
 
 		String id_banco = recibido.getOrigen();
@@ -582,7 +604,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		}
 		
 		//Reenviar al Cajero
-		this.responderMensajeCajero(recibido);
+		this.sendToCajero(recibido);
 	}
 	
 	

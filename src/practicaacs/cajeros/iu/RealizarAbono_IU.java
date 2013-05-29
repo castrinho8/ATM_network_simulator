@@ -164,6 +164,7 @@ public class RealizarAbono_IU extends javax.swing.JFrame {
         try{
 	    	inicializa_visibilidades();
 	        String importe = this.ImporteText.getText();
+	        
 	        //Comprobamos si no se ha introducido el importe
 	        if(importe.equals("")){
 	        	throw new NumberFormatException();

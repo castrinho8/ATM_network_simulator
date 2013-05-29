@@ -26,7 +26,7 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
         this.parent = padre;
         this.cajero = caj;
         initComponents();
-        this.ConsultandoLabel.setVisible(false);
+        this.ConsultandoLabel.setVisible(true);
         envia_consulta(env);
         this.setLocationRelativeTo(null);
     }
@@ -35,7 +35,6 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
     	//Inicializar mensaje
     	env.setTipoMensaje(CodigosMensajes.SOLMOVIMIENTOS);
     	Mensaje envio = this.cajero.crear_mensaje(env);
-    	this.ConsultandoLabel.setVisible(true);
     	
     	//Realizar el envio
     	RespMovimientos respuesta;

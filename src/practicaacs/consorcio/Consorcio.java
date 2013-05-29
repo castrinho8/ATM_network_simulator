@@ -29,6 +29,7 @@ public class Consorcio {
 	 * @throws IOException 
 	 */
     public Consorcio(String file) throws IOException{
+    	
     	//Obtenemos los datos del fichero properties
 		Properties prop = new Properties();
 		InputStream is;
@@ -38,11 +39,9 @@ public class Consorcio {
 		} catch (FileNotFoundException e) {
 			System.err.println("Non se encontrou arquivo de configuracion " + file + ".");
 			System.exit(-1);
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		
-    	//leer datos de ficheros
+    	//Lee del fichero de propiedades
 		this.address = InetAddress.getByName(prop.getProperty("consorcio.address"));
 		int puerto_cajeros = new Integer(prop.getProperty("consorcio.cash_server.port"));
 		int puerto_bancos = new Integer(prop.getProperty("consorcio.bank_server.port"));
@@ -79,6 +78,10 @@ public class Consorcio {
 	
 	public void realizar_finRecuperacion(String id_banco){
 		this.bancos_server.solicitar_fin_recuperacion(id_banco);
+	}
+
+	public PantallaInicialConsorcio_IU getIu() {
+		return iu;
 	}
     
 }
