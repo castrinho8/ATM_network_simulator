@@ -26,7 +26,7 @@ import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
 
-public class ServidorConsorcio_Bancos {
+public class ServidorConsorcio_Bancos extends Thread{
 
 	private int port;
 	private Consorcio consorcio;
@@ -54,11 +54,7 @@ public class ServidorConsorcio_Bancos {
 			 System.out.println("Error al crear el objeto socket servidor Consorcio_Bancos");
 			 System.exit(-1);
 		 }
-		try { //Establece un timeout
-			socketServidor.setSoTimeout(1000);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
+		
 	}
 	
 	//-------GETTERS & SETTERS-------
@@ -83,58 +79,92 @@ public class ServidorConsorcio_Bancos {
 	}
 	//-------END GETTERS & SETTERS-------
 	
-
+	@Override
+	public void run() {
+		abrir_servidorBancos();
+		while(true){
+			try {
+				if(isOnline())
+					recibir_servidorBancos();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	/**
      * Levanta el servidorBancos hasta que la variable que controla el estado se ponga a False.
      * El servidor espera la recepcion de mensajes y para cada uno crea un thread para realizar las tareas
      * que sean necesarias.
      */
-    public void levantar_servidorBancos() throws ClassNotFoundException, IOException{
-    	
-    		byte [] recibirDatos = new byte[1024];
+    public void recibir_servidorBancos() throws ClassNotFoundException{
     		
-        	Calendar time = Calendar.getInstance();
-        	System.out.println("APERTURA: Sesion Servidor de Bancos comenzada a las " + time.getTime());
-        	this.abierto_serv_bancos = true;
+    		byte [] recibirDatos = new byte[1024];
 
-    		while(this.abierto_serv_bancos){
-    			//Crea el Datagrama en donde recibir los datos
-    			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
-    			try{
-    				//Recibe datos
-    				socketServidor.receive(inputPacket);
-    				
-    				//Crea una conexión para analizar el datagrama
-    				ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(TipoAccion.CONEXION,inputPacket,this.consorcio,this,this.socketServidor);
-    				t.start();
-    				
-    			}catch (SocketTimeoutException e){
-    				cierra_servidorBancos();
-    			}catch (IOException e) {
-    				System.out.println("Error al recibir");
-    				System.exit ( 0 );
-    			}
-    		}
-    		time = Calendar.getInstance();
-        	System.out.println("CIERRE: Sesion Servidor de Bancos termidada a las " + time.getTime());
+    		//Crea el Datagrama en donde recibir los datos
+			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
+			try{
+				System.out.println("RECIBIR SERVIDOR BANCOS");
+				//Recibe datos
+				socketServidor.receive(inputPacket);
+				
+				if(isOnline()){
+					//Crea una conexión para analizar el datagrama
+					ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(TipoAccion.CONEXION,inputPacket,this.consorcio,this,this.socketServidor);
+					t.start();
+				}
+				
+			}catch (SocketTimeoutException e){
+				System.out.println("Socket timeout");
+				cerrar_servidorBancos();
+			}catch (IOException e) {
+				System.out.println("Error al recibir");
+				System.exit ( 0 );
+			}
         }
+    
+    public void abrir_servidorBancos(){
+    	this.abierto_serv_bancos = true;
+		
+    	try { //Establece un timeout
+			this.socketServidor.setSoTimeout(100000);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		
+    	Calendar time = Calendar.getInstance();
+    	System.out.println("APERTURA: Sesion Servidor de Bancos comenzada a las " + time.getTime());
+    }
     
     /**
      * Cierra el servidorBancos.
      * Para ello cierra todas las sesiones con los bancos
      */
-    public void cierra_servidorBancos(){
+    public void cerrar_servidorBancos(){
     	this.abierto_serv_bancos = false;
-    	ArrayList<String> i = Database_lib.getInstance().getSesiones();
+    	
+		Calendar time = Calendar.getInstance();
+    	System.out.println("CIERRE: Sesion Servidor de Bancos termidada a las " + time.getTime());
+    	
+    	/*ArrayList<String> i = Database_lib.getInstance().getSesiones();
     	String id_banco;
     	//Cerrar todas las conexiones con los bancos
     	while(i.iterator().hasNext()){
     		id_banco = i.iterator().next(); 
     		Database_lib.getInstance().cerrar_sesion(id_banco);
-    	}
+    	}*/
     }
 
+    /**
+     * Método que cambia el estado del servidor
+     */
+    public void cambiar_estado(){
+    	if(isOnline())
+    		cerrar_servidorBancos();
+		else
+			abrir_servidorBancos();
+    }
+    
     /**
      * Método que envia un mensaje de solicitar Recuperacion
      * @param id_banco 

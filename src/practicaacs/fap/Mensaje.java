@@ -121,7 +121,7 @@ public abstract class Mensaje implements java.io.Serializable {
 		} catch (CodigoNoValidoException e) {
 			throw new MensajeNoValidoException("Codigo (\"" + bs.substring(16, 18) + "\") non valido (Mensaje)");
 		}
-			
+
 		try {
 			Mensaje m;
 			if(esRespuestaDatos(tipo)){
@@ -129,6 +129,7 @@ public abstract class Mensaje implements java.io.Serializable {
 			}else{
 				m = Mensaje.codigo_clase.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
 			}
+
 			m.parseComp(bs);
 			return m;
 		}catch (IllegalArgumentException | InvocationTargetException

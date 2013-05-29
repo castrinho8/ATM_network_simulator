@@ -172,6 +172,8 @@ public class ConexionConsorcio_Cajeros extends Thread{
 
 		RespSaldo respuesta = null;
 		
+		System.out.printf("ONLINE:%i-COD_RES:%s",codonline?1:0,cod_resp.toString());
+
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.

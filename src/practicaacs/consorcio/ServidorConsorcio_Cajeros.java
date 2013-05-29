@@ -13,7 +13,7 @@ import practicaacs.fap.MensajeDatos;
  * Clase que implementa un servidor para la recepción de mensajes de los cajeros.
  *
  */
-public class ServidorConsorcio_Cajeros {
+public class ServidorConsorcio_Cajeros extends Thread{
 
 	private int port;
 	private Consorcio consorcio;
@@ -38,7 +38,7 @@ public class ServidorConsorcio_Cajeros {
 			 System.exit(-1);
 		 }
 		try { //Establece un timeout
-			socketServidor.setSoTimeout(10000);
+			socketServidor.setSoTimeout(100000);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
@@ -55,44 +55,62 @@ public class ServidorConsorcio_Cajeros {
 	}
 	//-------END GETTERS & SETTERS-------
 
+	@Override
+	public void run() {
+		abrir_servidorCajeros();
+		while(true){
+			try {
+				if(isOnline())
+					recibir_servidorCajeros();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	/**
      * Levanta el servidorCajeros
      */
-    public void levantar_servidorCajeros() throws IOException{
+    public void recibir_servidorCajeros() throws IOException{
     	
 		byte [] recibirDatos = new byte[1024];
 		
-    	Calendar time = Calendar.getInstance();
-    	System.out.println("APERTURA: Sesion Servidor de Cajeros comenzada a las " + time.getTime());
-    	this.abierto_serv_cajeros = true;
+		//Crea el Datagrama en donde recibir los datos
+		DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
+		try{
+			//Recibe datos
+			socketServidor.receive(inputPacket);
 
-		while(this.isOnline()){
-			//Crea el Datagrama en donde recibir los datos
-			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
-			try{
-				//Recibe datos
-				socketServidor.receive(inputPacket);
-				
-				//Crea un thread para tratar el Datagrama recibido
-				Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this.socketServidor);
-				t.start();
+			//Crea un thread para tratar el Datagrama recibido
+			Thread t = new ConexionConsorcio_Cajeros(inputPacket,this.consorcio,this.socketServidor);
+			t.start();
 
-			}catch (SocketTimeoutException e){
-				cierra_servidorCajeros();
-			}catch (IOException e) {
-				System.out.println("Error al recibir");
-				System.exit ( 0 );
-			}
+		}catch (SocketTimeoutException e){
+			cerrar_servidorCajeros();
+		}catch (IOException e) {
+			System.out.println("Error al recibir");
+			System.exit ( 0 );
 		}
-		time = Calendar.getInstance();
-    	System.out.println("CIERRE: Sesion Servidor de Cajeros termidada a las " + time.getTime());
     }
     	
     /**
+     * Abre el servidorCajeros
+     */
+    public void abrir_servidorCajeros(){
+    	this.abierto_serv_cajeros = true;
+
+    	Calendar time = Calendar.getInstance();
+    	System.out.println("APERTURA: Sesion Servidor de Cajeros comenzada a las " + time.getTime());
+    }
+    
+    /**
      * Cierra el servidorCajeros
      */
-    public void cierra_servidorCajeros(){
+    public void cerrar_servidorCajeros(){
     	this.abierto_serv_cajeros = false;
+
+    	Calendar time = Calendar.getInstance();
+    	System.out.println("CIERRE: Sesion Servidor de Cajeros termidada a las " + time.getTime());
     }
     
     /**

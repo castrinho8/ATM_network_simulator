@@ -20,7 +20,7 @@ public class SolSaldo extends MensajeDatos {
 			boolean codonline, String num_tarjeta, int num_cuenta) {
 		
 		super(origen, destino, CodigosMensajes.SOLSALDO, numcanal, nmsg, codonline);
-		
+
 		assert(num_tarjeta.length() <= 11);
 		assert(num_cuenta >= 0);
 		assert(num_cuenta <=9);

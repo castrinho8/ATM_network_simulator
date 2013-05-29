@@ -23,7 +23,7 @@ public class SolMovimientos extends MensajeDatos {
 
 	@Override
 	protected String printCuerpo() {
-		return String.format("%11s%1i", this.num_cuenta,this.num_tarjeta);
+		return String.format("%11s%1i",this.num_tarjeta, this.num_cuenta);
 	}
 
 	public String getNum_tarjeta() {

@@ -15,18 +15,13 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     /**
      * Creates new form PantallaInicial
      */
-    public PantallaInicialConsorcio_IU() {
-    	try {
-			this.consorcio = new Consorcio("/home/castrinho8/Escritorio/UNI/ACS/res/configuracion");
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
+    public PantallaInicialConsorcio_IU(Consorcio cons) {
+		this.consorcio = cons;
         initComponents();
     	actualizarListaCajeros();
     	actualizarListaBancos();
     	this.setLocationRelativeTo(null);
-        this.DisponibleButton.setActionCommand("activado");
+        //this.DisponibleButton.setActionCommand("activado");
     }
 
     /**
@@ -41,7 +36,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         jProgressBar1 = new javax.swing.JProgressBar();
         SolButton = new javax.swing.JButton();
         FinButton = new javax.swing.JButton();
-        DisponibleButton = new javax.swing.JRadioButton();
+        DisponibleButton = new javax.swing.JButton();
+//        DisponibleButton = new javax.swing.JRadioButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         cajerosList = new javax.swing.JList();
         jScrollPane4 = new javax.swing.JScrollPane();
@@ -72,8 +68,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
             }
         });
 
-        DisponibleButton.setSelected(true);
-        DisponibleButton.setText("Disponible");
+       // DisponibleButton.setSelected(true);
+        DisponibleButton.setText("Cambiar Estado");
         DisponibleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DisponibleButtonActionPerformed(evt);
@@ -215,8 +211,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     private void DisponibleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisponibleButtonActionPerformed
         if(evt.getActionCommand().equals("activado")){
             System.out.println("MARCADO");
-            cambiar_estado();
         }
+        this.consorcio.getBancos_server().cambiar_estado();
     }//GEN-LAST:event_DisponibleButtonActionPerformed
 
     /**
@@ -249,13 +245,14 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new PantallaInicialConsorcio_IU().setVisible(true);
+                new PantallaInicialConsorcio_IU(null).setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList BancosLIst;
-    private javax.swing.JRadioButton DisponibleButton;
+    //private javax.swing.JRadioButton DisponibleButton;
+    private javax.swing.JButton DisponibleButton;
     private javax.swing.JButton FinButton;
     private javax.swing.JButton SolButton;
     private javax.swing.JList cajerosList;
@@ -280,17 +277,6 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     	ArrayList<String> lista = Database_lib.getInstance().MensajesBancoToString();
         this.BancosLIst.setListData(lista.toArray());
     }
-    
-    public void cambiar_estado(){
-    	if(this.consorcio.getBancos_server().isOnline())
-    		this.consorcio.getBancos_server().cierra_servidorBancos();
-		else
-			try {
-				this.consorcio.getBancos_server().levantar_servidorBancos();
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
-				return;
-			}
-    }
+   
     
 }

@@ -10,11 +10,13 @@ import java.util.logging.*;
 import practicaacs.banco.bd.ClienteBDBanco;
 import practicaacs.fap.*;
 import practicaacs.consorcio.bd.*;
+import practicaacs.consorcio.iu.PantallaInicialConsorcio_IU;
 
 public class Consorcio {
 
 	static private int next_id_consorcio = 0;
 
+	private PantallaInicialConsorcio_IU iu;
 	private String id_consorcio;
 	private InetAddress address;
 	
@@ -47,7 +49,12 @@ public class Consorcio {
 		
 		this.id_consorcio = Integer.toString(next_id_consorcio++);
 		this.cajeros_server = new ServidorConsorcio_Cajeros(this,puerto_cajeros);
+		this.cajeros_server.start();
 		this.bancos_server = new ServidorConsorcio_Bancos(this,puerto_bancos);
+		this.bancos_server.start();
+		
+		this.iu = new PantallaInicialConsorcio_IU(this);
+		this.iu.setVisible(true);
 	}
 
 	public ServidorConsorcio_Cajeros getCajeros_server() {
