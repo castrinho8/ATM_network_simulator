@@ -165,8 +165,7 @@ public class FinRecuperacion_IU extends javax.swing.JFrame {
      */
     public void recargar_bancos(){
     	ArrayList<String> sesiones_abiertas = Database_lib.getInstance().getSesiones();
-        JList list = new JList(sesiones_abiertas.toArray());
-        this.jScrollPane1.setViewportView(list);
+    	this.jList1.setListData(sesiones_abiertas.toArray());
     }
 
     public void finalizar_recuperacion(String id_banco){

@@ -166,8 +166,7 @@ public final class SolRecuperacion_IU extends javax.swing.JFrame {
      */
     public void recargar_bancos(){
     	ArrayList<String> sesiones_abiertas = Database_lib.getInstance().getSesiones();
-        JList list = new JList(sesiones_abiertas.toArray());
-        this.jScrollPane1.setViewportView(list);
+    	this.jList1.setListData(sesiones_abiertas.toArray());
     }    
     
     private void solicitar_recuperacion(String id_banco) {

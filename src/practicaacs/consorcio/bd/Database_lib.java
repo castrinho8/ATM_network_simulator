@@ -1145,18 +1145,20 @@ public class Database_lib {
 			while(resultSet.next()){
 				String str1 = resultSet.getString(1);
 				String str2 = resultSet.getString(2);
-				Mensaje m = Mensaje.parse(resultSet.getString(3));
-				
-				String elemento = str1 + "->" + str2 + ": " + m.toString();
+				//Mensaje m = Mensaje.parse(resultSet.getString(3));
+				//String elemento = str1 + "->" + str2 + ": " + m.toString();
+				String test = resultSet.getString(3);
+				String elemento = str1 + "->" + str2 + ": " + test;
+
 				res.add(elemento);
 			}
 			return res;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
-		} catch (MensajeNoValidoException e) {
-			e.printStackTrace();
-			return null;
+		//} catch (MensajeNoValidoException e) {
+		//	e.printStackTrace();
+		//	return null;
 		}
 	}
 	
@@ -1178,18 +1180,19 @@ public class Database_lib {
 			while(resultSet.next()){
 				String str1 = resultSet.getString(1);
 				String str2 = resultSet.getString(2);
-				Mensaje m = Mensaje.parse(resultSet.getString(3));
-				
-				String elemento = str1 + "->" + str2 + ": " + m.toString();
+				//Mensaje m = Mensaje.parse(resultSet.getString(3));
+				//String elemento = str1 + "->" + str2 + ": " + m.toString();
+				String test = resultSet.getString(3);
+				String elemento = str1 + "->" + str2 + ": " + test;
 				res.add(elemento);
 			}
 			return res;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
-		} catch (MensajeNoValidoException e) {
-			e.printStackTrace();
-			return null;
+		//} catch (MensajeNoValidoException e) {
+		//	e.printStackTrace();
+		//	return null;
 		}
 	}
 

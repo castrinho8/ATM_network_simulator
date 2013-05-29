@@ -1,8 +1,12 @@
 package practicaacs.consorcio.iu;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Vector;
 
 import practicaacs.consorcio.Consorcio;
+import practicaacs.consorcio.bd.Database_lib;
 
 public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
 
@@ -19,7 +23,9 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
 			return;
 		}
         initComponents();
-        this.setLocationRelativeTo(null);
+    	actualizarListaCajeros();
+    	actualizarListaBancos();
+    	this.setLocationRelativeTo(null);
         this.DisponibleButton.setActionCommand("activado");
     }
 
@@ -202,12 +208,15 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     /**
-     * Indica si esta disponible o no
+     * Boton DISPONIBLE
+     * Cambia el estado del consorcio abierto/cerrado
      * @param evt 
      */
     private void DisponibleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisponibleButtonActionPerformed
-        if(evt.getActionCommand().equals("activado"))
+        if(evt.getActionCommand().equals("activado")){
             System.out.println("MARCADO");
+            cambiar_estado();
+        }
     }//GEN-LAST:event_DisponibleButtonActionPerformed
 
     /**
@@ -262,13 +271,26 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     // End of variables declaration//GEN-END:variables
 
-    public void actualizarLista_cajero(){
-        
-        this.cajerosList.updateUI();
+    public void actualizarListaCajeros(){
+    	ArrayList<String> lista = Database_lib.getInstance().MensajesCajeroToString();
+        this.cajerosList.setListData(lista.toArray());
     }
     
-    public void actualizarLista_banco(String obj){
-        this.BancosLIst.updateUI();
+    public void actualizarListaBancos(){
+    	ArrayList<String> lista = Database_lib.getInstance().MensajesBancoToString();
+        this.BancosLIst.setListData(lista.toArray());
+    }
+    
+    public void cambiar_estado(){
+    	if(this.consorcio.getBancos_server().isOnline())
+    		this.consorcio.getBancos_server().cierra_servidorBancos();
+		else
+			try {
+				this.consorcio.getBancos_server().levantar_servidorBancos();
+			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+				return;
+			}
     }
     
 }
