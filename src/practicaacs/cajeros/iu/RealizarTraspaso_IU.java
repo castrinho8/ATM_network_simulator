@@ -16,13 +16,15 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
 
     JFrame parent;
     Envio envio;
+    Cajero cajero;
     
     /**
      * Creates new form RealizarTraspaso_IU
      */
-    public RealizarTraspaso_IU(JFrame padre,Envio env) {
+    public RealizarTraspaso_IU(JFrame padre,Cajero caj,Envio env) {
         this.parent = padre;
         this.envio = env;
+        this.cajero = caj;
         initComponents();
         inicializa_visibilidades();
         this.setLocationRelativeTo(null);
@@ -37,12 +39,12 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
     
     private void enviar_solicitud(){
     	//Inicializar el mensaje
-    	Mensaje message = Cajero.instance().crear_mensaje(this.envio);
+    	Mensaje message = this.cajero.crear_mensaje(this.envio);
     	
     	//Realizar el envio
     	RespTraspaso respuesta;
 		try {
-			respuesta = (RespTraspaso) Cajero.instance().enviar_mensaje(message);
+			respuesta = (RespTraspaso) this.cajero.enviar_mensaje(message);
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 			return;
@@ -251,7 +253,7 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new RealizarTraspaso_IU(null,null).setVisible(true);
+                new RealizarTraspaso_IU(null,null,null).setVisible(true);
             }
         });
     }

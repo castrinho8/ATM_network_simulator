@@ -14,13 +14,15 @@ public class RealizarReintegro_IU extends javax.swing.JFrame {
 
     JFrame parent;
     Envio envio;
-
+    Cajero cajero;
+    
     /**
      * Creates new form RealizarReintegro_IU
      */
-    public RealizarReintegro_IU(JFrame padre,Envio env) {
+    public RealizarReintegro_IU(JFrame padre,Cajero caj,Envio env) {
         this.parent = padre;
         this.envio = env;
+        this.cajero = caj;
         initComponents();
         inicializa_visibilidades();
         this.setLocationRelativeTo(null);
@@ -35,12 +37,12 @@ public class RealizarReintegro_IU extends javax.swing.JFrame {
     
     private void enviar_solicitud(){
     	//Inicializar el mensaje
-    	Mensaje message = Cajero.instance().crear_mensaje(this.envio);
+    	Mensaje message = this.cajero.crear_mensaje(this.envio);
     	
     	//Realizar el envio
     	RespAbono respuesta;
 		try {
-			respuesta = (RespAbono) Cajero.instance().enviar_mensaje(message);
+			respuesta = (RespAbono) this.cajero.enviar_mensaje(message);
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 			return;
@@ -227,7 +229,7 @@ public class RealizarReintegro_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new RealizarReintegro_IU(null,null).setVisible(true);
+                new RealizarReintegro_IU(null,null,null).setVisible(true);
             }
         });
     }

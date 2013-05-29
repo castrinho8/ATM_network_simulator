@@ -13,14 +13,17 @@ import practicaacs.fap.RespSaldo;
 public class ConsultarSaldo_IU extends javax.swing.JFrame {
 
     JFrame parent;
+    Cajero cajero;
+    
     /**
      * Creates new form ConsultarSaldo
      */
-    public ConsultarSaldo_IU(JFrame padre,Envio env) {
+    public ConsultarSaldo_IU(JFrame padre,Cajero caj,Envio env) {
         this.parent = padre;
+        this.cajero = caj;
         initComponents();
 		this.ConsultandoLabel.setVisible(false);
-	//	enviar_consulta(env);
+		enviar_consulta(env);
         this.setLocationRelativeTo(null);
     }
 
@@ -32,13 +35,13 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
     private void enviar_consulta(Envio env){
     	//Inicializar el mensaje
     	env.setTipoMensaje(CodigosMensajes.SOLSALDO);
-    	Mensaje envio = Cajero.instance().crear_mensaje(env);
+    	Mensaje envio = this.cajero.crear_mensaje(env);
     	this.ConsultandoLabel.setVisible(true);
     	
     	//Realizar el envio
     	RespSaldo respuesta;
 		try {
-			respuesta = (RespSaldo) Cajero.instance().enviar_mensaje(envio);
+			respuesta = (RespSaldo) this.cajero.enviar_mensaje(envio);
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 			return;
@@ -155,7 +158,7 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ConsultarSaldo_IU(null,null).setVisible(true);
+                new ConsultarSaldo_IU(null,null,null).setVisible(true);
             }
         });
     }

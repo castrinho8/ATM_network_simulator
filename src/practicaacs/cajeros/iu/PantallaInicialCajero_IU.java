@@ -8,13 +8,15 @@ import practicaacs.cajeros.Envio;
 
 public class PantallaInicialCajero_IU extends javax.swing.JFrame {
 
-    /**
+    private Cajero cajero;
+    
+	/**
      * Creates new form Ventana_principal
      */
-    public PantallaInicialCajero_IU() {
+    public PantallaInicialCajero_IU(Cajero caj) {
     	//Instanciamos el cajero por primera vez
-    	Cajero.instance();
-        initComponents();
+    	this.cajero = caj;
+    	initComponents();
         inicializa_visibilidades();
         this.setLocationRelativeTo(null);
     }
@@ -150,7 +152,7 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
 	        //Crea el envio y se lo pasa a la siguiente pantalla
 	        Envio envio = new Envio(tarjeta,num_cuenta);
 	        this.setVisible(false);
-	        new SeleccionAccion_IU(this,envio).setVisible(true);
+	        new SeleccionAccion_IU(this,this.cajero,envio).setVisible(true);
     	}
     	catch (NumberFormatException nfe){
     		//Si hay errores, mostramos el label correspondiente.
@@ -189,7 +191,7 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new PantallaInicialCajero_IU().setVisible(true);
+                new PantallaInicialCajero_IU(null).setVisible(true);
             }
         });
     }

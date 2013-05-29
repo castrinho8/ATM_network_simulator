@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Properties;
 
+import practicaacs.cajeros.iu.PantallaInicialCajero_IU;
 import practicaacs.fap.*;
 
 /**
@@ -24,7 +25,7 @@ public class Cajero{
 
 	static private int next_id_cajero = 0;
 	static private int next_number_message = 0;
-	static private Cajero instancia;
+	static private PantallaInicialCajero_IU iu;
 	
 	private String id_cajero;
 	private InetAddress cajero_address;
@@ -40,7 +41,7 @@ public class Cajero{
 	 * Constructor de la clase Cajero
 	 * @param file Un string con el path del archivo de propiedades.
 	 */
-    private Cajero(String file) throws UnknownHostException {
+    public Cajero(String file) throws UnknownHostException {
     	
     	//Obtenemos los datos del fichero properties
 		Properties prop = new Properties();
@@ -55,9 +56,6 @@ public class Cajero{
 			e.printStackTrace();
 		}
 		
-    	//int port = 2002;
-		//InetAddress direccion = InetAddress.getByName("127.0.0.1");
-		
 		//Direccion del consorcio
 		this.id_consorcio = prop.getProperty("consorcio.id");
 		this.consorcio_address = InetAddress.getByName(prop.getProperty("consorcio.address"));
@@ -65,7 +63,9 @@ public class Cajero{
 		this.cajero_address = InetAddress.getByName(prop.getProperty("cajero.address"));
 		this.cajero_port = new Integer(prop.getProperty("cajero.port"));
 		this.id_cajero = Integer.toString(next_id_cajero++);
-
+		this.iu = new PantallaInicialCajero_IU(this);
+		this.iu.setVisible(true);
+				
 		try {
 			socketCajero = new DatagramSocket(this.cajero_port);
 		 }catch (IOException e) {
@@ -74,21 +74,6 @@ public class Cajero{
 		 }
 	}
 
-    /**
-     * Método del singleton que obtiene o crea la instancia del cajero segun sea necesario.
-     * @return La instancia del Cajero
-     */
-    public static Cajero instance(){
-    	if(instancia == null)
-			try {
-				instancia = new Cajero("/home/castrinho8/Escritorio/UNI/ACS/res/configuracion");
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-				System.exit(0);
-			}
-    	return instancia;
-    }
-    
     /**
      * Método recibe el Envio creado por la IU y genera el mensaje correspondiente a 
      * los datos obtenidos de la IU.

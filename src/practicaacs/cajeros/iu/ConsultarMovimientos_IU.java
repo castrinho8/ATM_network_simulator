@@ -17,28 +17,30 @@ import practicaacs.fap.RespMovimientos;
 public class ConsultarMovimientos_IU extends javax.swing.JFrame {
 
     JFrame parent;
+    Cajero cajero;
     
     /**
      * Creates new form ConsultarMovimientos_IU
      */
-    public ConsultarMovimientos_IU(JFrame padre,Envio env) {
+    public ConsultarMovimientos_IU(JFrame padre,Cajero caj,Envio env) {
         this.parent = padre;
+        this.cajero = caj;
         initComponents();
         this.ConsultandoLabel.setVisible(false);
-       // envia_consulta(env);
+        envia_consulta(env);
         this.setLocationRelativeTo(null);
     }
 
     private void envia_consulta(Envio env){
     	//Inicializar mensaje
     	env.setTipoMensaje(CodigosMensajes.SOLMOVIMIENTOS);
-    	Mensaje envio = Cajero.instance().crear_mensaje(env);
+    	Mensaje envio = this.cajero.crear_mensaje(env);
     	this.ConsultandoLabel.setVisible(true);
     	
     	//Realizar el envio
     	RespMovimientos respuesta;
 		try {
-			respuesta = (RespMovimientos) Cajero.instance().enviar_mensaje(envio);
+			respuesta = (RespMovimientos) this.cajero.enviar_mensaje(envio);
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 			return;
@@ -153,7 +155,7 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ConsultarMovimientos_IU(null,null).setVisible(true);
+                new ConsultarMovimientos_IU(null,null,null).setVisible(true);
             }
         });
     }

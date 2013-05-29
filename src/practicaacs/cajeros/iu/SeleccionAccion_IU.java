@@ -2,18 +2,22 @@ package practicaacs.cajeros.iu;
 
 import javax.swing.JFrame;
 
+import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 
 public class SeleccionAccion_IU extends javax.swing.JFrame {
 
     JFrame parent;
     Envio envio;
+	private Cajero cajero;
+    
     /**
      * Creates new form SeleccionAccion
      */
-    public SeleccionAccion_IU(JFrame padre,Envio env) {
+    public SeleccionAccion_IU(JFrame padre,Cajero caj,Envio env) {
         this.parent = padre;
         this.envio = env;
+        this.cajero = caj;
         initComponents();
         this.setLocationRelativeTo(null);
     }
@@ -132,12 +136,12 @@ public class SeleccionAccion_IU extends javax.swing.JFrame {
 
     private void consultarSaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_consultarSaldoButtonActionPerformed
         this.setVisible(false);
-        new ConsultarSaldo_IU(this,this.envio).setVisible(true);
+        new ConsultarSaldo_IU(this,this.cajero,this.envio).setVisible(true);
     }//GEN-LAST:event_consultarSaldoButtonActionPerformed
 
     private void consultarMovimientosButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_consultarMovimientosButtonActionPerformed
         this.setVisible(false);
-        new ConsultarMovimientos_IU(this,this.envio).setVisible(true);
+        new ConsultarMovimientos_IU(this,this.cajero,this.envio).setVisible(true);
     }//GEN-LAST:event_consultarMovimientosButtonActionPerformed
 
     private void SalirButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SalirButtonActionPerformed
@@ -148,17 +152,17 @@ public class SeleccionAccion_IU extends javax.swing.JFrame {
 
     private void realizarAbonoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_realizarAbonoButtonActionPerformed
         this.setVisible(false);
-        new RealizarAbono_IU(this,this.envio).setVisible(true);
+        new RealizarAbono_IU(this,this.cajero,this.envio).setVisible(true);
     }//GEN-LAST:event_realizarAbonoButtonActionPerformed
 
     private void realizarReintegroButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_realizarReintegroButtonActionPerformed
         this.setVisible(false);
-        new RealizarReintegro_IU(this,this.envio).setVisible(true);
+        new RealizarReintegro_IU(this,this.cajero,this.envio).setVisible(true);
     }//GEN-LAST:event_realizarReintegroButtonActionPerformed
 
     private void realizarTraspasoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_realizarTraspasoButtonActionPerformed
         this.setVisible(false);
-        new RealizarTraspaso_IU(this,this.envio).setVisible(true);
+        new RealizarTraspaso_IU(this,this.cajero,this.envio).setVisible(true);
     }//GEN-LAST:event_realizarTraspasoButtonActionPerformed
 
     /**
@@ -191,7 +195,7 @@ public class SeleccionAccion_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new SeleccionAccion_IU(null,null).setVisible(true);
+                new SeleccionAccion_IU(null,null,null).setVisible(true);
             }
         });
     }

@@ -15,13 +15,15 @@ public class RealizarAbono_IU extends javax.swing.JFrame {
 
     JFrame parent;
     Envio envio;
+    Cajero cajero;
     
     /**
      * Creates new form RealizarAbono
      */
-    public RealizarAbono_IU(JFrame padre,Envio env) {
+    public RealizarAbono_IU(JFrame padre,Cajero caj,Envio env) {
         this.parent = padre;
         this.envio = env;
+        this.cajero = caj;
         initComponents();
         inicializa_visibilidades();
         this.setLocationRelativeTo(null);
@@ -36,12 +38,12 @@ public class RealizarAbono_IU extends javax.swing.JFrame {
     
     private void enviar_solicitud(){
     	//Inicializar el mensaje
-    	Mensaje message = Cajero.instance().crear_mensaje(this.envio);
+    	Mensaje message = this.cajero.crear_mensaje(this.envio);
     	
     	//Realizar el envio
     	RespAbono respuesta;
 		try {
-			respuesta = (RespAbono) Cajero.instance().enviar_mensaje(message);
+			respuesta = (RespAbono) this.cajero.enviar_mensaje(message);
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 			return;
@@ -172,7 +174,7 @@ public class RealizarAbono_IU extends javax.swing.JFrame {
 	        //Añadimos los componentes del envio
 	        this.envio.setTipoMensaje(CodigosMensajes.SOLABONO);
 	        this.envio.setImporte(importe_abono);
-	        //enviar_solicitud();
+	        enviar_solicitud();
 	        
 	        this.EsperandoRespuestaLabel.setVisible(false);
 	        this.ErrorLabel.setVisible(false);
@@ -221,7 +223,7 @@ public class RealizarAbono_IU extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new RealizarAbono_IU(null,null).setVisible(true);
+                new RealizarAbono_IU(null,null,null).setVisible(true);
             }
         });
     }
