@@ -40,7 +40,7 @@ public enum CodigosRespuesta {
 			}
 		}catch(NumberFormatException e){}
 		
-		throw new CodigoNoValidoException();
+		throw new CodigoNoValidoException("O valor '" + string + "' non é un código válido.");
 	}
 	
 }
