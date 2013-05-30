@@ -5,8 +5,6 @@ import java.net.*;
 import java.util.Calendar;
 
 import practicaacs.consorcio.aux.TipoAccion;
-import practicaacs.consorcio.aux.TipoOrigDest;
-import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.MensajeDatos;
 
 /**
@@ -78,8 +76,10 @@ public class ServidorConsorcio_Cajeros extends Thread{
 		//Crea el Datagrama en donde recibir los datos
 		DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
 		try{
+			System.out.println("ESPERANDO");
 			//Recibe datos
 			socketServidor.receive(inputPacket);
+			System.out.println("RECIBIDO");
 
 			//Crea un thread para tratar el Datagrama recibido
 			Thread t = new ConexionConsorcio_Cajeros(TipoAccion.CONEXION,inputPacket,this.consorcio,this.socketServidor);

@@ -73,12 +73,15 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			switch(this.tipo_accion){
 				//RECEPCION DE MENSAJE DE CAJERO -> BANCO
 				case CONEXION:{
+					System.out.println("CREA THREAD");
 					//Creamos el mensaje correspondiente al recibido
 					Mensaje recibido = Mensaje.parse(new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength()-1));
 					System.out.printf(recibido.toString());
 					
 					//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 					Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
+					//Actualizar la interfaz grafica
+					this.consorcio.actualizarIU();
 					
 					//Analizamos el mensaje y realizamos las acciones correspondientes
 					analizar_mensaje(recibido);
@@ -110,7 +113,9 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		//Guardamos el Mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(respuesta,TipoOrigDest.CONSORCIO,respuesta.getOrigen(),TipoOrigDest.CAJERO,respuesta.getDestino());
-
+		//Actualizar la interfaz grafica
+		this.consorcio.actualizarIU();
+		
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip_cajero,port_cajero);
 		
@@ -138,7 +143,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		message.setDestino(destino);
 		message.setOrigen(origen);
 
-		//Delegar en el ServidorBancos para el reenvio
+		//Delegar en el ServidorBancos para el reenvio y el almacenamiento del envio
 		this.consorcio.getBancos_server().sendToBanco(message,this.output_socket.getInetAddress(),this.output_socket.getPort());
 	}
 	

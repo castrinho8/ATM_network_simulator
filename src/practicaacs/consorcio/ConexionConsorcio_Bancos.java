@@ -26,6 +26,7 @@ import practicaacs.banco.estados.SesNonAberta;
 import practicaacs.banco.estados.SesRecuperacion;
 import practicaacs.consorcio.aux.Sesion;
 import practicaacs.consorcio.aux.TipoAccion;
+import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
@@ -105,10 +106,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 		try {
 			switch(this.tipo_accion){
 				case CONEXION:{
+					System.out.printf("recibe:\n");
+
 					//Creamos el mensaje correspondiente al recibido
 					Mensaje recibido = Mensaje.parse(new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength()-1));
 					System.out.printf(recibido.toString());
 				
+					//Guardamos el mensaje en la BD (Tabla de MENSAJES)
+					Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CONSORCIO,recibido.getOrigen(),TipoOrigDest.BANCO,recibido.getDestino());
+					//Actualizar la interfaz grafica
+					this.consorcio.actualizarIU();
+					
 					//Analizamos el mensaje y realizamos las acciones correspondientes
 					analizar_mensaje(recibido);
 					break;
@@ -158,7 +166,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		InetAddress ip_dest = Database_lib.getInstance().getIpEnvio(id_banco,respuesta.getNumcanal());
 		int puerto_dest = Database_lib.getInstance().getPortEnvio(id_banco,respuesta.getNumcanal());
 
-		//Delegar en el ServidorCajeros para el reenvio
+		//Delegar en el ServidorCajeros para el reenvio y el almacenamiento del envio
 		this.consorcio.getCajeros_server().sendToCajero(respuesta,ip_dest,puerto_dest);
 	}
 	
@@ -175,10 +183,16 @@ public class ConexionConsorcio_Bancos extends Thread {
 		//Obtenemos la direccion y el puerto a donde enviar
 		InetAddress ip = Database_lib.getInstance().getIpBanco(id_banco);
 		int puerto = Database_lib.getInstance().getPortBanco(id_banco);
-
+		int canal = 0; //Porque solo envia mensajes de control
+		
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,ip_local,puerto_local,canal);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.output_socket.getLocalAddress(),this.output_socket.getLocalPort(),canal);
 
+		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
+		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
+		//Actualizar la interfaz grafica
+		this.consorcio.actualizarIU();
+		
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
 
@@ -215,6 +229,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
 		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.ip_cajero,this.puerto_cajero,canal);
+
+		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
+		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
+		//Actualizar la interfaz grafica
+		this.consorcio.actualizarIU();
 		
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
