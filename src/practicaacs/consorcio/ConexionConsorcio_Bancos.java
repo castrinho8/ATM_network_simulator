@@ -103,14 +103,19 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * mensaje para realizar la tarea adecuada.
 	 */
 	public void run() {
-		try {
+		
 			switch(this.tipo_accion){
-				case CONEXION:{
-					System.out.printf("recibe:\n");
-
+				case CONEXION:
+					Mensaje recibido = null;
+					String msg =  new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength());
+					System.out.println("recibe2:" + msg);
+					
 					//Creamos el mensaje correspondiente al recibido
-					Mensaje recibido = Mensaje.parse(new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength()-1));
-					System.out.printf(recibido.toString());
+					try {
+						recibido = Mensaje.parse(msg);
+					}catch (MensajeNoValidoException e) {
+					    System.err.println(e.getLocalizedMessage());
+					}
 				
 					//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 					Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CONSORCIO,recibido.getOrigen(),TipoOrigDest.BANCO,recibido.getDestino());
@@ -120,7 +125,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 					//Analizamos el mensaje y realizamos las acciones correspondientes
 					analizar_mensaje(recibido);
 					break;
-				}
+			
 				case RECUPERACION:{
 					solicitar_iniciar_recuperacion(this.id_banco_rec);
 					break;
@@ -134,10 +139,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 					break;
 				}
 			}	
-		}
-		catch (Exception e) {
-	    // manipular las excepciones
-		}
+		
 	}
 	
 	

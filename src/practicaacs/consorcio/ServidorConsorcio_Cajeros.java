@@ -33,7 +33,7 @@ public class ServidorConsorcio_Cajeros extends Thread{
 		try {
 			 socketServidor = new DatagramSocket(this.port);
 		 }catch (IOException e) {
-			 System.out.println("Error al crear el objeto socket servidor Consorcio_Cajeros");
+			 System.out.println("Error al crear el objeto socket servidor Consorcio_Cajeros::" + e.getLocalizedMessage());
 			 System.exit(-1);
 		 }
 		//Establece un timeout

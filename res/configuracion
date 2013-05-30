@@ -1,7 +1,7 @@
 cajero.address 127.0.0.1
-cajero.port 2003
+cajero.port 8928
 consorcio.address 127.0.0.1
 consorcio.id 1
-consorcio.bank_server.port 2001
-consorcio.cash_server.port 2002
+consorcio.bank_server.port 2424
+consorcio.cash_server.port 8989
 

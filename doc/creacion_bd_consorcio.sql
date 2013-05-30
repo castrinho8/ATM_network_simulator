@@ -54,7 +54,8 @@ CREATE TABLE EstadoBanco(
 -- baip La ip del banco
 -- bamaxCanales El numero maximo de canales
 CREATE TABLE Banco(
-	codBanco INTEGER,
+	codigo INTEGER AUTO_INCREMENT,	
+	codBanco VARCHAR(20),
 	codEBanco INTEGER,
 	bapuerto INTEGER,
 	baip VARCHAR(20),
@@ -103,7 +104,7 @@ CREATE TABLE TipoOrigDest(
 -- 
 -- codBanco El codigo del banco correspondiente al mensaje
 CREATE TABLE Mensaje(
-	codMensaje INTEGER,
+	codMensaje INTEGER AUTO_INCREMENT,
 	codTOrigen INTEGER,
 	meorigen VARCHAR(30),
 	codTDestino INTEGER,
