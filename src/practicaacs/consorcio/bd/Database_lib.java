@@ -37,7 +37,7 @@ public class Database_lib {
 		Properties prop = new Properties();
 		InputStream is;
 		//LA SITUACION DEL FICHERO DE CONFIGURACION
-		String file = "/home/castrinho8/Escritorio/UNI/ACS/res/consorcioBD.properties";
+		String file = "/home/ch01/UNI/ACS/RepositorioPractica/res/consorcioBD.properties";
 		
 		try {
 			is = new FileInputStream(file);
@@ -469,8 +469,9 @@ public class Database_lib {
 		ResultSet resultSet;
 		int res = 0;
 		try {
+		
 			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco" +
-					" WHERE codBanco = " + id_banco + " AND (codEBanco = " + 1);
+					" WHERE codBanco = '" + id_banco + "' AND codEBanco = 1");
 			
 			if(resultSet.next())
 				res = resultSet.getInt(1);
@@ -1211,9 +1212,11 @@ public class Database_lib {
 		}
 		
 		try {
-			this.statement.executeUpdate("INSERT INTO Mensaje(codMensaje,meoffline,meorigen,medestino,mestringMensaje) " +
-					"VALUES (" + num_mensaje + "," + ((offline)? 1:0) + "," + torigen.getNum() +
-					"," + origen + "," + tdestino.getNum() + "," + destino + "," + message.toString() +")");
+			String q = "INSERT INTO Mensaje(meoffline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
+					"VALUES (" + ((offline)? 1:0) + "," + torigen.getNum() +
+					", '" + origen + "' ," + tdestino.getNum() + ", '" + destino + "' , '" + message.toString() +"')";
+			System.out.println(q);
+			this.statement.executeUpdate(q);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

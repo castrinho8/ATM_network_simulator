@@ -97,7 +97,7 @@ public class ServidorConsorcio_Bancos extends Thread{
 				System.out.println("RECIBIR SERVIDOR BANCOS");
 				//Recibe datos
 				socketServidor.receive(inputPacket);
-				System.out.printf("recibe1:\n");
+				System.out.printf("recibe1: " + new String(inputPacket.getData()));
 
 				if(isOnline()){
 					//Crea una conexión para analizar el datagrama
