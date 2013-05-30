@@ -191,8 +191,8 @@ public class ServidorConsorcio_Bancos extends Thread{
      * CAJERO->CONSORCIO->BANCOS
      * @param message El mensaje a enviar.
      */
-    public void sendToBanco(MensajeDatos message,InetAddress ip_cajero, int puerto_cajero){
-    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,ip_cajero,puerto_cajero,consorcio,this,socketServidor);
+    public void sendToBanco(MensajeDatos message,String id_cajero,InetAddress ip_cajero, int puerto_cajero){
+    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,id_cajero,ip_cajero,puerto_cajero,consorcio,this,socketServidor);
     	c.start();
     }
     

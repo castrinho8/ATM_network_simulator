@@ -141,6 +141,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void sendToBanco(MensajeDatos message,String numTarjeta){
 		
+		String cajero = message.getDestino();
 		//Cambiamos origen y destino
 		String destino = numTarjeta.substring(0, 8); //Id_banco
 		String origen = this.consorcio.getId_consorcio(); //Id_consorcio
@@ -148,7 +149,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		message.setOrigen(origen);
 
 		//Delegar en el ServidorBancos para el reenvio y el almacenamiento del envio
-		this.consorcio.getBancos_server().sendToBanco(message,this.output_socket.getInetAddress(),this.output_socket.getPort());
+		this.consorcio.getBancos_server().sendToBanco(message,cajero,this.output_socket.getInetAddress(),this.output_socket.getPort());
 	}
 	
 	

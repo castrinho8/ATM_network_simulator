@@ -52,6 +52,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	//ENVIO
 	private MensajeDatos envio;
+	private String id_cajero;
 	private InetAddress ip_cajero;
 	private int puerto_cajero;
 	
@@ -70,13 +71,14 @@ public class ConexionConsorcio_Bancos extends Thread {
 		this.output_socket =  socket;
 	}
 
-	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,InetAddress ip, int puerto, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
+	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,String caj,InetAddress ip, int puerto, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
 		this.consorcio = cons;
 		this.servidor = s;
 		
 		this.tipo_accion = tipo;
 		this.envio = env;
+		this.id_cajero = caj;
 		this.ip_cajero = ip;
 		this.puerto_cajero = puerto;
 		this.output_socket =  socket;
@@ -186,7 +188,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		int canal = 0; //Porque solo envia mensajes de control
 		
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.output_socket.getLocalAddress(),this.output_socket.getLocalPort(),canal);
+		//Database_lib.getInstance().anhadir_ultimo_envio(envio,this.output_socket.getLocalAddress(),this.output_socket.getLocalPort(),canal);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -228,7 +230,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		envio.setNmsg(n_mensaje);
 		
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.ip_cajero,this.puerto_cajero,canal);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,this.ip_cajero,this.puerto_cajero,canal);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());

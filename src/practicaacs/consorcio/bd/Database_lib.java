@@ -1012,6 +1012,74 @@ public class Database_lib {
 		}
 	}
 	
+	private String getTarjetaEnvio(MensajeDatos mensaje){
+		switch(mensaje.getTipoMensaje()){
+			case SOLSALDO:
+				return ((SolSaldo)mensaje).getNum_tarjeta();
+			case SOLMOVIMIENTOS:
+				return ((SolMovimientos)mensaje).getNum_tarjeta();
+			case SOLREINTEGRO:
+				return ((SolReintegro)mensaje).getNum_tarjeta();
+			case SOLABONO:
+				return ((SolAbono)mensaje).getNum_tarjeta();
+			case SOLTRASPASO:
+				return ((SolTraspaso)mensaje).getNum_tarjeta();
+			default:
+				return null;
+		}
+	}
+	
+	private int getCuentaEnvio(MensajeDatos mensaje){
+		switch(mensaje.getTipoMensaje()){
+			case SOLSALDO:
+				return ((SolSaldo)mensaje).getNum_cuenta();
+			case SOLMOVIMIENTOS:
+				return ((SolMovimientos)mensaje).getNum_cuenta();
+			case SOLREINTEGRO:
+				return ((SolReintegro)mensaje).getNum_cuenta();
+			case SOLABONO:
+				return ((SolAbono)mensaje).getNum_cuenta();
+			case SOLTRASPASO:
+				return ((SolTraspaso)mensaje).getNum_cuenta_origen();
+			default:
+				return -1;
+		}	
+	}
+	
+	private void insertar_ultimo_envio(MensajeDatos mensaje,String codCajero,InetAddress ip_cajero, int puerto_cajero){
+		
+		String tarjeta = null;
+		int cuenta = 0;
+		try{
+			if((tarjeta = getTarjetaEnvio(mensaje)) == null)
+				throw new CodigoNoValidoException();
+			if((cuenta = getCuentaEnvio(mensaje)) == -1)
+				throw new CodigoNoValidoException();
+		}catch (CodigoNoValidoException a){
+				a.printStackTrace();
+				System.exit(-1);
+		}
+		 
+		try {
+			this.statement.executeUpdate("INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip," +
+					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
+					" VALUES (" + mensaje.getNmsg() + "," + codCajero + "," + puerto_cajero + "," + ip_cajero + 
+					"," + mensaje.getDestino() + "," + tarjeta + "," + cuenta + " " + mensaje.toString() +")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	private void eliminar_ultimo_envio(int codigo_ultimo_envio){
+		try {
+			this.statement.executeUpdate("DELETE FROM UltimoEnvio WHERE codUltimoEnvio=" + codigo_ultimo_envio);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	/**
 	 * Cambia el ultimo envio del canal indicado por el pasado por parametro.
 	 * Tambien añade el mensaje a la tabla de MENSAJES del consorcio.
@@ -1021,9 +1089,33 @@ public class Database_lib {
 	 * @param port El puerto del que proviene el envio (Cajero)
 	 * @param canal El canal correspondiente.
 	 */
-	public void anhadir_ultimo_envio(Mensaje message, InetAddress ip, int port,int canal){
-		//hay que controlar el id_mensaje que es la clave primaria en la BD.
+	public void anhadir_ultimo_envio(MensajeDatos message,String codCajero,InetAddress ip_cajero, int puerto_cajero,int canal){
+
 		String id_banco = message.getDestino();
+		ResultSet resultSet;
+		int codigo_ultimo_envio = 0;
+		
+		//Comprueba si el canal esta ocupado o el mensaje del canal no ha sido respondido
+		if (this.isCanal_ocupado(id_banco, canal))
+			return;
+		
+		//Selecciona el codigo del ultimo envio para el banco y canal indicados
+		try {
+			resultSet = this.statement.executeQuery("SELECT codUltimoEnvio" +
+					" FROM Canal" +
+					" WHERE codCanal=" + canal + " AND codBanco=" + id_banco);
+			codigo_ultimo_envio = resultSet.getInt(0);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		//Borra el envio para el banco y canal indicado
+		eliminar_ultimo_envio(codigo_ultimo_envio);
+		 
+		//Inserta el nuevo envio para el banco y canal indicado
+		insertar_ultimo_envio(message,codCajero, ip_cajero, puerto_cajero);
+		
+		//hay que controlar el id_mensaje que es la clave primaria en la BD.
 		//if canal==0->mensaje de control sin canal
 		/*si el canal esta ocupado, no se inserta como ultimo envio de forma que se pueda seguir la ejecucion*/
 		//aceder a la tabla Sesion con id_banco, a la tabla Canal con id_canal y por ultimo a envios añadir el envio
