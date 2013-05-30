@@ -8,9 +8,10 @@ import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
+import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespSaldo;
 
-public class ConsultarSaldo_IU extends javax.swing.JFrame {
+public class ConsultarSaldo_IU extends ConsultaAbstracta {
 
     JFrame parent;
     Cajero cajero;
@@ -23,34 +24,10 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
         this.cajero = caj;
         initComponents();
 		this.ConsultandoLabel.setVisible(true);
-		enviar_consulta(env);
+		envia_consulta(env);
         this.setLocationRelativeTo(null);
     }
 
-    /**
-     * Método que crea el mensaje a enviar y lo envia
-     * @param env El envio
-     * @throws InterruptedException 
-     */
-    private void enviar_consulta(Envio env){
-    	//Inicializar el mensaje
-    	env.setTipoMensaje(CodigosMensajes.SOLSALDO);
-    	Mensaje envio = this.cajero.crear_mensaje(env);
-    	
-    	//Realizar el envio
-    	RespSaldo respuesta;
-		try {
-			respuesta = (RespSaldo) this.cajero.enviar_mensaje(envio);
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-    	//Mostrar respuesta
-		this.ConsultandoLabel.setVisible(false);
-    	this.jTextField1.setText(String.valueOf(respuesta.getSaldo()));
-    }
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -168,4 +145,20 @@ public class ConsultarSaldo_IU extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
+    
+    
+	@Override
+    public void envia_consulta(Envio env){
+    	env.setTipoMensaje(CodigosMensajes.SOLSALDO);
+    	Mensaje envio = this.cajero.crear_mensaje(env);
+    	
+    	this.cajero.enviar_mensaje(envio,this);
+    }
+    
+	@Override
+    public void actualizarIU(MensajeDatos respuesta){
+		this.ConsultandoLabel.setVisible(false);
+    	this.jTextField1.setText(String.valueOf(((RespSaldo)respuesta).getSaldo()));
+    }
+
 }

@@ -12,9 +12,10 @@ import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
+import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespMovimientos;
 
-public class ConsultarMovimientos_IU extends javax.swing.JFrame {
+public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 
     JFrame parent;
     Cajero cajero;
@@ -31,25 +32,6 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
     }
 
-    private void envia_consulta(Envio env){
-    	//Inicializar mensaje
-    	env.setTipoMensaje(CodigosMensajes.SOLMOVIMIENTOS);
-    	Mensaje envio = this.cajero.crear_mensaje(env);
-    	
-    	//Realizar el envio
-    	RespMovimientos respuesta;
-		try {
-			respuesta = (RespMovimientos) this.cajero.enviar_mensaje(envio);
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-			return;
-		}
-
-		//Mostrar respuesta
-		this.ConsultandoLabel.setVisible(false);
-    	this.jTextArea1.setText(respuesta.toString());
-    }
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -165,4 +147,19 @@ public class ConsultarMovimientos_IU extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
+    
+    
+	@Override
+    public void envia_consulta(Envio env){
+    	env.setTipoMensaje(CodigosMensajes.SOLMOVIMIENTOS);
+    	Mensaje envio = this.cajero.crear_mensaje(env);
+    	this.cajero.enviar_mensaje(envio,this);
+    }
+    
+	@Override
+    public void actualizarIU(MensajeDatos respuesta){
+		this.ConsultandoLabel.setVisible(false);
+    	this.jTextArea1.setText(respuesta.toString());
+    }
+
 }
