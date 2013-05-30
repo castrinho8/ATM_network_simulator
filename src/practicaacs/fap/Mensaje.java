@@ -138,11 +138,8 @@ public abstract class Mensaje implements java.io.Serializable {
 			return m;
 		}catch (IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
-			
+			throw new MensajeNoValidoException(e.getLocalizedMessage());
 		}
-		
-		return null;
 	}
 	
 	private static boolean esRespuestaDatos(CodigosMensajes tipo) {
