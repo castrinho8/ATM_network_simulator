@@ -18,13 +18,15 @@ public abstract class Mensaje implements java.io.Serializable {
 		
 		this.tipoMensaje = tipoMensaje;
 		this.origen = origen;
-		this.destino = destino;
-		
+		this.destino = destino;		
+	}
+	
+	private static void iniClase(){
 		if(codigo_clase == null){
 			codigo_clase = new HashMap<CodigosMensajes,Class<? extends Mensaje>>();
 			codigo_clase.put(CodigosMensajes.SOLINIREC,SolIniTraficoRec.class);
 			codigo_clase.put(CodigosMensajes.SOLFINREC,SolFinTraficoRec.class);
-			codigo_clase.put(CodigosMensajes.SOLABRIRSESION, SolAperturaSesion.class );
+			codigo_clase.put(CodigosMensajes.SOLABRIRSESION, SolAperturaSesion.class);
 			codigo_clase.put(CodigosMensajes.SOLDETENERTRAFICO,  SolDetTrafico.class);
 			codigo_clase.put(CodigosMensajes.SOLREANUDARTRAFICO, SolReanTrafico.class);
 			codigo_clase.put(CodigosMensajes.SOLCIERRESESION, SolCierreSesion.class);
@@ -54,7 +56,6 @@ public abstract class Mensaje implements java.io.Serializable {
 			codigo_clase_error.put(CodigosMensajes.RESABONO, RespAbonoError.class);
 			codigo_clase_error.put(CodigosMensajes.RESTRASPASO, RespTraspasoError.class);
 		}
-		
 	}
 
 	
@@ -112,6 +113,7 @@ public abstract class Mensaje implements java.io.Serializable {
 
 	public static Mensaje parse(String bs) throws MensajeNoValidoException {
 		CodigosMensajes tipo;
+		iniClase();
 		
 		if(bs.toString().length() < 18)
 			throw new MensajeNoValidoException("Lonxitude (" + bs.toString().length() + ") non valida  (Mensaje)");
@@ -133,7 +135,7 @@ public abstract class Mensaje implements java.io.Serializable {
 					}
 				} catch (CodigoNoValidoException e) {}
 			
-			m = Mensaje.codigo_clase.get(tipo).getConstructor(new Class<?>[]{}).newInstance();	
+			m = Mensaje.codigo_clase.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
 			m.parseComp(bs);
 			return m;
 		}catch (IllegalArgumentException | InvocationTargetException
