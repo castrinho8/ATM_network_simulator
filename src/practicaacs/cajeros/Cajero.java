@@ -13,13 +13,14 @@ import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Properties;
 
+import javax.swing.JFrame;
+
+import practicaacs.cajeros.iu.ConsultaAbstracta;
 import practicaacs.cajeros.iu.PantallaInicialCajero_IU;
 import practicaacs.fap.*;
 
 /**
  * Clase que representa a un cajero.
- * Es un Singleton
- *
  */
 public class Cajero{
 
@@ -32,8 +33,8 @@ public class Cajero{
 	private int cajero_port;
 	
 	private String id_consorcio;
-	private int consorcio_port;
 	private InetAddress consorcio_address;
+	private int consorcio_port;
 	
 	private DatagramSocket socketCajero;
 		
@@ -65,7 +66,9 @@ public class Cajero{
 		this.id_cajero = Integer.toString(next_id_cajero++);
 		this.iu = new PantallaInicialCajero_IU(this);
 		this.iu.setVisible(true);
-				
+		
+    	System.out.println("IP: " + this.consorcio_address + "-" + this.consorcio_port);
+
 		try {
 			socketCajero = new DatagramSocket(this.cajero_port);
 		 }catch (IOException e) {
@@ -74,7 +77,47 @@ public class Cajero{
 		 }
 	}
 
-    /**
+    public static int getNext_id_cajero() {
+		return next_id_cajero;
+	}
+
+	public static int getNext_number_message() {
+		return next_number_message;
+	}
+
+	public static PantallaInicialCajero_IU getIu() {
+		return iu;
+	}
+
+	public String getId_cajero() {
+		return id_cajero;
+	}
+
+	public InetAddress getCajero_address() {
+		return cajero_address;
+	}
+
+	public int getCajero_port() {
+		return cajero_port;
+	}
+
+	public String getId_consorcio() {
+		return id_consorcio;
+	}
+
+	public InetAddress getConsorcio_address() {
+		return consorcio_address;
+	}
+
+	public int getConsorcio_port() {
+		return consorcio_port;
+	}
+
+	public DatagramSocket getSocketCajero() {
+		return socketCajero;
+	}
+
+	/**
      * Método recibe el Envio creado por la IU y genera el mensaje correspondiente a 
      * los datos obtenidos de la IU.
      * @return El mensaje a enviar.
@@ -82,7 +125,7 @@ public class Cajero{
     public Mensaje crear_mensaje(Envio env){
     	MensajeDatos envio = null;
     	
-    	switch(env.getTipoMensaje()){	
+    	switch(env.getTipoMensaje()){
 	    	case SOLSALDO:{
 	        	envio = new SolSaldo(this.id_cajero,this.id_consorcio,
 	        			0,next_number_message++,
@@ -120,56 +163,12 @@ public class Cajero{
     	}
     	return envio;
     }
-    
-    /**
-     * Envia el mensaje y se queda esperando una respuesta.
-     * @param envio El mensaje a enviar.
-     * @param address La dirección a donde enviar el mensaje.
-     * @param port El puerto a donde enviar el mensaje.
-     * @return El mensaje de respuesta correspondiente.
-     */
-    public Mensaje enviar_mensaje(Mensaje envio) throws IOException, ClassNotFoundException{
-    	
-    	Calendar time = Calendar.getInstance();
-    	System.out.println("ENVIO: Cajero: " + this.id_cajero + " a las " + time.getTime() + " \n" + envio.toString());
 
-    	//Crea el Datagrama a enviar
-		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),this.consorcio_address,this.consorcio_port);
-		
-		try{
-			//Enviamos el mensaje
-			this.socketCajero.send(enviarPaquete);
-		}catch (IOException e) {
-			System.out.println("Error al enviar.");
-			System.exit ( 0 );
-		}
-		
-		byte [] recibirDatos = new byte[1024];
-		//Crea el Datagrama en donde recibir los datos
-		DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
-		
-		try{
-			//Recibe datos
-			socketCajero.receive(inputPacket);
-		}catch (SocketTimeoutException e){
-			System.out.println("Timeout");
-		}catch (IOException e) {
-			System.out.println("Error al recibir.");
-			System.exit ( 0 );
-		}
-
-		Mensaje recepcion = null;
-		try {
-			recepcion = Mensaje.parse(new String(inputPacket.getData(),inputPacket.getOffset(),inputPacket.getLength()-1));
-		} catch (MensajeNoValidoException e) {
-			System.out.println("Error al parsear el mensaje recibido.");
-			e.printStackTrace();
-		}
-		
-		time = Calendar.getInstance();
-    	System.out.println("RECEPCION: Cajero: " + this.id_cajero +" a las " + time.getTime());
-    	return recepcion;
+    public void enviar_mensaje(Mensaje envio,ConsultaAbstracta ventana){
+    	ConexionCajero c = new ConexionCajero(envio,this,ventana);
+    	c.start();
     }
+
 }
 
 

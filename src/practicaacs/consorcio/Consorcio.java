@@ -54,6 +54,8 @@ public class Consorcio {
 		
 		this.iu = new PantallaInicialConsorcio_IU(this);
 		this.iu.setVisible(true);
+		
+    	System.out.println("IP: " + this.address + "-" + puerto_cajeros);
 	}
 
 	public ServidorConsorcio_Cajeros getCajeros_server() {
@@ -82,6 +84,11 @@ public class Consorcio {
 
 	public PantallaInicialConsorcio_IU getIu() {
 		return iu;
+	}
+	
+	public void actualizarIU(){
+		this.iu.actualizarListaBancos();
+		this.iu.actualizarListaCajeros();
 	}
     
 }

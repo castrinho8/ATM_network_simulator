@@ -8,11 +8,12 @@ import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
+import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespAbono;
 import practicaacs.fap.RespTraspaso;
 
 
-public class RealizarTraspaso_IU extends javax.swing.JFrame {
+public class RealizarTraspaso_IU extends ConsultaAbstracta {
 
     JFrame parent;
     Envio envio;
@@ -37,24 +38,6 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
         this.ErrorLabel.setVisible(false);
     }
     
-    private void enviar_solicitud(){
-    	//Inicializar el mensaje
-    	Mensaje message = this.cajero.crear_mensaje(this.envio);
-    	
-    	//Realizar el envio
-    	RespTraspaso respuesta;
-		try {
-			respuesta = (RespTraspaso) this.cajero.enviar_mensaje(message);
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-    	//Mostrar respuesta
-    	this.ImporteText.setText(String.valueOf("ORIGEN: " + String.valueOf(respuesta.getSaldoOrigen()) +
-    			"\nDESTINO: " + String.valueOf(respuesta.getSaldoDestino())));
-    }
-        
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -202,12 +185,8 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
 	        this.envio.setTipoMensaje(CodigosMensajes.SOLTRASPASO);
 	        this.envio.setImporte(importe_traspaso);
 	        this.envio.setNum_cuenta_destino(cuenta_destino);
-	        enviar_solicitud();
+	        envia_consulta(this.envio);
 	        
-	        this.EsperandoRespuestaLabel.setVisible(false);
-	        this.ErrorLabel.setVisible(false);
-	        this.SaldoLabel.setVisible(true);
-	        this.SaldoText.setVisible(true);
         }catch(NumberFormatException nfe){
             this.ErrorLabel.setVisible(true);
             return;
@@ -271,4 +250,24 @@ public class RealizarTraspaso_IU extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     // End of variables declaration//GEN-END:variables
+    
+    
+	@Override
+    public void envia_consulta(Envio env){
+    	env.setTipoMensaje(CodigosMensajes.SOLTRASPASO);
+    	Mensaje envio = this.cajero.crear_mensaje(env);
+    	this.cajero.enviar_mensaje(envio,this);
+    }
+    
+	@Override
+    public void actualizarIU(MensajeDatos respuesta){
+		this.ImporteText.setText(String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
+				"\nDESTINO: " + String.valueOf(((RespTraspaso)respuesta).getSaldoDestino())));
+        this.EsperandoRespuestaLabel.setVisible(false);
+        this.ErrorLabel.setVisible(false);
+        this.SaldoLabel.setVisible(true);
+        this.SaldoText.setVisible(true);
+    }
+    
+    
 }
