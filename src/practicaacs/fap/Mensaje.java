@@ -124,12 +124,16 @@ public abstract class Mensaje implements java.io.Serializable {
 
 		try {
 			Mensaje m;
-			if(esRespuestaDatos(tipo)){
-				m = Mensaje.codigo_clase_error.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
-			}else{
-				m = Mensaje.codigo_clase.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
-			}
-
+			if(esRespuestaDatos(tipo))
+				try {
+					if(CodigosRespuesta.parse(bs.substring(26, 28)).equals(CodigosRespuesta.CONSDEN)){
+						m = Mensaje.codigo_clase_error.get(tipo).getConstructor(new Class<?>[]{}).newInstance();
+						m.parseComp(bs);
+						return m;
+					}
+				} catch (CodigoNoValidoException e) {}
+			
+			m = Mensaje.codigo_clase.get(tipo).getConstructor(new Class<?>[]{}).newInstance();	
 			m.parseComp(bs);
 			return m;
 		}catch (IllegalArgumentException | InvocationTargetException
