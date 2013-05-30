@@ -43,7 +43,6 @@ public class ConexionCajero extends Thread{
     	
     	Calendar time = Calendar.getInstance();
     	System.out.println("ENVIO: Cajero: " + this.cajero + " a las " + time.getTime() + " \n" + this.envio.toString());
-
     	//Crea el Datagrama a enviar
 		DatagramPacket enviarPaquete = new DatagramPacket(this.envio.getBytes(),this.envio.size(),this.cajero.getConsorcio_address(),this.cajero.getConsorcio_port());
 		

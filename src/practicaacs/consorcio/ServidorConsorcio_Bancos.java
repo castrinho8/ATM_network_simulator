@@ -78,7 +78,6 @@ public class ServidorConsorcio_Bancos extends Thread{
 		while(true){
 			if(isOnline())
 				recibir_servidorBancos();
-			System.out.printf("ONLINE: %d\n",isOnline()?1:0);
 		}
 	}
 
