@@ -61,7 +61,7 @@ CREATE TABLE Banco(
 	baip VARCHAR(20),
 	bamaxCanales INTEGER,
 	CONSTRAINT ba_codEBanco_fk FOREIGN KEY (codEBanco) REFERENCES EstadoBanco(codEBanco) ON DELETE SET NULL,
-	CONSTRAINT ba_pk PRIMARY KEY (codBanco)
+	CONSTRAINT ba_pk PRIMARY KEY (codigo)
 );
 
 -- codCuentaOrig Codigo cuenta origen
@@ -85,7 +85,7 @@ CREATE TABLE Movimiento(
 
 	CONSTRAINT mo_codTMovimiento_fk FOREIGN KEY (codTMovimiento) REFERENCES TipoMovimiento(codTMovimiento) ON DELETE SET NULL,
 
-	CONSTRAINT mo_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codBanco) ON DELETE NO ACTION,
+	CONSTRAINT mo_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE NO ACTION,
 
 	CONSTRAINT mo_pk PRIMARY KEY (codMovimiento)
 );
@@ -120,9 +120,10 @@ CREATE TABLE Mensaje(
 
 --	++++++++++++++++ mensaje
 CREATE TABLE UltimoEnvio(
+	codigoue INTEGER AUTO_INCREMENT,
 	codUltimoEnvio INTEGER,
 	uecontestado BOOLEAN DEFAULT 1,
-	uecodCajero INTEGER,
+	uecodCajero VARCHAR(20),
 	uepuerto INTEGER,
 	ueip VARCHAR(20),
 	codBanco INTEGER,
@@ -130,10 +131,10 @@ CREATE TABLE UltimoEnvio(
 	codCuenta INTEGER,
 	uestringMensaje VARCHAR(500),
 
-	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codBanco) ON DELETE NO ACTION,
+	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE NO ACTION,
 	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE NO ACTION,
 
-	CONSTRAINT ue_pk PRIMARY KEY (codUltimoEnvio)
+	CONSTRAINT ue_pk PRIMARY KEY (codigoue)
 );
 
 
@@ -143,7 +144,9 @@ CREATE TABLE Canal(
 	cabloqueado BOOLEAN DEFAULT 0,
 	codUltimoEnvio INTEGER DEFAULT NULL,
 	canext_numMensaje INTEGER DEFAULT 1,
-	CONSTRAINT me_codUltimoEnvio_fk FOREIGN KEY (codUltimoEnvio) REFERENCES UltimoEnvio(codUltimoEnvio) ON DELETE CASCADE,
+
+	CONSTRAINT ca_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
+	CONSTRAINT ca_codUltimoEnvio_fk FOREIGN KEY (codUltimoEnvio) REFERENCES UltimoEnvio(codigoue) ON DELETE CASCADE,
 	CONSTRAINT ca_pk PRIMARY KEY (codBanco,codCanal)
 );
 
@@ -221,13 +224,13 @@ INSERT INTO Canal(codBanco,codCanal) VALUES (1,3);
 
 -- Ultimos envios
 INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta,uestringMensaje) 
-VALUES (1,1,90,'192.168.0.1',1,'pastor42 01',0000,'El mensaje enviado');
+VALUES (1,'1',90,'192.168.0.1',1,'pastor42 01',0000,'El mensaje enviado');
 
 INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
-VALUES (2,1,90,'192.168.0.1',1,'pastor42 01',0000);
+VALUES (2,'1',90,'192.168.0.1',1,'pastor42 01',0000);
 
 INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
-VALUES (3,2,91,'192.168.0.2',1,'pastor42 01',0001);
+VALUES (3,'2',91,'192.168.0.2',1,'pastor42 01',0001);
 
 
 --	TipoOrigDest
@@ -242,29 +245,24 @@ VALUES (3,'Cajero');
 -- Mensajes 
 
 -- BANCO-> CONSORCIO
-INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
-VALUES (1,1,'ID_BAN:11',2,'ID_CONS:21',0,'CODIGO MENSAJE:1 BANCO->CONSORCIO');
+INSERT INTO Mensaje(codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (1,'ID_BAN:11',2,'ID_CONS:21',0,'CODIGO MENSAJE:1 BANCO->CONSORCIO');
 
 -- CONSORCIO->BANCO
-INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
-VALUES (2,2,'ID_CONS:21',1,'ID_BAN:11',0,'CODIGO MENSAJE:2 CONSORCIO->BANCO');
+INSERT INTO Mensaje(codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (2,'ID_CONS:21',1,'ID_BAN:11',0,'CODIGO MENSAJE:2 CONSORCIO->BANCO');
 
 -- CAJERO->CONSORCIO
-INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
-VALUES (3,3,'ID_CAJERO:01',2,'ID_CONS:21',0,'CODIGO MENSAJE:3 CAJERO->CONSORCIO');
+INSERT INTO Mensaje(codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (3,'ID_CAJERO:01',2,'ID_CONS:21',0,'CODIGO MENSAJE:3 CAJERO->CONSORCIO');
 
 -- CAJERO->CONSORCIO
-INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
-VALUES (4,3,'ID_CAJERO:31',2,'ID_CONS:21',0,'CODIGO MENSAJE:4 CAJERO->CONSORCIO');
+INSERT INTO Mensaje(codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (3,'ID_CAJERO:31',2,'ID_CONS:21',0,'CODIGO MENSAJE:4 CAJERO->CONSORCIO');
 
 -- CONSORCIO->CAJERO
-INSERT INTO Mensaje(codMensaje,codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
-VALUES (5,2,'ID_CONS:21',3,'ID_CAJERO:31',1,'CODIGO MENSAJE:5 CONSORCIO->CAJERO offline');
-
-
-
-
-
+INSERT INTO Mensaje(codTOrigen,meorigen,codTDestino,medestino,meoffline,mestringMensaje)
+VALUES (2,'ID_CONS:21',3,'ID_CAJERO:31',1,'CODIGO MENSAJE:5 CONSORCIO->CAJERO offline');
 
 
 
