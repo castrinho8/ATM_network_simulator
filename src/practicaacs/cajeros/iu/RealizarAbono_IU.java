@@ -219,7 +219,7 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
     
 	@Override
     public void envia_consulta(Envio env){
-    	env.setTipoMensaje(CodigosMensajes.SOLMOVIMIENTOS);
+    	env.setTipoMensaje(CodigosMensajes.SOLABONO);
     	Mensaje envio = this.cajero.crear_mensaje(env);
     	this.cajero.enviar_mensaje(envio,this);
     }

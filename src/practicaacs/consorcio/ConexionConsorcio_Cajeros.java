@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Calendar;
 
 import practicaacs.consorcio.aux.EstadoEnvio;
 import practicaacs.consorcio.aux.TipoAccion;
@@ -72,9 +73,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		switch(this.tipo_accion){
 			//RECEPCION DE MENSAJE DE CAJERO -> BANCO
 			case CONEXION:{
-				System.out.println("CREA THREAD");
 				String msg = new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength());
-				System.out.println("STRING-" + msg + "-");
 				
 				//Creamos el mensaje correspondiente al recibido
 				Mensaje recibido = null;
@@ -84,7 +83,8 @@ public class ConexionConsorcio_Cajeros extends Thread{
 					System.err.println(e.getLocalizedMessage());
 				}
 				
-				System.out.printf("SALE DEL PARSE" + recibido.toString());
+				System.out.println("SALE DEL PARSE" + recibido.toString());
+				System.out.println("ENTRA: " + recibido.getTipoMensaje().toString());
 				
 				//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 				Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
@@ -120,6 +120,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//Actualizar la interfaz grafica
 		this.consorcio.actualizarIU();
 		
+		System.out.println("SALE: " + respuesta.getTipoMensaje().toString());
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip_cajero,port_cajero);
 		
@@ -238,7 +239,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 
 		RespSaldo respuesta = null;
 		
-		System.out.printf("ONLINE:%i-COD_RES:%s",codonline?1:0,cod_resp.toString());
+		System.out.printf("ONLINE:%d-COD_RES:%s\n",codonline?1:0,cod_resp.toString());
 
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
@@ -246,7 +247,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -276,15 +277,16 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLMOVIMIENTOS,0);
 		
 		RespMovimientos respuesta = null;
+		Calendar c = Calendar.getInstance();
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.
 				respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,codonline,cod_resp,
-						0,CodigosMovimiento.OTRO,true,0,null/*Fecha*/);
+						0,CodigosMovimiento.OTRO,true,0,c.getTime());
 			
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{

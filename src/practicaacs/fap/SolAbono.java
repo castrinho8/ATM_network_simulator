@@ -10,7 +10,9 @@ public class SolAbono extends MensajeDatos {
 	
 	public SolAbono(String origen, String destino, int numcanal, int nmsg,
 			boolean codonline, String num_tarjeta, int num_cuenta, int importe) {
+		
 		super(origen, destino, CodigosMensajes.SOLABONO, numcanal, nmsg, codonline);
+		
 		this.num_tarjeta = num_tarjeta;
 		this.num_cuenta = num_cuenta;
 		this.importe = importe;

@@ -37,8 +37,9 @@ public class Database_lib {
 		Properties prop = new Properties();
 		InputStream is;
 		//LA SITUACION DEL FICHERO DE CONFIGURACION
-		String file = "/home/ch01/UNI/ACS/RepositorioPractica/res/consorcioBD.properties";
-		
+		//String file = "/home/ch01/UNI/ACS/RepositorioPractica/res/consorcioBD.properties";
+		String file = "/home/castrinho8/Escritorio/UNI/ACS/res/consorcioBD.properties";
+
 		try {
 			is = new FileInputStream(file);
 		    prop.load(is);
@@ -217,7 +218,7 @@ public class Database_lib {
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,null,Integer.toString(cuenta),Integer.toString(10),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+		this.insertar_movimiento(tarjeta,Integer.toString(cuenta),null,Integer.toString(10),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'-');
 		
@@ -269,8 +270,11 @@ public class Database_lib {
 		if(!codonline)
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
+		System.out.println("tarjeta:" + tarjeta);
+		String id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,null,Integer.toString(cuenta),Integer.toString(50),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+		this.insertar_movimiento(tarjeta,Integer.toString(cuenta),null,Integer.toString(50),Integer.toString(importe),codonline,id_banco);
 
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'+');
@@ -1064,7 +1068,7 @@ public class Database_lib {
 		try {
 			this.statement.executeUpdate("INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip," +
 					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
-					" VALUES (" + mensaje.getNmsg() + "," + codCajero + "," + puerto_cajero + "," + ip_cajero + 
+					" VALUES (" + mensaje.getNmsg() + ",'" + codCajero + "'," + puerto_cajero + "," + ip_cajero + 
 					"," + mensaje.getDestino() + "," + tarjeta + "," + cuenta + " " + mensaje.toString() +")");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1208,14 +1212,15 @@ public class Database_lib {
 		//Si el mensaje es de datos obtenemos el numero de mensaje y 
 		if(message.es_datos()){
 			num_mensaje = ((MensajeDatos) message).getNmsg();
-			offline = ((MensajeDatos) message).getCodonline();
+			offline = !((MensajeDatos) message).getCodonline();
 		}
 		
 		try {
 			String q = "INSERT INTO Mensaje(meoffline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
 					"VALUES (" + ((offline)? 1:0) + "," + torigen.getNum() +
-					", '" + origen + "' ," + tdestino.getNum() + ", '" + destino + "' , '" + message.toString() +"')";
-			System.out.println(q);
+					",'" + origen + "'," + tdestino.getNum() + ",'" + destino + "','" + message.toString() +"')";
+			
+			System.out.println("\n" + q);
 			this.statement.executeUpdate(q);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1235,7 +1240,7 @@ public class Database_lib {
 			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
 					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
 					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
-					" WHERE ta.todnombre='Cajero' || tb.todnombre='Cajero'");
+					" WHERE ta.todnombre='Cajero' || tb.todnombre='Cajero' ORDER BY codMensaje");
 
 			while(resultSet.next()){
 				String str1 = resultSet.getString(1);

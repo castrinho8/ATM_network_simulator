@@ -46,6 +46,8 @@ public class ConexionCajero extends Thread{
     	//Crea el Datagrama a enviar
 		DatagramPacket enviarPaquete = new DatagramPacket(this.envio.getBytes(),this.envio.size(),this.cajero.getConsorcio_address(),this.cajero.getConsorcio_port());
 		
+		System.out.println("ENVIA: " + this.envio.getTipoMensaje().toString());
+
 		try{
 			//Enviamos el mensaje
 			this.cajero.getSocketCajero().send(enviarPaquete);
@@ -73,7 +75,8 @@ public class ConexionCajero extends Thread{
 
 		Mensaje recepcion = null;
 		try {
-			recepcion = Mensaje.parse(new String(inputPacket.getData(),inputPacket.getOffset(),inputPacket.getLength()-1));
+			String msg = new String(inputPacket.getData(),inputPacket.getOffset(),inputPacket.getLength());
+			recepcion = Mensaje.parse(msg);
 		} catch (MensajeNoValidoException e) {
 			System.out.println("Error al parsear el mensaje recibido.");
 			e.printStackTrace();

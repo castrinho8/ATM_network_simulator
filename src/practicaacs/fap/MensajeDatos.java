@@ -11,6 +11,7 @@ public abstract class MensajeDatos extends Mensaje {
 	public MensajeDatos(String origen, String destino,
 			CodigosMensajes tipoMensaje, int numcanal, int nmsg,
 			boolean codonline) {
+		
 		super(origen, destino, tipoMensaje);
 		assert(numcanal > 0);
 		assert(numcanal < 100);

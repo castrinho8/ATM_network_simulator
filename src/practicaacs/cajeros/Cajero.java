@@ -129,31 +129,31 @@ public class Cajero{
 	    	case SOLSALDO:{
 	        	envio = new SolSaldo(this.id_cajero,this.id_consorcio,
 	        			0,next_number_message++,
-	        			true,env.getNum_tarjeta(),env.getNum_cuenta_origen());
+	        			false,env.getNum_tarjeta(),env.getNum_cuenta_origen());
 	    		break;
 	    	}
 	    	case SOLMOVIMIENTOS:{
 	    		envio = new SolMovimientos(this.id_cajero,this.id_consorcio,
 	    				env.getTipoMensaje(),0,next_number_message++,
-	    				true,env.getNum_tarjeta(),env.getNum_cuenta_origen());
+	    				false,env.getNum_tarjeta(),env.getNum_cuenta_origen());
 	    		break;
 	    	}
 	    	case SOLREINTEGRO:{
 	    		envio = new SolReintegro(this.id_cajero,this.id_consorcio,
 	    				0,next_number_message++,
-	    				true,env.getNum_tarjeta(),env.getNum_cuenta_origen(),env.getImporte());
+	    				false,env.getNum_tarjeta(),env.getNum_cuenta_origen(),env.getImporte());
 	    		break;
 	    	}
 	    	case SOLABONO:{
 	    		envio = new SolAbono(this.id_cajero,this.id_consorcio,
 	    				0,next_number_message++,
-	    				true,env.getNum_tarjeta(),env.getNum_cuenta_origen(),env.getImporte());
+	    				false,env.getNum_tarjeta(),env.getNum_cuenta_origen(),env.getImporte());
 	    		break;
 	    	}
 	    	case SOLTRASPASO:{
 	    		envio = new SolTraspaso(this.id_cajero,this.id_consorcio,
 	    				0,next_number_message++,
-	    				true,env.getNum_tarjeta(),env.getNum_cuenta_origen(),
+	    				false,env.getNum_tarjeta(),env.getNum_cuenta_origen(),
 	    				env.getNum_cuenta_destino(),env.getImporte());
 	    		break;
 	    	}
