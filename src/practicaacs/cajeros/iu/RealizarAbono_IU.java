@@ -226,7 +226,7 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
     
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
-    	this.ImporteText.setText(String.valueOf(((RespAbono)respuesta).getSaldo()));
+    	this.SaldoText.setText(String.valueOf(((RespAbono)respuesta).getSaldo()));
         this.EsperandoRespuestaLabel.setVisible(false);
         this.ErrorLabel.setVisible(false);
         this.SaldoLabel.setVisible(true);

@@ -140,10 +140,17 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
 	        String cuenta = this.CuentaTextFIeld.getText();
 	        inicializa_visibilidades();
 
-	        //Comprueba si esta bien escrito
-	        if(tarjeta.equals("") | cuenta.equals("")){
-	        	throw new NumberFormatException();
+	        //Comprueba si TARJETA esta bien escrito
+	        if(tarjeta.equals("") | tarjeta.length() < 4 | tarjeta.length() > 11){
+	            IncorrectosLabel.setText("Número de tarjeta incorrecto...");
+	            throw new NumberFormatException();
 	        }
+	        //Comprueba si CUENTA esta bien escrito
+	        if(cuenta.equals("") | cuenta.length()!=1){
+	            IncorrectosLabel.setText("Número de cuenta incorrecto...");
+	            throw new NumberFormatException();
+	        }
+	        
 	        int num_cuenta = Integer.parseInt(cuenta);
 	        
 	        //Crea el envio y se lo pasa a la siguiente pantalla

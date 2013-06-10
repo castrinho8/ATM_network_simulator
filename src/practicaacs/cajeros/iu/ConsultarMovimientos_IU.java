@@ -14,6 +14,7 @@ import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespMovimientos;
+import practicaacs.fap.RespSaldo;
 
 public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 
@@ -159,7 +160,14 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
 		this.ConsultandoLabel.setVisible(false);
-    	this.jTextArea1.setText(respuesta.toString());
+		RespMovimientos m = (RespMovimientos)respuesta;
+		
+		if(m.getCodonline()){
+			String texto = m.getTipoMov()+": "+m.getOrigen()+"->"+m.getDestino()+" Importe:"+m.getImporte();
+			this.jTextArea1.setText(texto);
+		}else{
+			this.jTextArea1.setText("Error: No hay conexion");
+		}
     }
 
 }

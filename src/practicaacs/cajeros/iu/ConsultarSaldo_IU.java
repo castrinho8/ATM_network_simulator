@@ -158,7 +158,11 @@ public class ConsultarSaldo_IU extends ConsultaAbstracta {
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
 		this.ConsultandoLabel.setVisible(false);
-    	this.jTextField1.setText(String.valueOf(((RespSaldo)respuesta).getSaldo()));
+		RespSaldo m = (RespSaldo)respuesta;
+		if(m.getCodonline())
+			this.jTextField1.setText(String.valueOf(m.getSaldo()));
+		else
+			this.jTextField1.setText("Error: No hay conexion");
     }
 
 }

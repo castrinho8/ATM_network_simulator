@@ -55,7 +55,7 @@ CREATE TABLE EstadoBanco(
 -- bamaxCanales El numero maximo de canales
 CREATE TABLE Banco(
 	codigo INTEGER AUTO_INCREMENT,	
-	codBanco VARCHAR(20),
+	codBanco VARCHAR(20) UNIQUE,
 	codEBanco INTEGER,
 	bapuerto INTEGER,
 	baip VARCHAR(20),
