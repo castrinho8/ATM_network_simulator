@@ -261,7 +261,7 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
     
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
-		this.ImporteText.setText(String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
+		this.SaldoText.setText(String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
 				"\nDESTINO: " + String.valueOf(((RespTraspaso)respuesta).getSaldoDestino())));
         this.EsperandoRespuestaLabel.setVisible(false);
         this.ErrorLabel.setVisible(false);

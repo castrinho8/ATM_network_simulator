@@ -7,14 +7,15 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 
 import practicaacs.banco.estados.EstadoSesion;
@@ -91,7 +92,6 @@ public class Database_lib {
 	public void comprueba_cuenta(String tarjeta,int cuenta){
 		
 		ResultSet resultSet;
-		
 		//Obtiene la cuenta de la BD
 		try {
 			resultSet = this.statement.executeQuery("SELECT codCuenta FROM Cuenta" +  
@@ -237,18 +237,26 @@ public class Database_lib {
 					"') || (codCuentaDest = " + cuenta + " AND codTarjeta = '" + tarjeta + "'))");
 			
 			ArrayList<Movimiento> res = new ArrayList<Movimiento>();
-			
-			//Obtiene el tipo
-			CodigosMovimiento tipo = null;
-			try {
-				tipo = CodigosMovimiento.getTipoMovimiento(resultSet.getInt(4));
-			} catch (CodigoNoValidoException e) {
-				System.out.println("Codigo de movimiento no valido");
-				e.printStackTrace();
-			}
-			
+			Date fecha = null;
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
 			while(resultSet.next()){
-				res.add(new Movimiento(resultSet.getInt(1),resultSet.getInt(2),resultSet.getDate(3),tipo));
+				//Obtiene el tipo
+				CodigosMovimiento tipo = null;
+				try {
+					tipo = CodigosMovimiento.getTipoMovimiento(resultSet.getInt(4));
+				} catch (CodigoNoValidoException e) {
+					System.out.println("Codigo de movimiento no valido");
+					e.printStackTrace();
+				}
+				
+				try {
+					String sqlDate = sdf.format(resultSet.getDate(3));
+				    fecha = sdf.parse(sqlDate);
+				} catch (ParseException ex) {
+				    ex.printStackTrace();
+				}
+				res.add(new Movimiento(resultSet.getInt(1),resultSet.getInt(2),fecha,tipo));
 			}
 			return res;
 		}catch (SQLException e) {
@@ -310,9 +318,10 @@ public class Database_lib {
 		//Insertamos en la tabla MOVIMIENTO
 		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,11,importe,codonline,id_banco);
 	
-		//Recalculamos el saldo actual de la CUENTA
+		//Recalculamos el saldo actual de las CUENTAS
 		this.recalcular_saldoActual(cuenta_origen,tarjeta, importe,'-');
-		
+		this.recalcular_saldoActual(cuenta_destino,tarjeta, importe,'+');
+
 		//Devolvemos el saldo actual de la cuenta
 		int res = this.consultar_saldo(tarjeta,cuenta_destino);
 		
@@ -460,15 +469,17 @@ public class Database_lib {
 			comprueba_cuenta(tarjeta,cuenta_dest);
 		
 		String cuentas = ((cuenta_orig<0)? "NULL":cuenta_orig) + "," + ((cuenta_dest<0)? "NULL":cuenta_dest);
+		String fecha = sdf.format(time.getTime());
+		
 		System.out.println("INSERT INTO Movimiento" +
 				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
-				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + sdf.format(time.getTime()) + "," +
+				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + fecha + "," +
 				importe + "," + ((codonline)? 0:1) + "," + id_banco + ")");
 		
 		try {
 			this.statement.executeUpdate("INSERT INTO Movimiento" +
 				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
-				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + sdf.format(time.getTime()) + "," +
+				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + ", STR_TO_DATE('" + fecha + "','%m/%d/%Y')," +
 				importe + "," + ((codonline)? 0:1) + "," + id_banco + ")");
 		} catch (SQLException e) {
 			System.out.println("Error insertando movimiento.");

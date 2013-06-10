@@ -236,7 +236,7 @@ public class RealizarReintegro_IU extends ConsultaAbstracta {
     
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
-		this.ImporteText.setText(String.valueOf(((RespReintegro)respuesta).getSaldo()));
+		this.SaldoText.setText(String.valueOf(((RespReintegro)respuesta).getSaldo()));
         this.EsperandoRespuestaLabel.setVisible(false);
         this.SaldoLabel.setVisible(true);
         this.SaldoText.setVisible(true);
