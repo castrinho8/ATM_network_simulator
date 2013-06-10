@@ -319,7 +319,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespReintegro(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0); 
 						
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ALMACENAMIENTO:{
@@ -331,7 +331,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespReintegro(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo); 
 
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -365,7 +365,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespAbono(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 						
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ALMACENAMIENTO:{
@@ -377,7 +377,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespAbono(origen,destino,numcanal,nmsg,codonline,cod_resp,signo,saldo);
 	
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{
@@ -410,7 +410,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				respuesta = new RespTraspaso(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0,true,0);
 						
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ALMACENAMIENTO:{
@@ -428,7 +428,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 						signoOrigen,saldoOrigen,signoDestino,saldoDestino);
 	
 				//Enviamos el mensaje
-				sendToCajero(respuesta,this.output_socket.getInetAddress(),this.output_socket.getPort());
+				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
 			case ENVIO_CORRECTO:{

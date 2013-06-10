@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,6 +83,61 @@ public class Database_lib {
 		return instancia;
 	}
 	
+	/**
+	 * Método que comprueba si existe la pareja Tarjeta,Cuenta en la BD. En caso de que no exista la inserta.
+	 * @param tarjeta El string correspondiente a la tarjeta.
+	 * @param cuenta EL int correspondiente a la cuenta.
+	 */
+	public void comprueba_cuenta(String tarjeta,int cuenta){
+		
+		ResultSet resultSet;
+		
+		//Obtiene la cuenta de la BD
+		try {
+			resultSet = this.statement.executeQuery("SELECT codCuenta FROM Cuenta" +  
+				" WHERE codTarjeta = '" + tarjeta + "' AND codCuenta = " + cuenta);
+			
+			if(resultSet.next())
+				return;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		//En caso de que no haya, se introduce en la BD
+		try {
+			this.statement.executeUpdate("INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo)" +
+					" VALUES('" + tarjeta + "'," + cuenta + ",0)");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Método que comprueba si existe la tarjeta en la BD. En caso de que no exista la inserta.
+	 * @param tarjeta El string correspondiente a la tarjeta.
+	 */
+	public void comprueba_tarjeta(String tarjeta){
+		
+		ResultSet resultSet;
+		//Obtiene la tarjeta de la BD
+		try {
+			resultSet = this.statement.executeQuery("SELECT codTarjeta FROM Tarjeta" +  
+				" WHERE codTarjeta = '" + tarjeta + "'");
+			
+			if(resultSet.next())
+				return;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		//En caso de que no haya, se introduce en la BD
+		try {
+			this.statement.executeUpdate("INSERT INTO Tarjeta(codTarjeta,tagastoOffline)" +
+					" VALUES('" + tarjeta + "',0)");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	/*---------------------------------------------------
 	 ---------------- CONSULTAS EN CUENTAS -----------------------
@@ -155,12 +211,13 @@ public class Database_lib {
 		try{
 			resultSet = this.statement.executeQuery("SELECT cusaldo FROM Cuenta " +
 					"WHERE codCuenta=" + cuenta + " AND codTarjeta = '" + tarjeta + "'");
-			return resultSet.getInt(3);
+			if(resultSet.next())
+				return resultSet.getInt(1);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
-			return (Integer) null;
 		}
+		return -1;
 	}
 
 	
@@ -217,8 +274,12 @@ public class Database_lib {
 		if(!codonline)
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
+		System.out.println("tarjeta:" + tarjeta);
+		String id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,Integer.toString(cuenta),null,Integer.toString(10),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+		this.insertar_movimiento(tarjeta,cuenta,-1,10,importe,codonline,id_banco);
+		
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'-');
 		
@@ -243,8 +304,11 @@ public class Database_lib {
 		if(!codonline)
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
+		System.out.println("tarjeta:" + tarjeta);
+		String id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,Integer.toString(cuenta_origen),Integer.toString(cuenta_destino),Integer.toString(11),Integer.toString(importe),codonline,tarjeta.substring(0, 8));
+		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,11,importe,codonline,id_banco);
 	
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta_origen,tarjeta, importe,'-');
@@ -274,7 +338,7 @@ public class Database_lib {
 		String id_banco = tarjeta.substring(0,tarjeta.length()-3);
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,Integer.toString(cuenta),null,Integer.toString(50),Integer.toString(importe),codonline,id_banco);
+		this.insertar_movimiento(tarjeta,cuenta,-1,50,importe,codonline,id_banco);
 
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'+');
@@ -374,19 +438,38 @@ public class Database_lib {
 	 * @param codonline El booleando que indica si es online o offline.
 	 * @param banco El número del banco.
 	 */
-	private void insertar_movimiento(String tarjeta,String cuenta_orig,String cuenta_dest,String cod_tmovimiento,
-		String importe,boolean codonline,String banco){
+	private void insertar_movimiento(String tarjeta,int cuenta_orig,int cuenta_dest,int cod_tmovimiento,
+		int importe,boolean codonline,String banco){
 		
 		//Obtiene el tiempo actual y lo añade con el formato indicado
 	  	Calendar time = Calendar.getInstance();
-    	time.getTime();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		
+		//Obtiene codigo que identifica al banco en la BD a partir del string del banco
+		int id_banco = getIdBanco(banco);
+		
+		//Si no nay banco, no hacer nada
+		if(id_banco<0)
+			return;
+		
+		//Comprobamos si existen la tarjeta y las cuentas en la BD, sino, las insertamos
+		comprueba_tarjeta(tarjeta);
+		if(cuenta_orig>0)
+			comprueba_cuenta(tarjeta,cuenta_orig);
+		if(cuenta_dest>0)
+			comprueba_cuenta(tarjeta,cuenta_dest);
+		
+		String cuentas = ((cuenta_orig<0)? "NULL":cuenta_orig) + "," + ((cuenta_dest<0)? "NULL":cuenta_dest);
+		System.out.println("INSERT INTO Movimiento" +
+				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
+				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + sdf.format(time.getTime()) + "," +
+				importe + "," + ((codonline)? 0:1) + "," + id_banco + ")");
 		
 		try {
 			this.statement.executeUpdate("INSERT INTO Movimiento" +
 				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
-				" VALUES ('" + tarjeta + "'," + cuenta_orig + "," + cuenta_dest + "," + cod_tmovimiento + "," + sdf.format(time) + "," +
-				importe + "," + ((codonline)? 0:1) + "," + banco + ")");
+				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + sdf.format(time.getTime()) + "," +
+				importe + "," + ((codonline)? 0:1) + "," + id_banco + ")");
 		} catch (SQLException e) {
 			System.out.println("Error insertando movimiento.");
 			e.printStackTrace();
@@ -511,6 +594,26 @@ public class Database_lib {
 	}
 	
 	//------GETTERS Y SETTERS
+	
+	/**
+	 * Obtiene el codigo real que identifica al primer banco cuyo codBanco es igual al banco pasado por parametro.
+	 * @param banco El string con el codigo del banco
+	 * @return El int con el codigo que lo identifica en la BD
+	 */
+	public int getIdBanco(String banco){
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco" +
+					" WHERE codBanco = " + banco);
+			
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
 	
 	/**
 	 * Getter en BANCO del estado de la conexion con el banco.
