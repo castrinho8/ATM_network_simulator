@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 
 import practicaacs.consorcio.aux.EstadoEnvio;
+import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.consorcio.aux.TipoAccion;
 import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.consorcio.bd.Database_lib;
@@ -280,13 +283,30 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		Calendar c = Calendar.getInstance();
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
-			case RECHAZAR_PETICION:{
+			/*case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.
 				respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,codonline,cod_resp,
 						0,CodigosMovimiento.OTRO,true,0,c.getTime());
 			
 				//Enviamos el mensaje
 				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
+				break;
+			}*/
+			case RECHAZAR_PETICION:{
+				//La respuesta en caso de error.
+				ArrayList<Movimiento> list = Database_lib.getInstance().consultar_movimientos(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
+				Iterator<Movimiento> it = list.iterator();
+				int num = list.size()-1;
+				
+				while(it.hasNext()){
+					Movimiento m = it.next();
+					respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,true,cod_resp,
+						num,m.tipo,(m.importe>=0),m.importe,c.getTime());
+					num--;
+					System.out.println(num);
+					//Enviamos el mensaje
+					sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
+				}
 				break;
 			}
 			case ENVIO_CORRECTO:{

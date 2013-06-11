@@ -3,12 +3,17 @@ package practicaacs.cajeros;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import practicaacs.cajeros.iu.ConsultaAbstracta;
+import practicaacs.fap.CodigoNoValidoException;
+import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.MensajeNoValidoException;
+import practicaacs.fap.RespMovimientos;
+import practicaacs.fap.SolMovimientos;
 
 public class ConexionCajero extends Thread{
 
@@ -28,8 +33,30 @@ public class ConexionCajero extends Thread{
 	
 	@Override
 	public void run() {
-		MensajeDatos m = this.enviar_mensaje();
-		this.interfaz.actualizarIU(m);
+		
+		MensajeDatos m = null;
+		RespMovimientos resp = null;
+		ArrayList<RespMovimientos> lista = new ArrayList<RespMovimientos>();
+		this.enviar_mensaje();
+
+		//Si es MOVIMIENTOS hay que recibir varios mensajes
+		if(this.envio.getTipoMensaje().equals(CodigosMensajes.SOLMOVIMIENTOS)){
+			do{
+				resp = (RespMovimientos) this.recibir_mensaje();
+				lista.add(resp);
+				System.out.println(resp.getNmovimientos());
+			}while(resp.getNmovimientos()>0);
+			
+			try {
+				this.interfaz.actualizarIUmovimientos(lista);
+			} catch (CodigoNoValidoException e) {
+				e.printStackTrace();
+			}
+		//Si no es MOVIMIENTOS solo se recibe uno
+		}else{
+			m = this.recibir_mensaje();
+			this.interfaz.actualizarIU(m);
+		}
 	}
 
 	/**
@@ -39,7 +66,7 @@ public class ConexionCajero extends Thread{
      * @param port El puerto a donde enviar el mensaje.
      * @return El mensaje de respuesta correspondiente.
      */
-    private MensajeDatos enviar_mensaje(){
+    private void enviar_mensaje(){
     	
     	Calendar time = Calendar.getInstance();
     	System.out.println("ENVIO: Cajero: " + this.cajero + " a las " + time.getTime() + " \n" + this.envio.toString());
@@ -55,8 +82,13 @@ public class ConexionCajero extends Thread{
 			System.out.println("Error al enviar.");
 			System.exit ( 0 );
 		}
-		
-		byte [] recibirDatos = new byte[1024];
+    }
+    
+    
+    public MensajeDatos recibir_mensaje(){
+    
+    	Calendar time = Calendar.getInstance();
+    	byte [] recibirDatos = new byte[1024];
 		//Crea el Datagrama en donde recibir los datos
 		DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
 		
@@ -86,4 +118,6 @@ public class ConexionCajero extends Thread{
     	System.out.println("RECEPCION: Cajero: " + this.cajero.getId_cajero() +" a las " + time.getTime());
     	return (MensajeDatos) recepcion;
     }
+    
+    
 }

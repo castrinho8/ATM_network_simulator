@@ -124,7 +124,7 @@ public class Cajero{
      */
     public Mensaje crear_mensaje(Envio env){
     	MensajeDatos envio = null;
-    	
+    	System.out.println("ENTRAA");
     	switch(env.getTipoMensaje()){
 	    	case SOLSALDO:{
 	        	envio = new SolSaldo(this.id_cajero,this.id_consorcio,
@@ -136,6 +136,7 @@ public class Cajero{
 	    		envio = new SolMovimientos(this.id_cajero,this.id_consorcio,
 	    				env.getTipoMensaje(),0,next_number_message++,
 	    				false,env.getNum_tarjeta(),env.getNum_cuenta_origen());
+	        	System.out.println("Sale");
 	    		break;
 	    	}
 	    	case SOLREINTEGRO:{
