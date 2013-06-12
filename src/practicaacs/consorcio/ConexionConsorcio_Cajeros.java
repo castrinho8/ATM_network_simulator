@@ -242,8 +242,6 @@ public class ConexionConsorcio_Cajeros extends Thread{
 
 		RespSaldo respuesta = null;
 		
-		System.out.printf("ONLINE:%d-COD_RES:%s\n",codonline?1:0,cod_resp.toString());
-
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.
@@ -283,7 +281,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		Calendar c = Calendar.getInstance();
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
-			/*case RECHAZAR_PETICION:{
+			case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.
 				respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,codonline,cod_resp,
 						0,CodigosMovimiento.OTRO,true,0,c.getTime());
@@ -291,8 +289,9 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				//Enviamos el mensaje
 				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
-			}*/
-			case RECHAZAR_PETICION:{
+			}
+			//PARA HACER PRUEBAS DE ENVIO DE MOVIMIENTOS AL CAJERO SIN TENER QUE USAR EL BANCO
+			/*case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.
 				ArrayList<Movimiento> list = Database_lib.getInstance().consultar_movimientos(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
 				Iterator<Movimiento> it = list.iterator();
@@ -308,7 +307,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 					sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				}
 				break;
-			}
+			}*/
 			case ENVIO_CORRECTO:{
 				//Reenviamos el mensaje al banco
 				//reenviar_mensaje(recibido,recibido.getNum_tarjeta());

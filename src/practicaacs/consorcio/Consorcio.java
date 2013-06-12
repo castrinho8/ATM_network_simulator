@@ -14,7 +14,7 @@ import practicaacs.consorcio.iu.PantallaInicialConsorcio_IU;
 
 public class Consorcio {
 
-	static private int next_id_consorcio = 0;
+	static private int next_id_consorcio = 1;
 
 	private PantallaInicialConsorcio_IU iu;
 	private String id_consorcio;

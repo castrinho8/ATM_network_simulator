@@ -1359,10 +1359,15 @@ public class Database_lib {
 			while(resultSet.next()){
 				String str1 = resultSet.getString(1);
 				String str2 = resultSet.getString(2);
-				//Mensaje m = Mensaje.parse(resultSet.getString(3));
-				//String elemento = str1 + "->" + str2 + ": " + m.toString();
-				String test = resultSet.getString(3);
-				String elemento = str1 + "->" + str2 + ": " + test;
+				Mensaje m = null;
+				try {
+					m = Mensaje.parse(resultSet.getString(3));
+				} catch (MensajeNoValidoException e) {
+					e.printStackTrace();
+				}
+				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
+				//String test = resultSet.getString(3);
+				//String elemento = str1 + "->" + str2 + ": " + test;
 
 				res.add(elemento);
 			}
