@@ -12,23 +12,28 @@ public enum CodigosMovimiento {
 
 	public static CodigosMovimiento getTipoMovimiento(int valor) throws CodigoNoValidoException{
 		switch(valor){
-		case 10:
-			return REINTEGRO;
-		case 11:
-			return TRANSEMITIDO;
-		case 12:
-			return TRANSRECIB;
-		case 13:
-			return PAGORECIB;
-		case 50:
-			return ABONO;
-		case 51:
-			return COBROCHEQUE;
-		case 99:
-			return OTRO;
-		default:
-			throw new CodigoNoValidoException("" + valor);
+			case 10:
+				return REINTEGRO;
+			case 11:
+				return TRANSEMITIDO;
+			case 12:
+				return TRANSRECIB;
+			case 13:
+				return PAGORECIB;
+			case 50:
+				return ABONO;
+			case 51:
+				return COBROCHEQUE;
+			case 99:
+				return OTRO;
+			default:
+				throw new CodigoNoValidoException("" + valor);
 		}
+	}
+	
+	public static boolean getSigno(CodigosMovimiento codigo){
+		//Si es una transferencia recibida, pago recibido, abono, o cobro de cheque el signo es positivo
+		return ((codigo == TRANSRECIB)||(codigo == PAGORECIB)||(codigo == ABONO)||(codigo == COBROCHEQUE));
 	}
 
 	public int getNum() {

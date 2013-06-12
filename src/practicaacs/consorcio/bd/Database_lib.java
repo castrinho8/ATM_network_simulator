@@ -233,7 +233,7 @@ public class Database_lib {
 		try{
 			resultSet = this.statement.executeQuery("SELECT codMovimiento,moimporte,mofecha,codTMovimiento" +
 					" FROM Movimiento " +
-					"WHERE ((codCuentaOrig = " + cuenta + " AND codTarjeta = '" + tarjeta + 
+					"WHERE ((codCuentaOrig = " + cuenta + " AND codTarjeta = '" + tarjeta +
 					"') || (codCuentaDest = " + cuenta + " AND codTarjeta = '" + tarjeta + "'))");
 			
 			ArrayList<Movimiento> res = new ArrayList<Movimiento>();
@@ -256,7 +256,7 @@ public class Database_lib {
 				} catch (ParseException ex) {
 				    ex.printStackTrace();
 				}
-				res.add(new Movimiento(resultSet.getInt(1),resultSet.getInt(2),fecha,tipo));
+				res.add(new Movimiento(resultSet.getInt(1),CodigosMovimiento.getSigno(tipo),resultSet.getInt(2),fecha,tipo));
 			}
 			return res;
 		}catch (SQLException e) {
@@ -317,7 +317,7 @@ public class Database_lib {
 		
 		//Insertamos en la tabla MOVIMIENTO
 		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,11,importe,codonline,id_banco);
-	
+
 		//Recalculamos el saldo actual de las CUENTAS
 		this.recalcular_saldoActual(cuenta_origen,tarjeta, importe,'-');
 		this.recalcular_saldoActual(cuenta_destino,tarjeta, importe,'+');

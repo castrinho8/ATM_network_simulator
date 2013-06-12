@@ -55,7 +55,12 @@ public class ConexionCajero extends Thread{
 		//Si no es MOVIMIENTOS solo se recibe uno
 		}else{
 			m = this.recibir_mensaje();
-			this.interfaz.actualizarIU(m);
+			
+			try {
+				this.interfaz.actualizarIU(m);
+			} catch (CodigoNoValidoException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

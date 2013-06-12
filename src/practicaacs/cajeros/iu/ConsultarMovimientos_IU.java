@@ -168,21 +168,6 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
     }
     
 	@Override
-    public void actualizarIU(MensajeDatos respuesta){
-		this.ConsultandoLabel.setVisible(false);
-		RespMovimientos m = (RespMovimientos)respuesta;
-		
-		if(m.getCodonline()){
-			String texto = m.getTipoMov()+": "+m.getOrigen()+"->"+m.getDestino()+" Importe:"+m.getImporte();
-			this.listModel.addElement(texto);
-			this.listMovimientos = new JList(this.listModel);
-		}else{
-			this.listModel.clear();
-			this.listModel.addElement("Error: No hay conexion");
-		}
-    }
-	
-	@Override
     public void actualizarIUmovimientos(ArrayList<RespMovimientos> lista) throws CodigoNoValidoException{
 		this.ConsultandoLabel.setVisible(false);
 		
@@ -193,7 +178,7 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 		while(it.hasNext()){
 			RespMovimientos m = (RespMovimientos) it.next();
 			if(m.getCodonline()){
-				texto = "Importe: " + ((m.getSigno())?"+":"-")+m.getImporte()+"€  Fecha: "+m.getFecha();
+				texto = m.getTipoMov() + " - Importe: " + ((m.getSigno())?"+":"-")+m.getImporte()+"€  Fecha: "+m.getFecha();
 				strlist.add(texto);
 			}else{
 				String[] s = {"Error: No hay conexion"};

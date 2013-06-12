@@ -301,7 +301,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				while(it.hasNext()){
 					Movimiento m = it.next();
 					respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,true,cod_resp,
-						num,m.tipo,(m.importe>=0),m.importe,c.getTime());
+						num,m.getTipo(),m.getSigno(),m.getImporte(),c.getTime());
 					num--;
 					System.out.println(num);
 					//Enviamos el mensaje
