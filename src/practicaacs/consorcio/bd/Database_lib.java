@@ -283,7 +283,13 @@ public class Database_lib {
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
 		System.out.println("tarjeta:" + tarjeta);
-		String id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		String id_banco = "";
+		try{
+			id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		}catch(IndexOutOfBoundsException i){
+			i.printStackTrace();
+			return -1;
+		}
 		
 		//Insertamos en la tabla MOVIMIENTO
 		this.insertar_movimiento(tarjeta,cuenta,-1,10,importe,codonline,id_banco);
@@ -313,7 +319,13 @@ public class Database_lib {
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
 		System.out.println("tarjeta:" + tarjeta);
-		String id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		String id_banco = "";
+		try{
+			id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		}catch(IndexOutOfBoundsException i){
+			i.printStackTrace();
+			return -1;
+		}
 		
 		//Insertamos en la tabla MOVIMIENTO
 		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,11,importe,codonline,id_banco);
@@ -344,7 +356,13 @@ public class Database_lib {
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
 		System.out.println("tarjeta:" + tarjeta);
-		String id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		String id_banco = "";
+		try{
+			id_banco = tarjeta.substring(0,tarjeta.length()-3);
+		}catch(IndexOutOfBoundsException i){
+			i.printStackTrace();
+			return -1;
+		}
 		
 		//Insertamos en la tabla MOVIMIENTO
 		this.insertar_movimiento(tarjeta,cuenta,-1,50,importe,codonline,id_banco);
@@ -373,7 +391,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try{
 			resultSet = this.statement.executeQuery("SELECT SUM(moimporte) FROM Movimiento " +
-				"WHERE codTMovimiento = " + codigo_mov + " AND codBanco = "+ id_banco);
+				"WHERE codTMovimiento = " + codigo_mov + " AND codBanco = '"+ id_banco +"'");
 		
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -479,7 +497,7 @@ public class Database_lib {
 		try {
 			this.statement.executeUpdate("INSERT INTO Movimiento" +
 				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
-				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + ", STR_TO_DATE('" + fecha + "','%m/%d/%Y')," +
+				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + ", STR_TO_DATE('" + fecha + "','%d/%m/%Y')," +
 				importe + "," + ((codonline)? 0:1) + "," + id_banco + ")");
 		} catch (SQLException e) {
 			System.out.println("Error insertando movimiento.");
@@ -506,7 +524,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try{
 			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco " +
-					"WHERE codbanco = " + id_banco);
+					"WHERE codbanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
 				//Si hay ya un banco, settear la sesion
@@ -537,7 +555,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try{
 			resultSet = this.statement.executeQuery("SELECT count(*),bamaxCanales FROM Banco " +
-					"WHERE codbanco = " + id_banco);
+					"WHERE codbanco = '" + id_banco +"'");
 			
 			if(resultSet.next()){
 				//Si hay ya un banco, settear la sesion a cerrada
@@ -592,7 +610,7 @@ public class Database_lib {
 		int res = 0;
 		try {
 			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco" +
-					" WHERE codBanco = " + id_banco + " AND ((codEBanco = " + 1 + ") || (codEBanco = " + 4 + "))");
+					" WHERE codBanco = '" + id_banco + "' AND ((codEBanco = 1 ) || (codEBanco = 4))");
 			
 			if(resultSet.next())
 				res = resultSet.getInt(1);
@@ -615,7 +633,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco" +
-					" WHERE codBanco = " + banco);
+					" WHERE codBanco = '" + banco + "'");
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -637,7 +655,7 @@ public class Database_lib {
 		int codEBanco = 0;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codEBanco FROM Banco" +
-					" WHERE codBanco = " + id_banco);
+					" WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next())
 				codEBanco = resultSet.getInt(1);
@@ -659,7 +677,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT bamaxCanales FROM Banco" +
-					" WHERE codBanco = " + id_banco);
+					" WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -680,7 +698,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT bapuerto FROM Banco" +
-					" WHERE codBanco = " + id_banco);
+					" WHERE codBanco = '" + id_banco +"'");
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -704,7 +722,7 @@ public class Database_lib {
 		String temp = "";
 		try {
 			resultSet = this.statement.executeQuery("SELECT baip FROM Banco" +
-					" WHERE codBanco = " + id_banco);
+					" WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next())
 				temp = resultSet.getString(1);
@@ -728,7 +746,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codBanco FROM Banco " +
-					"WHERE codEBanco = " + 1);
+					"WHERE codEBanco = 1");
 			
 			ArrayList<String> res = new ArrayList<String>();
 			
@@ -754,7 +772,7 @@ public class Database_lib {
 			int state = EstadoSesion.getInt_fromEstadoSesion(estado);
 			
 			this.statement.executeUpdate("UPDATE Banco SET codEbanco = " + state + 
-					" WHERE codBanco = " + id_banco);
+					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -772,7 +790,7 @@ public class Database_lib {
 			int port = Integer.getInteger(puerto);
 
 			this.statement.executeUpdate("UPDATE Banco SET bapuerto = " + port + 
-					" WHERE codBanco = " + id_banco);
+					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -793,7 +811,7 @@ public class Database_lib {
 		
 		try {
 			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
-			" VALUES(" + id_banco + "," + estado + "," + puerto + "," + ip + "," + num_canales);
+			" VALUES('" + id_banco + "'," + estado + "," + puerto + "," + ip + "," + num_canales);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -818,7 +836,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT MIN(codCanal) FROM Canal c JOIN UltimoEnvio ue " +
-					"ON c.codBanco = " + id_banco + " WHERE c.cabloqueado = 0 AND ue.uecontestado = 1" );
+					"ON c.codBanco = '" + id_banco + "' WHERE c.cabloqueado = 0 AND ue.uecontestado = 1" );
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -841,10 +859,10 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT canext_numMensaje FROM Canal " +
-					"WHERE codBanco = " + id_banco + " AND codCanal = " + id_canal);
+					"WHERE codBanco = '" + id_banco + "' AND codCanal = " + id_canal);
 			
 			this.statement.executeUpdate("UPDATE Canal SET canext_numMensaje = canext_numMensaje+1" +
-					" WHERE codBanco = " + id_banco + " AND codCanal = " + id_canal);
+					" WHERE codBanco = '" + id_banco + "' AND codCanal = " + id_canal);
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -867,7 +885,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT c.cabloqueado || (ue.uecontestado=0)" +
 					" FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codUltimoEnvio" +
-					"WHERE c.codBanco = " + id_banco +" AND c.codCanal = " + canal);
+					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) == 1);
@@ -889,7 +907,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT COUNT(codUltimoEnvio) FROM UltimoEnvio " +
-					"WHERE codBanco = " + id_banco + " AND uecontestado = 0");
+					"WHERE codBanco = '" + id_banco + "' AND uecontestado = 0");
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) != 0);
@@ -912,7 +930,7 @@ public class Database_lib {
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT uestringMensaje FROM UltimoEnvio " +
-					"WHERE codBanco = " + id_banco);
+					"WHERE codBanco = '" + id_banco + "'");
 			
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
@@ -934,7 +952,7 @@ public class Database_lib {
 	public void bloquearCanal(String id_banco, int canal){
 		try {
 			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 1 " +
-					"WHERE codBanco = " + id_banco + " AND codCanal = " + canal);
+					"WHERE codBanco = '" + id_banco + "' AND codCanal = " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -960,7 +978,7 @@ public class Database_lib {
 	public void desbloquearCanales(String id_banco){
 		try {
 			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 0 " +
-					"WHERE codBanco = " + id_banco);
+					"WHERE codBanco = '" + id_banco + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -978,7 +996,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT uecontestado " +
 					"FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco +" AND c.codCanal = " + canal);
+					"WHERE c.codBanco = '" + id_banco +"' AND c.codCanal = " + canal);
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) == 1);
@@ -1000,7 +1018,7 @@ public class Database_lib {
 	public void anhadir_canal(String id_banco, int canal){
 		
 		try {
-			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES (" + id_banco + "," + canal + ")");
+			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES ('" + id_banco + "'," + canal + ")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1014,7 +1032,7 @@ public class Database_lib {
 	public void eliminar_canal(String id_banco, int canal){
 		
 		try {
-			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = " + id_banco + " AND codCanal = " + canal);
+			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = '" + id_banco + "' AND codCanal = " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1039,7 +1057,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.ueip FROM UltimoEnvio ue JOIN Canal c " +
 					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal );
+					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal );
 			
 			if(resultSet.next())
 				temp = resultSet.getString(1);
@@ -1068,7 +1086,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.uepuerto FROM UltimoEnvio ue JOIN Canal c " +
 					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 			
 			if(resultSet.next())
 				res = resultSet.getInt(1);
@@ -1093,7 +1111,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
 					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 			
 			if(resultSet.next())
 				res = resultSet.getInt(1);
@@ -1119,7 +1137,7 @@ public class Database_lib {
 			
 			resultSet = this.statement.executeQuery("SELECT ue.codUltimoEnvio " +
 					"FROM UltimoEnvio ue JOIN Canal c ON ue.codUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 		
 			if(resultSet.next()){
 				codigo = resultSet.getInt(1);
@@ -1183,7 +1201,7 @@ public class Database_lib {
 			this.statement.executeUpdate("INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip," +
 					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
 					" VALUES (" + mensaje.getNmsg() + ",'" + codCajero + "'," + puerto_cajero + "," + ip_cajero + 
-					"," + mensaje.getDestino() + "," + tarjeta + "," + cuenta + " " + mensaje.toString() +")");
+					",'" + mensaje.getDestino() + "','" + tarjeta + "'," + cuenta + ",'" + mensaje.toString() +"')");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -1222,7 +1240,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT codUltimoEnvio" +
 					" FROM Canal" +
-					" WHERE codCanal=" + canal + " AND codBanco=" + id_banco);
+					" WHERE codCanal=" + canal + " AND codBanco='" + id_banco +"'");
 			codigo_ultimo_envio = resultSet.getInt(0);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1257,7 +1275,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.uestringMensaje " +
 					"FROM UltimoEnvio ue JOIN Canal c ON ue.codUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco + " AND c.codCanal = " + canal);
+					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 			
 			if(resultSet.next()){
 				str_mensaje = resultSet.getString(1);
@@ -1293,7 +1311,7 @@ public class Database_lib {
 			//Obtenemos todos los mensajes OFFLINE
 			resultSet = this.statement.executeQuery("SELECT mestringMensaje " +
 					"FROM Mensaje " +
-					"WHERE codBanco = " + id_banco + " AND (meoffline IS NOT NULL || meoffline != 0)");
+					"WHERE codBanco = '" + id_banco + "' AND (meoffline IS NOT NULL || meoffline != 0)");
 			
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
@@ -1301,7 +1319,7 @@ public class Database_lib {
 			}
 			
 			//Ponemos OFFLINE a false para todos los mensajes del id_banco
-			this.statement.executeUpdate("UPDATE Mensaje SET meoffline = 0 WHERE codBanco = " + id_banco);
+			this.statement.executeUpdate("UPDATE Mensaje SET meoffline = 0 WHERE codBanco = '" + id_banco + "'");
 			
 			return res;
 		} catch (SQLException e) {
