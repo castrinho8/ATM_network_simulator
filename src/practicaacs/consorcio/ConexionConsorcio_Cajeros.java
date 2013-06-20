@@ -145,15 +145,20 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void sendToBanco(MensajeDatos message,String numTarjeta){
 		
-		String cajero = message.getDestino();
+		String cajero = message.getOrigen();
+		String destino = null;
 		//Cambiamos origen y destino
-		String destino = numTarjeta.substring(0, 8); //Id_banco
+		try{
+			destino = numTarjeta.substring(0,numTarjeta.length()-3); //Id_banco
+		}catch(IndexOutOfBoundsException i){
+			
+		}
 		String origen = this.consorcio.getId_consorcio(); //Id_consorcio
 		message.setDestino(destino);
 		message.setOrigen(origen);
 
 		//Delegar en el ServidorBancos para el reenvio y el almacenamiento del envio
-		this.consorcio.getBancos_server().sendToBanco(message,cajero,this.output_socket.getInetAddress(),this.output_socket.getPort());
+		this.consorcio.getBancos_server().sendToBanco(message,cajero,this.input_packet.getAddress(),this.input_packet.getPort());
 	}
 	
 	
@@ -253,6 +258,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			}
 			case ENVIO_CORRECTO:{
 				//Reenviamos el mensaje al banco
+				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				//reenviar_mensaje(recibido,recibido.getNum_tarjeta());
 				break;
 			}

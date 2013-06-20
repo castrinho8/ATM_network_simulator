@@ -71,7 +71,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		this.output_socket =  socket;
 	}
 
-	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,String caj,InetAddress ip, int puerto, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
+	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,String caj,InetAddress ip_caj, int puerto_caj, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
 		this.consorcio = cons;
 		this.servidor = s;
@@ -79,8 +79,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 		this.tipo_accion = tipo;
 		this.envio = env;
 		this.id_cajero = caj;
-		this.ip_cajero = ip;
-		this.puerto_cajero = puerto;
+		this.ip_cajero = ip_caj;
+		this.puerto_cajero = puerto_caj;
 		this.output_socket =  socket;
 	}
 	
