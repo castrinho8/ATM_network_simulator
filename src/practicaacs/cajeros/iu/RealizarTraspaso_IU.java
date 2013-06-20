@@ -101,8 +101,6 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
             }
         });
 
-        ErrorLabel.setText("No hay introducido importe o cuenta destino...");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -172,15 +170,37 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
 	    	inicializa_visibilidades();
 	        String importe = this.ImporteText.getText();
 	        String cdestino = this.CuentaText.getText();
+	        int importe_traspaso = 0;
+	        int cuenta_destino = 0;
 	        
 	        //Comprobamos si se ha introducido la cuenta y el importe
 	        if(importe.equals("") | cdestino.equals("")){
-	        	throw new NumberFormatException();
+	        	throw new NumberFormatException("No hay introducido importe o cuenta destino...");
 	        }
-	        int importe_traspaso = Integer.parseInt(importe);
-	        int cuenta_destino = Integer.parseInt(cdestino);
-	        this.EsperandoRespuestaLabel.setVisible(true);
 	        
+	        //Comprobamos si es correcto el importe introducido (si es un numero)
+	        try{
+	        	importe_traspaso = Integer.parseInt(importe);
+	        }catch(NumberFormatException nfe){
+        		throw new NumberFormatException("Importe incorrecto...");
+	        }
+	        
+	        //Comprobamos si es correcta la cuenta introducida
+	        try{
+	            if(cdestino.length()!=1)
+	        		throw new NumberFormatException();
+	        	cuenta_destino = Integer.parseInt(cdestino);
+	        }catch(NumberFormatException nfe){
+	    		throw new NumberFormatException("Cuenta destino incorrecta...");
+	        }
+        
+	        //Comprobamos si la cuenta origen y destino son la misma
+	        if(cuenta_destino == this.envio.getNum_cuenta_origen()){
+	        	throw new NumberFormatException("La cuenta origen y destino son la misma...");
+	        }
+		    
+	        this.EsperandoRespuestaLabel.setVisible(true);
+
 	        //Añadimos los componentes del envio
 	        this.envio.setTipoMensaje(CodigosMensajes.SOLTRASPASO);
 	        this.envio.setImporte(importe_traspaso);
@@ -188,6 +208,7 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
 	        envia_consulta(this.envio);
 	        
         }catch(NumberFormatException nfe){
+            this.ErrorLabel.setText(nfe.getMessage());
             this.ErrorLabel.setVisible(true);
             return;
         }
