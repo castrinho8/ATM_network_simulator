@@ -69,7 +69,7 @@ public class ClienteServidorConsorcio extends Thread {
 			
 			try{
 				socketServidor.receive(recibirPaquete);
-				this.analizarMensaje(new String(recibirPaquete.getData(),recibirPaquete.getOffset(),recibirPaquete.getLength()-1));
+				this.analizarMensaje(new String(recibirPaquete.getData(),recibirPaquete.getOffset(),recibirPaquete.getLength()));
 				
 			}catch (SocketTimeoutException e){
 			

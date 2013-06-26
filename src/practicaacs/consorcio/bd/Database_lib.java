@@ -524,23 +524,26 @@ public class Database_lib {
 		ResultSet resultSet;
 		try{
 			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco " +
-					"WHERE codbanco = '" + id_banco + "'");
+					"WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
 				//Si hay ya un banco, settear la sesion
 				if(resultSet.getInt(1)==1){
-					this.setEstado_conexion_banco(id_banco,SesAberta.instance());
+					setEstado_conexion_banco(id_banco,SesAberta.instance());
+					borrar_canales(id_banco);
 				}
 			}else{
 				//Añadir BANCO a la BD
 				insertar_banco(id_banco,1,Integer.parseInt(puerto),ip,num_canales);
-				
-				int id_canal = 0;
-				//Añadir todos los CANALES del BANCO
-				for(id_canal=0;id_canal<num_canales;id_canal++)
-					anhadir_canal(id_banco,id_canal);
 			}
+			
+			int id_canal = 0;
+			//Añadir todos los CANALES del BANCO
+			for(id_canal=0;id_canal<num_canales;id_canal++)
+				anhadir_canal(id_banco,id_canal);
+			
 		}catch (SQLException e) {
+				System.out.println("Error abriendo sesion.");
 				e.printStackTrace();
 		}
 	}
@@ -554,24 +557,19 @@ public class Database_lib {
 
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT count(*),bamaxCanales FROM Banco " +
+			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco " +
 					"WHERE codbanco = '" + id_banco +"'");
 			
 			if(resultSet.next()){
-				//Si hay ya un banco, settear la sesion a cerrada
+				//Si hay un banco, settear la sesion a cerrada
 				if(resultSet.getInt(1)==1){
 					this.setEstado_conexion_banco(id_banco,SesNonAberta.instance());
+					borrar_canales(id_banco);
 				}
-				
-				//Obtenemos el numero de canales a cerrar
-				int num_canales = resultSet.getInt(2);
-				int id_canal = 0;
-				//Eliminamos todos los CANALES del BANCO
-				for(id_canal=0;id_canal<num_canales;id_canal++)
-					eliminar_canal(id_banco,id_canal);
 			}
 		}catch (SQLException e) {
-				e.printStackTrace();
+			System.out.println("Error cerrando sesion.");
+			e.printStackTrace();
 		}
 	}
 	
@@ -775,7 +773,8 @@ public class Database_lib {
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
-			System.err.println(e);
+			System.out.println("Error seteando el estado de la conexión del banco.");
+			e.printStackTrace();
 		}
 	}
 	
@@ -793,7 +792,8 @@ public class Database_lib {
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
-			System.err.println(e);
+			System.out.println("Error seteando el puerto del banco.");
+			e.printStackTrace();
 		}
 		
 	}
@@ -811,7 +811,7 @@ public class Database_lib {
 		
 		try {
 			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
-			" VALUES('" + id_banco + "'," + estado + "," + puerto + "," + ip + "," + num_canales);
+			" VALUES('" + id_banco + "'," + estado + "," + puerto + ",'" + ip + "'," + num_canales);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -885,7 +885,7 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT c.cabloqueado || (ue.uecontestado=0)" +
 					" FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codUltimoEnvio" +
-					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
+					" WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) == 1);
@@ -894,7 +894,7 @@ public class Database_lib {
 			e.printStackTrace();
 			return true;
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -1000,7 +1000,6 @@ public class Database_lib {
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) == 1);
-			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return true;
@@ -1018,7 +1017,7 @@ public class Database_lib {
 	public void anhadir_canal(String id_banco, int canal){
 		
 		try {
-			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES ('" + id_banco + "'," + canal + ")");
+			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES ('" + getIdBanco(id_banco) + "'," + canal + ")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1033,6 +1032,26 @@ public class Database_lib {
 		
 		try {
 			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = '" + id_banco + "' AND codCanal = " + canal);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Obtiene todos los canales de un banco concreto y los elimina.
+	 * @param id_banco El banco a eliminar sus canales.
+	 */
+	public void borrar_canales(String id_banco){
+		
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codCanal " +
+					"FROM Canal " +
+					"WHERE codBanco = '" + id_banco +"'");
+
+			while(resultSet.next()){
+				eliminar_canal(id_banco,resultSet.getInt(1));
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1309,9 +1328,9 @@ public class Database_lib {
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			//Obtenemos todos los mensajes OFFLINE
-			resultSet = this.statement.executeQuery("SELECT mestringMensaje " +
-					"FROM Mensaje " +
-					"WHERE codBanco = '" + id_banco + "' AND (meoffline IS NOT NULL || meoffline != 0)");
+			resultSet = this.statement.executeQuery("SELECT mestringMensaje" +
+					" FROM Mensaje m JOIN Banco b" +
+					" WHERE b.codBanco = '" + id_banco + "' AND (m.meoffline IS NOT NULL || m.meoffline != 0)");
 			
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
@@ -1352,7 +1371,6 @@ public class Database_lib {
 					"VALUES (" + ((offline)? 1:0) + "," + torigen.getNum() +
 					",'" + origen + "'," + tdestino.getNum() + ",'" + destino + "','" + message.toString() +"')";
 			
-			System.out.println("\n" + q);
 			this.statement.executeUpdate(q);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1384,18 +1402,12 @@ public class Database_lib {
 					e.printStackTrace();
 				}
 				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
-				//String test = resultSet.getString(3);
-				//String elemento = str1 + "->" + str2 + ": " + test;
-
 				res.add(elemento);
 			}
 			return res;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
-		//} catch (MensajeNoValidoException e) {
-		//	e.printStackTrace();
-		//	return null;
 		}
 	}
 	
@@ -1412,24 +1424,24 @@ public class Database_lib {
 			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
 					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
 					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
-					" WHERE ta.todnombre='Banco' || tb.todnombre='Banco'");
+					" WHERE ta.todnombre='Banco' || tb.todnombre='Banco' ORDER BY codMensaje");
 
 			while(resultSet.next()){
 				String str1 = resultSet.getString(1);
 				String str2 = resultSet.getString(2);
-				//Mensaje m = Mensaje.parse(resultSet.getString(3));
-				//String elemento = str1 + "->" + str2 + ": " + m.toString();
-				String test = resultSet.getString(3);
-				String elemento = str1 + "->" + str2 + ": " + test;
+				Mensaje m = null;
+				try {
+					m = Mensaje.parse(resultSet.getString(3));
+				} catch (MensajeNoValidoException e) {
+					e.printStackTrace();
+				}
+				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
 				res.add(elemento);
 			}
 			return res;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
-		//} catch (MensajeNoValidoException e) {
-		//	e.printStackTrace();
-		//	return null;
 		}
 	}
 

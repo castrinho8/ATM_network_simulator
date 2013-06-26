@@ -295,6 +295,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		Mensaje msx;
 		try {
+			System.out.println(bs);
 			msx = Mensaje.parse(bs);
 			this.iu.engadirLinhaLog("Mensaxe recibida: " + msx.getTipoMensaje() + "\n");
 			this.rexistrarMensaxe(msx, bs);
