@@ -389,8 +389,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 	    	Sesion ses = new Sesion(id_banco,this.servidor,recibido.getNcanales());
 	    	this.servidor.insertaSesion(ses);
 	    	
+	    	int port = recibido.getPuerto();
+	    	String ip = recibido.getIp();
+	    	
 			//Guardamos la sesion en la BD
-			Database_lib.getInstance().abrir_sesion(id_banco,this.input_packet.getAddress().toString(),recibido.getPuerto(),recibido.getNcanales());
+			Database_lib.getInstance().abrir_sesion(id_banco,ip,port,recibido.getNcanales());
 
 			//Envia la respuesta
 			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error));

@@ -42,8 +42,30 @@ public class SolAperturaSesion extends Mensaje {
 		return ncanales;
 	}
 
-	public String getPuerto() {
+	public String getIpPuerto(){
 		return puerto;
+	}
+	
+	public String getIp(){
+		try{
+			String[] port = this.puerto.split("/");
+			return port[0];
+		}catch(IndexOutOfBoundsException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return null;
+	}
+	
+	public int getPuerto() {
+		try{
+			String[] port = this.puerto.split("/");
+			return Integer.parseInt(port[1]);
+		}catch(IndexOutOfBoundsException | NumberFormatException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return 0;
 	}
 	
 	public Date getTime() {

@@ -519,11 +519,11 @@ public class Database_lib {
 	 * @param puerto El puerto en el que se encuentra el servidor del banco.
 	 * @param num_canales El número de canales máximo que el banco puede usar.
 	 */
-	public void abrir_sesion(String id_banco, String ip, String puerto, int num_canales){
+	public void abrir_sesion(String id_banco, String ip, int puerto, int num_canales){
 		
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco " +
+			resultSet = this.statement.executeQuery("SELECT codBanco FROM Banco " +
 					"WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
@@ -531,10 +531,12 @@ public class Database_lib {
 				if(resultSet.getInt(1)==1){
 					setEstado_conexion_banco(id_banco,SesAberta.instance());
 					borrar_canales(id_banco);
+					System.out.println("HAY BANCO");
 				}
 			}else{
 				//Añadir BANCO a la BD
-				insertar_banco(id_banco,1,Integer.parseInt(puerto),ip,num_canales);
+				insertar_banco(id_banco,1,puerto,ip,num_canales);
+				System.out.println("NO HAY BANCO");
 			}
 			
 			int id_canal = 0;
@@ -809,9 +811,10 @@ public class Database_lib {
 	 */
 	private void insertar_banco(String id_banco, int estado ,int puerto,String ip,int num_canales){
 		
+		System.out.println("INSERTAR BANCO: "+id_banco+"-"+estado+"-"+puerto+"-"+ip+"-"+num_canales);
 		try {
 			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
-			" VALUES('" + id_banco + "'," + estado + "," + puerto + ",'" + ip + "'," + num_canales);
+			" VALUES('" + id_banco + "'," + estado + "," + puerto + ",'" + ip + "'," + num_canales+")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1017,9 +1020,10 @@ public class Database_lib {
 	public void anhadir_canal(String id_banco, int canal){
 		
 		try {
-			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES ('" + getIdBanco(id_banco) + "'," + canal + ")");
+			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES (" + getIdBanco(id_banco) + "," + canal + ")");
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
