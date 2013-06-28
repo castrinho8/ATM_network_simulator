@@ -54,9 +54,9 @@ public abstract class EstadoSesion {
 	
 		if(valor.equals(SesAberta.instance()))
 			return 1;
-		if(!valor.equals(SesNonAberta.instance()))
+		if(valor.equals(SesNonAberta.instance()))
 			return 2;
-		if(!valor.equals(SesDetida.instance()))
+		if(valor.equals(SesDetida.instance()))
 			return 3;
 		if(valor.equals(SesRecuperacion.instance()))
 			return 4;

@@ -94,17 +94,14 @@ public class ServidorConsorcio_Bancos extends Thread{
     		//Crea el Datagrama en donde recibir los datos
 			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
 			try{
-				System.out.println("RECIBIR SERVIDOR BANCOS");
 				//Recibe datos
 				socketServidor.receive(inputPacket);
-				System.out.printf("recibe1: " + new String(inputPacket.getData()));
 
 				if(isOnline()){
 					//Crea una conexión para analizar el datagrama
 					ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(TipoAccion.CONEXION,inputPacket,this.consorcio,this,this.socketServidor);
 					t.start();
 				}
-				System.out.printf("sale:\n");
 
 			}catch (SocketTimeoutException e){
 				System.out.println("Socket timeout");

@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 
 import practicaacs.banco.estados.EstadoSesion;
@@ -527,18 +528,17 @@ public class Database_lib {
 					"WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
-				//Si hay ya un banco, settear la sesion
-				if(resultSet.getInt(1)==1){
+				//Si ya está el banco, settear la sesion a abierta
+				if(resultSet.getString(1).equals(id_banco)){
 					setEstado_conexion_banco(id_banco,SesAberta.instance());
-					borrar_canales(id_banco);
-					System.out.println("HAY BANCO");
 				}
 			}else{
 				//Añadir BANCO a la BD
 				insertar_banco(id_banco,1,puerto,ip,num_canales);
-				System.out.println("NO HAY BANCO");
 			}
 			
+			borrar_canales(id_banco);
+
 			int id_canal = 0;
 			//Añadir todos los CANALES del BANCO
 			for(id_canal=0;id_canal<num_canales;id_canal++)
@@ -1032,10 +1032,10 @@ public class Database_lib {
 	 * @param id_banco El id del banco en el que se encuentra.
 	 * @param canal El numero de canal a borrar.
 	 */
-	public void eliminar_canal(String id_banco, int canal){
+	public void eliminar_canal(int id_banco, int canal){
 		
 		try {
-			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = '" + id_banco + "' AND codCanal = " + canal);
+			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = " + id_banco + " AND codCanal = " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1047,14 +1047,23 @@ public class Database_lib {
 	 */
 	public void borrar_canales(String id_banco){
 		
-		ResultSet resultSet;
+		int banco_real = this.getIdBanco(id_banco);
+		ArrayList<Integer> canales = new ArrayList<Integer>();
+		ResultSet resultSet = null;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codCanal " +
 					"FROM Canal " +
-					"WHERE codBanco = '" + id_banco +"'");
+					"WHERE codBanco = " + banco_real);
 
+			//Obtiene todos los canales a borrar
 			while(resultSet.next()){
-				eliminar_canal(id_banco,resultSet.getInt(1));
+				canales.add(resultSet.getInt(1));
+			}
+			
+			//Borra todos los canales
+			Iterator<Integer> it = canales.iterator();
+			while(it.hasNext()){
+				eliminar_canal(banco_real,it.next());
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1206,25 +1215,34 @@ public class Database_lib {
 		}	
 	}
 	
-	private void insertar_ultimo_envio(MensajeDatos mensaje,String codCajero,InetAddress ip_cajero, int puerto_cajero){
+	private void insertar_ultimo_envio(Mensaje mensaje,String codCajero,String ip_cajero, int puerto_cajero){
 		
 		String tarjeta = null;
 		int cuenta = 0;
-		try{
-			if((tarjeta = getTarjetaEnvio(mensaje)) == null)
-				throw new CodigoNoValidoException();
-			if((cuenta = getCuentaEnvio(mensaje)) == -1)
-				throw new CodigoNoValidoException();
-		}catch (CodigoNoValidoException a){
-				a.printStackTrace();
-				System.exit(-1);
+		int num_mensaje = 0;
+		
+		if(mensaje.es_datos()){
+			try{
+				if((tarjeta = getTarjetaEnvio((MensajeDatos)mensaje)) == null)
+					throw new CodigoNoValidoException();
+				if((cuenta = getCuentaEnvio((MensajeDatos)mensaje)) == -1)
+					throw new CodigoNoValidoException();
+				num_mensaje = ((MensajeDatos)mensaje).getNmsg();
+			}catch (CodigoNoValidoException a){
+					a.printStackTrace();
+					System.exit(-1);
+			}
 		}
-		 
 		try {
+			int banco = this.getIdBanco(mensaje.getDestino());
+			
+			System.out.println("ULTIMO ENVIO:"+num_mensaje+"-CAJERO:"+codCajero+"-PUERTO:"+puerto_cajero+"-IP:"+ip_cajero+"-BANCO:"
+			+banco+"-TARJETA:"+tarjeta+"-CUENTA:"+cuenta);
+			
 			this.statement.executeUpdate("INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip," +
 					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
-					" VALUES (" + mensaje.getNmsg() + ",'" + codCajero + "'," + puerto_cajero + "," + ip_cajero + 
-					",'" + mensaje.getDestino() + "','" + tarjeta + "'," + cuenta + ",'" + mensaje.toString() +"')");
+					" VALUES (" + num_mensaje + "," + ((codCajero==null)?"NULL":"'"+codCajero+"'") + "," + puerto_cajero + ",'" + ip_cajero + 
+					"'," + banco + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + cuenta + ",'" + mensaje.toString() +"')");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -1249,7 +1267,7 @@ public class Database_lib {
 	 * @param port El puerto del que proviene el envio (Cajero)
 	 * @param canal El canal correspondiente.
 	 */
-	public void anhadir_ultimo_envio(MensajeDatos message,String codCajero,InetAddress ip_cajero, int puerto_cajero,int canal){
+	public void anhadir_ultimo_envio(Mensaje message,String codCajero,String ip_cajero, int puerto_cajero,int canal){
 
 		String id_banco = message.getDestino();
 		ResultSet resultSet;
@@ -1264,7 +1282,8 @@ public class Database_lib {
 			resultSet = this.statement.executeQuery("SELECT codUltimoEnvio" +
 					" FROM Canal" +
 					" WHERE codCanal=" + canal + " AND codBanco='" + id_banco +"'");
-			codigo_ultimo_envio = resultSet.getInt(0);
+			if(resultSet.next())
+				codigo_ultimo_envio = resultSet.getInt(0);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1328,13 +1347,14 @@ public class Database_lib {
 	 */
 	public ArrayList<Mensaje> getMensajesOffline(String id_banco){
 		
+		int banco_real = this.getIdBanco(id_banco);
 		ResultSet resultSet = null;
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			//Obtenemos todos los mensajes OFFLINE
 			resultSet = this.statement.executeQuery("SELECT mestringMensaje" +
-					" FROM Mensaje m JOIN Banco b" +
-					" WHERE b.codBanco = '" + id_banco + "' AND (m.meoffline IS NOT NULL || m.meoffline != 0)");
+					" FROM Mensaje " +
+					" WHERE codBanco = " + banco_real + " AND (meoffline IS NOT NULL || meoffline != 0) AND codTDestino=1");
 			
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
@@ -1342,7 +1362,7 @@ public class Database_lib {
 			}
 			
 			//Ponemos OFFLINE a false para todos los mensajes del id_banco
-			this.statement.executeUpdate("UPDATE Mensaje SET meoffline = 0 WHERE codBanco = '" + id_banco + "'");
+			this.statement.executeUpdate("UPDATE Mensaje SET meoffline = 0 WHERE codBanco = " + banco_real);
 			
 			return res;
 		} catch (SQLException e) {
@@ -1362,7 +1382,7 @@ public class Database_lib {
 	public void almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
 
 		int num_mensaje = 0;
-		boolean offline = false;
+		boolean offline = true;
 		
 		//Si el mensaje es de datos obtenemos el numero de mensaje y 
 		if(message.es_datos()){

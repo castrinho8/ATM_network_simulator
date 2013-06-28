@@ -110,7 +110,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 				case CONEXION:
 					Mensaje recibido = null;
 					String msg =  new String(this.input_packet.getData(),this.input_packet.getOffset(),this.input_packet.getLength());
-					System.out.println("recibe2:" + msg);
 					
 					//Creamos el mensaje correspondiente al recibido
 					try {
@@ -190,9 +189,9 @@ public class ConexionConsorcio_Bancos extends Thread {
     	InetAddress ip = this.input_packet.getAddress();
     	int puerto = this.input_packet.getPort();
 		int canal = 0; //Porque solo envia mensajes de control
-		
+    	
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		//Database_lib.getInstance().anhadir_ultimo_envio(envio,envio.getOrigen(),this.input_packet.getAddress(),this.input_packet.getPort(),canal);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,null,this.input_packet.getAddress().toString(),this.input_packet.getPort(),canal);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -203,7 +202,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
 
-		System.out.println(envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje());
+		if(envio.es_datos())
+			System.out.println(((MensajeDatos)envio).getNmsg()+":"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje()+
+					"\nCANAL:"+((MensajeDatos)envio).getNumcanal()+"COD_ONLINE:"+((MensajeDatos)envio).getCodonline());
+		else
+			System.out.println(envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje());
+		
 		try{
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);
@@ -237,7 +241,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		envio.setNmsg(n_mensaje);
 		
 		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,this.ip_cajero,this.puerto_cajero,canal);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,this.ip_cajero.toString(),this.puerto_cajero,canal);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -302,7 +306,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 		//Solicitar OPERACION!=ABRIR SESION y no hay SESION ABIERTA
 		if(!(m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)) 
-				&& (Database_lib.getInstance().hasSesion(id_banco)))
+				&& !(Database_lib.getInstance().hasSesion(id_banco)))
 			return CodigosError.NOSESION;
 	
 		//OPERACION ==CERRAR SESION y hay Mensajes sin responder
@@ -398,16 +402,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 			//Envia la respuesta
 			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
 
-			System.out.println("SALE:"+origen+"->"+destino+"cod:"+cod_resp+"err:"+cod_error);
-
 			//Enviamos los mensajes offline de este banco
 			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
 				this.sendToBanco(m);
 			}
 		}
 		else{ //Si hay errores respondemos con el error correspondiente
-			System.out.println("SALE ERROR:"+origen+"->"+destino+"cod:"+cod_resp+"err:"+cod_error);
-
 			//Envia la respuesta
 			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
 		}
@@ -478,7 +478,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String destino = recibido.getOrigen();
 		//cuerpo
 		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
-		CodigosError cod_error =  comprobar_errores(recibido,0);
+		CodigosError cod_error =  this.comprobar_errores(recibido,0);
+		System.out.println(cod_resp+"ERROR:"+cod_error);
 		
 		if(cod_error.equals(CodigosError.CORRECTO)){
 			Calendar time = Calendar.getInstance();
@@ -487,6 +488,9 @@ public class ConexionConsorcio_Bancos extends Thread {
     		//Settear el estado a DETIDA
 	    	Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesDetida.instance());
 		}
+		else
+			cod_resp = false;
+		
 		//Envia la respuesta
 		this.sendToBanco(new RespDetTrafico(origen,destino,cod_resp,cod_error));
 	}	
@@ -521,6 +525,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			}
 			
 		}else{
+			cod_resp = false;
 			//En caso de error, enviamos el error
 			this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error));
 		}
