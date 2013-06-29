@@ -121,11 +121,11 @@ public class ServidorConsorcio_Bancos extends Thread{
 			 System.exit(-1);
 		 }
 		
-    	try { //Establece un timeout
+    	/*try { //Establece un timeout
 			this.socketServidor.setSoTimeout(100000);
 		} catch (SocketException e) {
 			e.printStackTrace();
-		}
+		}*/
 
     	this.abierto_serv_bancos = true;
 

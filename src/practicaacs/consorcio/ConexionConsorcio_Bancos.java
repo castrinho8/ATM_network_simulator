@@ -304,9 +304,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 				&& (!Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance())))
 			return CodigosError.NORECUPERACION;
 	
-		//Solicitar OPERACION!=ABRIR SESION y no hay SESION ABIERTA
-		if(!(m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)) 
+		//Solicitar OPERACION!=ABRIR SESION y no hay SESION ABIERTA AND OPERACION!=REANTRAF y no hay SESION DETENIDA
+		if((!(m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION))
 				&& !(Database_lib.getInstance().hasSesion(id_banco)))
+			&& ((!m.getTipoMensaje().equals(CodigosMensajes.SOLREANUDARTRAFICO) && 
+					!Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesDetida.instance()))))
 			return CodigosError.NOSESION;
 	
 		//OPERACION ==CERRAR SESION y hay Mensajes sin responder
@@ -385,7 +387,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		CodigosError cod_error = comprobar_errores(recibido,0); //Comprueba el tipo de error
 		boolean cod_resp = cod_error.equals(CodigosError.CORRECTO); //True si correcto y false si error
 
-		if(cod_error.equals(CodigosError.CORRECTO)){ //Si no ha habido errores, realizar las tareas necesarias
+		if(cod_resp){ //Si no ha habido errores, realizar las tareas necesarias
 	    	Calendar time = Calendar.getInstance();
 	    	System.out.println("APERTURA: Sesion con el banco: '"+ id_banco +"' comenzada a las " + time.getTime());
 	
@@ -430,14 +432,14 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		//cuerpo
-		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
 		CodigosError cod_error =  comprobar_errores(recibido,0);
-		
+		boolean cod_resp = cod_error.equals(CodigosError.CORRECTO);
+
     	int reintegros_consorcio = 0;
     	int abonos_consorcio = 0;
     	int traspasos_consorcio = 0;
     	
-		if(cod_error.equals(CodigosError.CORRECTO)){ //Ejecuta las tareas necesarias
+		if(cod_resp){ //Ejecuta las tareas necesarias
 		   	Calendar time = Calendar.getInstance();
 	    	System.out.println("CIERRE: Sesion servidor Banco: "+ id_banco +" finalizado a las " + time.getTime());
 	    	
@@ -477,19 +479,16 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		//cuerpo
-		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
 		CodigosError cod_error =  this.comprobar_errores(recibido,0);
-		System.out.println(cod_resp+"ERROR:"+cod_error);
+		boolean cod_resp = cod_error.equals(CodigosError.CORRECTO);
 		
-		if(cod_error.equals(CodigosError.CORRECTO)){
+		if(cod_resp){
 			Calendar time = Calendar.getInstance();
 	    	System.out.println("TRAFICO DETENIDO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
 	   
     		//Settear el estado a DETIDA
 	    	Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesDetida.instance());
 		}
-		else
-			cod_resp = false;
 		
 		//Envia la respuesta
 		this.sendToBanco(new RespDetTrafico(origen,destino,cod_resp,cod_error));
@@ -506,13 +505,13 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		//cuerpo
-		boolean cod_resp = Database_lib.getInstance().hasSesion(destino);
 		CodigosError cod_error =  comprobar_errores(recibido,0);
+		boolean cod_resp = cod_error.equals(CodigosError.CORRECTO);
 		
-		if(cod_error.equals(CodigosError.CORRECTO)){ //realiza las acciones necesarias
+		if(cod_resp){ //realiza las acciones necesarias
 			Calendar time = Calendar.getInstance();
     		System.out.println("TRAFICO REANUDADO: Sesion servidor Banco: "+ id_banco +" comenzado a las " + time.getTime());
-    	
+  	
     		//Settear el estado a ABERTA
     		Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesAberta.instance());
 
@@ -525,7 +524,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 			}
 			
 		}else{
-			cod_resp = false;
 			//En caso de error, enviamos el error
 			this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error));
 		}

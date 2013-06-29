@@ -559,15 +559,13 @@ public class Database_lib {
 
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco " +
+			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco " +
 					"WHERE codbanco = '" + id_banco +"'");
 			
 			if(resultSet.next()){
-				//Si hay un banco, settear la sesion a cerrada
-				if(resultSet.getInt(1)==1){
-					this.setEstado_conexion_banco(id_banco,SesNonAberta.instance());
-					borrar_canales(id_banco);
-				}
+				//Si hay un banco, settear la sesion a cerrada y borrar canales
+				this.setEstado_conexion_banco(id_banco,SesNonAberta.instance());
+				borrar_canales(id_banco);
 			}
 		}catch (SQLException e) {
 			System.out.println("Error cerrando sesion.");
