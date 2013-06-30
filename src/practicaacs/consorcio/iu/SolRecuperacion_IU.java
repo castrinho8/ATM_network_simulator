@@ -165,12 +165,12 @@ public final class SolRecuperacion_IU extends javax.swing.JFrame {
      * Método que obtiene los bancos de la BD y los añade al ScrollPane
      */
     public void recargar_bancos(){
-    	ArrayList<String> sesiones_abiertas = Database_lib.getInstance().getSesiones();
+    	//Obtiene las sesiones abiertas (codigo=1)
+    	ArrayList<String> sesiones_abiertas = Database_lib.getInstance().getSesiones(1);
     	this.jList1.setListData(sesiones_abiertas.toArray());
     }    
     
     private void solicitar_recuperacion(String id_banco) {
-    	//this.consorcio.realizar_recuperacion(id_banco);
-    	System.out.println(id_banco);
+    	this.consorcio.realizar_recuperacion(id_banco);
     }
 }

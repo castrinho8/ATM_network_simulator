@@ -164,13 +164,13 @@ public class FinRecuperacion_IU extends javax.swing.JFrame {
      * Método que obtiene los bancos de la BD y los añade al ScrollPane
      */
     public void recargar_bancos(){
-    	ArrayList<String> sesiones_abiertas = Database_lib.getInstance().getSesiones();
+    	//Obtienen las sesiones en recuperacion (codigo=4)
+    	ArrayList<String> sesiones_abiertas = Database_lib.getInstance().getSesiones(4);
     	this.jList1.setListData(sesiones_abiertas.toArray());
     }
 
     public void finalizar_recuperacion(String id_banco){
-    	//this.consorcio.realizar_finRecuperacion(id_banco);
-    	System.out.println(id_banco);
+    	this.consorcio.realizar_finRecuperacion(id_banco);
     }
     
 }

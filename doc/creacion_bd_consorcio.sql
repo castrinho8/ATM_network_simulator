@@ -80,8 +80,8 @@ CREATE TABLE Movimiento(
 	moimporte INTEGER,
 	mooffline BOOLEAN,
 	codBanco INTEGER,
-	CONSTRAINT mo_codCuentaOrig_fk FOREIGN KEY (codCuentaOrig,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE NO ACTION,
-	CONSTRAINT mo_codCuentaDest_fk FOREIGN KEY (codCuentaDest,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE NO ACTION,
+	CONSTRAINT mo_codCuentaOrig_fk FOREIGN KEY (codCuentaOrig,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
+	CONSTRAINT mo_codCuentaDest_fk FOREIGN KEY (codCuentaDest,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
 
 	CONSTRAINT mo_codTMovimiento_fk FOREIGN KEY (codTMovimiento) REFERENCES TipoMovimiento(codTMovimiento) ON DELETE SET NULL,
 
@@ -105,6 +105,7 @@ CREATE TABLE TipoOrigDest(
 -- codBanco El codigo del banco correspondiente al mensaje
 CREATE TABLE Mensaje(
 	codMensaje INTEGER AUTO_INCREMENT,
+	meNumMensaje INTEGER,
 	codTOrigen INTEGER,
 	meorigen VARCHAR(30),
 	codTDestino INTEGER,
@@ -134,7 +135,7 @@ CREATE TABLE UltimoEnvio(
 	uestringMensaje VARCHAR(500),
 
 	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
-	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE NO ACTION,
+	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
 
 	CONSTRAINT ue_pk PRIMARY KEY (codigoue)
 );

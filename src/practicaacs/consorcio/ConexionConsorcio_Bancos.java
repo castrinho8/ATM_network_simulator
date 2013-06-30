@@ -179,19 +179,15 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * ENVIA MENSAJES DE CONTROL -  CONSORCIO->BANCO
 	 * @param envio El mensaje a enviar.
 	 */
-	private void sendToBanco(Mensaje envio){
+	private void sendToBanco(Mensaje envio,InetAddress ip, int puerto){
 		
-    	String id_banco = envio.getDestino();
+		//Como solo envia mensajes de control
+		int canal = 0;
+		
+		String ip_string = ip.getAddress().toString();
 
-		//Obtenemos la direccion y el puerto a donde enviar
-		//InetAddress ip = Database_lib.getInstance().getIpBanco(id_banco);
-		//int puerto = Database_lib.getInstance().getPortBanco(id_banco);
-    	InetAddress ip = this.input_packet.getAddress();
-    	int puerto = this.input_packet.getPort();
-		int canal = 0; //Porque solo envia mensajes de control
-    	
-		//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,null,this.input_packet.getAddress().toString(),this.input_packet.getPort(),canal);
+    	//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,"NO CAJERO",ip_string,puerto,canal);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -380,7 +376,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 	private void manejar_abrir_sesion(SolAperturaSesion recibido){
 
 		String id_banco = recibido.getOrigen();
-		//cabecera
+    	InetAddress ip_banco = this.input_packet.getAddress();
+    	int puerto_banco = this.input_packet.getPort();
+    	
+    	//cabecera
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		//cuerpo
@@ -402,16 +401,16 @@ public class ConexionConsorcio_Bancos extends Thread {
 			Database_lib.getInstance().abrir_sesion(id_banco,ip,port,recibido.getNcanales());
 
 			//Envia la respuesta
-			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
+			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error),ip_banco,puerto_banco);
 
 			//Enviamos los mensajes offline de este banco
 			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
-				this.sendToBanco(m);
+				this.sendToBanco(m,ip_banco,puerto_banco);
 			}
 		}
 		else{ //Si hay errores respondemos con el error correspondiente
 			//Envia la respuesta
-			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error));
+			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error),ip_banco,puerto_banco);
 		}
 	}
 	
@@ -423,7 +422,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 	private void manejar_cerrar_sesion(SolCierreSesion recibido){
 		
 		String id_banco = recibido.getOrigen();
-		//Datos recibidos
+    	InetAddress ip_banco = this.input_packet.getAddress();
+    	int puerto_banco = this.input_packet.getPort();
+    	
+    	//Datos recibidos
 		int total_reintegros = recibido.getTotal_reintegros();
 		int total_abonos = recibido.getAbonos();
 		int total_traspasos = recibido.getTraspasos();
@@ -465,7 +467,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		//Envia la respuesta
     	this.sendToBanco(new RespCierreSesion(origen,destino,
     			cod_resp,cod_error,
-    			reintegros_consorcio,abonos_consorcio,traspasos_consorcio));
+    			reintegros_consorcio,abonos_consorcio,traspasos_consorcio),ip_banco,puerto_banco);
 	}
 	
 	/**
@@ -475,7 +477,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 	private void manejar_detener_trafico(SolDetTrafico recibido){
 
 		String id_banco = recibido.getOrigen();
-		//cabecera
+    	InetAddress ip_banco = this.input_packet.getAddress();
+    	int puerto_banco = this.input_packet.getPort();
+    	
+    	//cabecera
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		//cuerpo
@@ -491,7 +496,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		}
 		
 		//Envia la respuesta
-		this.sendToBanco(new RespDetTrafico(origen,destino,cod_resp,cod_error));
+		this.sendToBanco(new RespDetTrafico(origen,destino,cod_resp,cod_error),ip_banco,puerto_banco);
 	}	
 	
 	/**
@@ -501,6 +506,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 	private void manejar_reanudar_trafico(SolReanTrafico recibido){
 		
 		String id_banco = recibido.getOrigen();
+    	InetAddress ip_banco = this.input_packet.getAddress();
+    	int puerto_banco = this.input_packet.getPort();
+    	
     	//cabecera
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
@@ -516,16 +524,16 @@ public class ConexionConsorcio_Bancos extends Thread {
     		Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesAberta.instance());
 
     		//Enviar el mensaje confirmando la apertura
-    		this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error));
+    		this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error),ip_banco,puerto_banco);
     		
 			//Enviamos los mensajes offline de este banco
 			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
-				this.sendToBanco(m);
+				this.sendToBanco(m,ip_banco,puerto_banco);
 			}
 			
 		}else{
 			//En caso de error, enviamos el error
-			this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error));
+			this.sendToBanco(new RespReanTrafico(origen,destino,cod_resp,cod_error),ip_banco,puerto_banco);
 		}
 	}
 	
@@ -536,7 +544,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 	public void manejar_iniciar_recuperacion(RespIniTraficoRec recibido){
 	
 		String id_banco = recibido.getOrigen();
-		boolean cod_resp = recibido.getCodResp();
+    	InetAddress ip_banco = this.input_packet.getAddress();
+    	int puerto_banco = this.input_packet.getPort();
+    	
+    	boolean cod_resp = recibido.getCodResp();
 		CodigosError cod_error = recibido.getCodError();
 		
 		if(cod_resp){
@@ -545,7 +556,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 			//Consultar ultimos envios en la BD y reenviarlos
 			for(Mensaje m : Database_lib.getInstance().recupera_ultimos_mensajes(id_banco)){
-				this.sendToBanco(m);
+				this.sendToBanco(m,ip_banco,puerto_banco);
 			}
 		}else{
 			System.out.println("Error iniciando a recuperación: " + cod_error.getMensaje());
@@ -560,7 +571,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	private void manejar_finalizar_recuperacion(RespFinTraficoRec recibido){
 		
 		String id_banco = recibido.getOrigen();
-		boolean cod_resp = recibido.getCodResp();
+    	boolean cod_resp = recibido.getCodResp();
 		CodigosError cod_error = recibido.getCodError();
 		
 		
@@ -587,13 +598,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * @param id_banco El banco con el que iniciar la recuperacion.
 	 */
 	private void solicitar_iniciar_recuperacion(String id_banco){
+		
+		InetAddress ip_banco = Database_lib.getInstance().getIpBanco(id_banco);
+		int puerto_banco = Database_lib.getInstance().getPortBanco(id_banco);
+		
 		//Obtenemos los datos
 		String origen = this.consorcio.getId_consorcio();
 		String destino = id_banco;
 
 		//Enviamos la solicitud de recuperacion
 		SolIniTraficoRec envio = new SolIniTraficoRec(origen,destino); 
-		this.sendToBanco(envio);
+		this.sendToBanco(envio,ip_banco,puerto_banco);
 	}
 	
 	/**
@@ -602,12 +617,16 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * @param id_banco EL banco con el que finalizar la recuperacion.
 	 */
 	private void solicitar_finalizar_recuperacion(String id_banco){
+
+		InetAddress ip_banco = Database_lib.getInstance().getIpBanco(id_banco);
+		int puerto_banco = Database_lib.getInstance().getPortBanco(id_banco);
+		
 		//Obtenemos los datos
 		String origen = this.consorcio.getId_consorcio();
 		String destino = id_banco;
 		
 		SolFinTraficoRec envio = new SolFinTraficoRec(origen,destino);
-		this.sendToBanco(envio);
+		this.sendToBanco(envio,ip_banco,puerto_banco);
 	}
 	
 	
