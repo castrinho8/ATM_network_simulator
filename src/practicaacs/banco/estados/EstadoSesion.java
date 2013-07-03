@@ -41,7 +41,7 @@ public abstract class EstadoSesion {
 				return SesRecuperacion.instance();
 			}
 		}
-		return null;
+		return SesNonAberta.instance();
 	}
 	
 	/**

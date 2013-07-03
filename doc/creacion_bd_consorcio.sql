@@ -56,10 +56,10 @@ CREATE TABLE EstadoBanco(
 CREATE TABLE Banco(
 	codigo INTEGER AUTO_INCREMENT,	
 	codBanco VARCHAR(20) UNIQUE,
-	codEBanco INTEGER,
+	codEBanco INTEGER DEFAULT 2,
 	bapuerto INTEGER,
 	baip VARCHAR(20),
-	bamaxCanales INTEGER,
+	bamaxCanales INTEGER DEFAULT 0 ,
 	CONSTRAINT ba_codEBanco_fk FOREIGN KEY (codEBanco) REFERENCES EstadoBanco(codEBanco) ON DELETE SET NULL,
 	CONSTRAINT ba_pk PRIMARY KEY (codigo)
 );

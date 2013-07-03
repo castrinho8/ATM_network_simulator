@@ -26,7 +26,9 @@ import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.fap.*;
 
-//Libreria de acceso a la base de datos
+/**
+ * Libreria de acceso a la base de datos
+ */
 public class Database_lib {
 	
 	static private Database_lib instancia;
@@ -34,6 +36,9 @@ public class Database_lib {
 	private Connection con;
 	private Statement statement = null;
 	
+	/**
+	 * Constructor de la clase que realiza el acceso a la BASE DE DATOS
+	 */
 	private Database_lib() {
 		
     	//Obtenemos los datos del fichero properties
@@ -47,10 +52,11 @@ public class Database_lib {
 			is = new FileInputStream(file);
 		    prop.load(is);
 		} catch (FileNotFoundException e) {
-			System.err.println("Non se encontrou arquivo de configuracion " + file + ".");
+			System.err.println("No se encontró el archivo de configuración " + file + ".");
 			System.exit(-1);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println("Error cargando el fichero de configuración " + file + ".");
+			System.exit(-1);
 		}
 		
 		String bdname = prop.getProperty("consorcio.bd.name");
@@ -61,18 +67,21 @@ public class Database_lib {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
-			System.err.println("Error creando o driver.");
+			System.err.println("Error creando el driver.");
 			e.printStackTrace();
+			System.exit(-1);
 		}
 
 		try {
 			con = DriverManager.getConnection("jdbc:mysql://" + bdadd + "/" + bdname + "?user=" + bduser + "&password=" + bdpass);
 			statement = con.createStatement();
 		} catch (SQLException e) {
-			System.err.println("Error ao conectar ca BD. " + e.getMessage());
+			System.err.println("Error al conectar con la BD. " + e.getMessage());
 			e.printStackTrace();
+			System.exit(-1);
 		}	
 	}
+	
 	
 	/**
 	 * Devuelve la instancia del singleton
@@ -85,12 +94,19 @@ public class Database_lib {
 		return instancia;
 	}
 	
+	
+	/*---------------------------------------------------
+	 -------------- COMPROBACION DE BANCOS --------------
+	 --------------- CUENTAS Y TARJETAS -----------------
+	 ----------------------------------------------------*/	
+	
+	
 	/**
 	 * Método que comprueba si existe la pareja Tarjeta,Cuenta en la BD. En caso de que no exista la inserta.
 	 * @param tarjeta El string correspondiente a la tarjeta.
-	 * @param cuenta EL int correspondiente a la cuenta.
+	 * @param cuenta El int correspondiente a la cuenta.
 	 */
-	public void comprueba_cuenta(String tarjeta,int cuenta){
+	private void comprueba_cuenta(String tarjeta,int cuenta){
 		
 		ResultSet resultSet;
 		//Obtiene la cuenta de la BD
@@ -102,6 +118,7 @@ public class Database_lib {
 				return;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 		
 		//En caso de que no haya, se introduce en la BD
@@ -110,14 +127,16 @@ public class Database_lib {
 					" VALUES('" + tarjeta + "'," + cuenta + ",0)");
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
+	
 	
 	/**
 	 * Método que comprueba si existe la tarjeta en la BD. En caso de que no exista la inserta.
 	 * @param tarjeta El string correspondiente a la tarjeta.
 	 */
-	public void comprueba_tarjeta(String tarjeta){
+	private void comprueba_tarjeta(String tarjeta){
 		
 		ResultSet resultSet;
 		//Obtiene la tarjeta de la BD
@@ -129,6 +148,7 @@ public class Database_lib {
 				return;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 		
 		//En caso de que no haya, se introduce en la BD
@@ -137,13 +157,64 @@ public class Database_lib {
 					" VALUES('" + tarjeta + "',0)");
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
+	
+	/**
+	 * Comprueba si un banco existe y en caso contrario lo inserta.
+	 * @param id_banco El banco a comprobar
+	 * @return El int con el codigo que identifica al banco en la BD
+	 * @throws ConsorcioBDException Lanza una excepcion cuando no existe el banco y no puede ser añadido
+	 */
+	private int comprueba_banco(String id_banco) throws ConsorcioBDException{
+
+		//Comprueba si existe, si existe devuelve el codigo de la BD que lo identifica
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
+
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		//Inserta el banco y devuelve el codigo de la BD que lo identifica
+		try {
+			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bamaxCanales)" +
+					" VALUES('"+id_banco+"',2,0)");
+			
+			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
+
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		throw new ConsorcioBDException("No existe el banco y no puede ser añadido.");
+	}
+	
 	/*---------------------------------------------------
-	 ---------------- CONSULTAS EN CUENTAS -----------------------
+	 --------------------- CONSULTAS --------------------
 	 ----------------------------------------------------*/	
 	
+	/**
+	 * Método que comprueba si se dan las condiciones necesarias para realizar la operación y 
+	 * devuelve el CodigosRespuesta correspondiente, CORRECTO si se dan y el codigo correspondiente 
+	 * en caso contrario.
+	 * @param tarjeta La tarjeta que realiza la operación.
+	 * @param cuenta_origen Si es un traspaso, la cuenta de la que se obtiene el dinero.
+	 * @param cuenta_destino La cuenta sobre la que se realiza la operacion
+	 * @param tipo El tipo de operación que se realiza.
+	 * @param importe La cantidad de dinero que se maneja en la operación.
+	 * @return El CodigosRespuesta correspondiente en función de si ha habido errores o no.
+	 */
 	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino,
 			CodigosMensajes tipo, int importe){
 		
@@ -155,10 +226,15 @@ public class Database_lib {
 
 		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (cuenta_origen == cuenta_destino))
 			return CodigosRespuesta.TRANSCUENTASIGUALES;
-
-		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (this.consultar_saldo(tarjeta,cuenta_origen) < importe))
-			return CodigosRespuesta.TRANSSINFONDOS;
-
+		
+		try {
+			if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (this.consultar_saldo(tarjeta,cuenta_origen) < importe))
+				return CodigosRespuesta.TRANSSINFONDOS;
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
 			return CodigosRespuesta.CONSACEPTADA;
 /*		CONSDEN(10,"Consulta Denegada."), 
 		CAPTARJ(11,"Consulta Denegada con Captura de Tarjeta."), 
@@ -175,12 +251,17 @@ public class Database_lib {
 	 * @param tarjeta La tarjeta para actualizar.
 	 * @param importe El importe a sumar.
 	 */
-	public void actualiza_GastoOffline(String tarjeta,int importe){
+	private void actualiza_GastoOffline(String tarjeta,int importe){
+		
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		
 		try {
 			this.statement.executeUpdate("UPDATE Tarjeta SET tagastoOffline=tagastoOffline+" + importe +  
 				" WHERE codTarjeta = '" + tarjeta + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
@@ -191,12 +272,19 @@ public class Database_lib {
 	 * @param importe El importe a modificar.
 	 * @param signo El signo que indica si se debe sumar o restar.
 	 */
-	public void recalcular_saldoActual(int cuenta,String tarjeta, int importe, char signo){
+	private void recalcular_saldoActual(int cuenta,String tarjeta, int importe, char signo){
+
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		//Comprueba si existe la cuenta y sino la añade
+		this.comprueba_cuenta(tarjeta, cuenta);
+
 		try {
 			this.statement.executeUpdate("UPDATE Cuenta SET cusaldo = cusaldo"+ signo + importe +
 				" WHERE codCuenta = " + cuenta + " AND codTarjeta = '" + tarjeta + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
@@ -205,8 +293,14 @@ public class Database_lib {
 	 * Obtiene el saldo a partir del atributo que hay en cuenta.
 	 * @param cuenta La cuenta a consultar.
 	 * @return Devuelve el saldo actual de la cuenta y null en caso de error
+	 * @throws ConsorcioBDException Lanza la excepción cuando no existe la tarjeta o la cuenta y no se puede añadir.
 	 */
-	public int consultar_saldo(String tarjeta,int cuenta){
+	public int consultar_saldo(String tarjeta,int cuenta) throws ConsorcioBDException{
+		
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		//Comprueba si existe la cuenta y sino la añade
+		this.comprueba_cuenta(tarjeta, cuenta);
 		
 		ResultSet resultSet;
 		try{
@@ -217,8 +311,9 @@ public class Database_lib {
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
-		return -1;
+		throw new ConsorcioBDException("consultar_saldo: No existe la cuenta o la tarjeta y no puede ser añadida.");
 	}
 
 	
@@ -227,11 +322,18 @@ public class Database_lib {
 	 * @param tarjeta La tarjeta a consultar.
 	 * @param cuenta La cuenta a consultar.
 	 * @return Un arrayList con los movimientos existentes.
+	 * @throws ConsorcioBDException Lanza la excepción cuando no existe la tarjeta o la cuenta y no se puede añadir.
 	 */
-	public ArrayList<Movimiento> consultar_movimientos(String tarjeta,int cuenta){
+	public ArrayList<Movimiento> consultar_movimientos(String tarjeta,int cuenta) throws ConsorcioBDException{
+		
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		//Comprueba si existe la cuenta y sino la añade
+		this.comprueba_cuenta(tarjeta, cuenta);
 		
 		ResultSet resultSet;
 		try{
+			//Obtenemos todos los movimientos de la cuenta
 			resultSet = this.statement.executeQuery("SELECT codMovimiento,moimporte,mofecha,codTMovimiento" +
 					" FROM Movimiento " +
 					"WHERE ((codCuentaOrig = " + cuenta + " AND codTarjeta = '" + tarjeta +
@@ -241,7 +343,9 @@ public class Database_lib {
 			Date fecha = null;
 			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
+			//Añadimos movimiento a movimiento al arrayList
 			while(resultSet.next()){
+				
 				//Obtiene el tipo
 				CodigosMovimiento tipo = null;
 				try {
@@ -251,19 +355,24 @@ public class Database_lib {
 					e.printStackTrace();
 				}
 				
+				//Obtiene la fecha
 				try {
 					String sqlDate = sdf.format(resultSet.getDate(3));
 				    fecha = sdf.parse(sqlDate);
 				} catch (ParseException ex) {
 				    ex.printStackTrace();
 				}
+				
+				//Añade el nuevo movimiento al arrayList
 				res.add(new Movimiento(resultSet.getInt(1),CodigosMovimiento.getSigno(tipo),resultSet.getInt(2),fecha,tipo));
 			}
+			
 			return res;
 		}catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			System.exit(-1);
 		}
+		throw new ConsorcioBDException("consultar_movimientos: No existe la cuenta o la tarjeta y no puede ser añadida.");
 	}
 
 	
@@ -279,27 +388,38 @@ public class Database_lib {
 	 */
 	public int realizar_reintegro(String tarjeta,int cuenta,int importe,boolean codonline){
 
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		//Comprueba si existe la cuenta y sino la añade
+		this.comprueba_cuenta(tarjeta, cuenta);
+		
 		//Actualizamos el gasto offline si es Offline
 		if(!codonline)
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
-		System.out.println("tarjeta:" + tarjeta);
+		//Obtenemos el banco a partir de la tarjeta
 		String id_banco = "";
 		try{
 			id_banco = tarjeta.substring(0,tarjeta.length()-3);
 		}catch(IndexOutOfBoundsException i){
 			i.printStackTrace();
-			return -1;
+			System.exit(-1);
 		}
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,cuenta,-1,10,importe,codonline,id_banco);
+		this.insertar_movimiento(tarjeta,-1,cuenta,CodigosMovimiento.REINTEGRO,importe,codonline,id_banco);
 		
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'-');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(tarjeta,cuenta);
+		int res = -1;
+		try {
+			res = this.consultar_saldo(tarjeta,cuenta);
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 		
 		return res;
 	}
@@ -314,29 +434,43 @@ public class Database_lib {
 	 * @return El nuevo saldo de la cuenta destino.
 	 */
 	public int realizar_traspaso(String tarjeta,int cuenta_origen,int cuenta_destino,boolean codonline,int importe){
+
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		//Comprueba si existe la cuenta y sino la añade
+		this.comprueba_cuenta(tarjeta, cuenta_origen);
+		//Comprueba si existe la cuenta y sino la añade
+		this.comprueba_cuenta(tarjeta, cuenta_destino);
 		
 		//Actualizamos el gasto offline si es Offline
 		if(!codonline)
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
-		System.out.println("tarjeta:" + tarjeta);
+		//Obtenemos el banco a partir de la tarjeta
 		String id_banco = "";
 		try{
 			id_banco = tarjeta.substring(0,tarjeta.length()-3);
 		}catch(IndexOutOfBoundsException i){
 			i.printStackTrace();
+			System.exit(-1);
 			return -1;
 		}
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,11,importe,codonline,id_banco);
+		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,CodigosMovimiento.TRANSEMITIDO,importe,codonline,id_banco);
 
 		//Recalculamos el saldo actual de las CUENTAS
 		this.recalcular_saldoActual(cuenta_origen,tarjeta, importe,'-');
 		this.recalcular_saldoActual(cuenta_destino,tarjeta, importe,'+');
 
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(tarjeta,cuenta_destino);
+		int res = -1;
+		try {
+			res = this.consultar_saldo(tarjeta,cuenta_destino);
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 		
 		return res;
 	}
@@ -352,27 +486,39 @@ public class Database_lib {
 	 */
 	public int realizar_abono(String tarjeta, int cuenta,boolean codonline,int importe){
 		
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		//Comprueba si existe la cuenta y sino la añade
+		this.comprueba_cuenta(tarjeta, cuenta);
+		
 		//Actualizamos el gasto offline si es Offline
 		if(!codonline)
 			this.actualiza_GastoOffline(tarjeta, importe);
 		
-		System.out.println("tarjeta:" + tarjeta);
+		//Obtenemos el banco a partir de la tarjeta
 		String id_banco = "";
 		try{
 			id_banco = tarjeta.substring(0,tarjeta.length()-3);
 		}catch(IndexOutOfBoundsException i){
 			i.printStackTrace();
+			System.exit(-1);
 			return -1;
 		}
 		
 		//Insertamos en la tabla MOVIMIENTO
-		this.insertar_movimiento(tarjeta,cuenta,-1,50,importe,codonline,id_banco);
+		this.insertar_movimiento(tarjeta,-1,cuenta,CodigosMovimiento.ABONO,importe,codonline,id_banco);
 
 		//Recalculamos el saldo actual de la CUENTA
 		this.recalcular_saldoActual(cuenta,tarjeta, importe,'+');
 		
 		//Devolvemos el saldo actual de la cuenta
-		int res = this.consultar_saldo(tarjeta,cuenta);
+		int res = -1;
+		try {
+			res = this.consultar_saldo(tarjeta,cuenta);
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 		
 		return res;
 	}
@@ -388,17 +534,32 @@ public class Database_lib {
 	 * @param id_banco El banco del cual obtener la suma de los movimientos.
 	 * @return Un int con el sumatorio de los importes de todos los movimientos.
 	 */
-	private int get_sumaTipoMovimiento(int codigo_mov, String id_banco){
+	private int get_sumaTipoMovimiento(CodigosMovimiento cod_m, String id_banco){
+		
+		//Obtiene el numero para el codigo de movimiento indicado
+		int codigo_mov = cod_m.getNum();
+		
+		int id_banco_bd = -1;
+		//Obtiene codigo que identifica al banco en la BD a partir del string del banco
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
+		//Calcula la suma de los movimientos para el tipo de movimiento indicado
 		ResultSet resultSet;
 		try{
 			resultSet = this.statement.executeQuery("SELECT SUM(moimporte) FROM Movimiento " +
-				"WHERE codTMovimiento = " + codigo_mov + " AND codBanco = '"+ id_banco +"'");
+				"WHERE codTMovimiento = " + codigo_mov + " AND codBanco = "+ id_banco_bd);
 		
 			if(resultSet.next())
 				return resultSet.getInt(1);
+			
 		}catch (SQLException e) {
 			e.printStackTrace();
-			return 0;
+			System.exit(-1);
 		}
 		return 0;
 	}
@@ -410,7 +571,7 @@ public class Database_lib {
 	 * @return El resultado de la suma de todos los reintegros
 	 */
 	public int getNumReintegros(String id_banco) {
-		return get_sumaTipoMovimiento(10,id_banco);
+		return get_sumaTipoMovimiento(CodigosMovimiento.REINTEGRO,id_banco);
 	}
 
 	/**
@@ -420,7 +581,7 @@ public class Database_lib {
 	 * @return El resultado de la suma de todos los traspasos
 	 */
 	public int getNumTraspasos(String id_banco) {
-		return get_sumaTipoMovimiento(11,id_banco);// o 12?
+		return get_sumaTipoMovimiento(CodigosMovimiento.TRANSEMITIDO,id_banco);// o 12?
 	}
 
 	/**
@@ -430,18 +591,20 @@ public class Database_lib {
 	 * @return El resultado de la suma de todos los abonos
 	 */
 	public int getNumAbonos(String id_banco) {
-		return get_sumaTipoMovimiento(50,id_banco);
+		return get_sumaTipoMovimiento(CodigosMovimiento.ABONO,id_banco);
 	}
 	
 	/**
 	 * Método que realiza una consulta del gasto offline para la tarjeta indicada.
-	 * Recorre la tabla de MOVIMIENTO y suma todos los gastos offline correspondientes 
-	 * a las cuentas de la tarjeta.
 	 * @param tarjeta La tarjeta a consultar
 	 * @return Un entero con el gasto oofline.
 	 */
-	public int consultarGastoOffline(String tarjeta){
+	private int consultarGastoOffline(String tarjeta){
 
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		
+		//Consulta el gastoOffline de la tarjeta
 		ResultSet resultSet;
 		try{
 			resultSet = this.statement.executeQuery("SELECT tagastoOffline FROM Tarjeta WHERE codTarjeta = '" + tarjeta + "'");
@@ -451,7 +614,7 @@ public class Database_lib {
 			
 		}catch (SQLException e) {
 				e.printStackTrace();
-				return 0;
+				System.exit(-1);
 		}
 		return 0;
 	}
@@ -466,49 +629,52 @@ public class Database_lib {
 	 * @param codonline El booleando que indica si es online o offline.
 	 * @param banco El número del banco.
 	 */
-	private void insertar_movimiento(String tarjeta,int cuenta_orig,int cuenta_dest,int cod_tmovimiento,
-		int importe,boolean codonline,String banco){
+	private void insertar_movimiento(String tarjeta,int cuenta_orig,int cuenta_dest,CodigosMovimiento codigo_m,
+		int importe,boolean codonline,String id_banco){
 		
-		//Obtiene el tiempo actual y lo añade con el formato indicado
-	  	Calendar time = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		//Comprueba si existe la tarjeta y sino la añade
+		this.comprueba_tarjeta(tarjeta);
+		//Comprueba si existe la cuenta origen y sino la añade
+		if(cuenta_orig>0)
+			this.comprueba_cuenta(tarjeta, cuenta_orig);
+		//Comprueba si existe la cuenta destino y sino la añade
+		if(cuenta_dest>0)
+			this.comprueba_cuenta(tarjeta, cuenta_dest);
 		
 		//Obtiene codigo que identifica al banco en la BD a partir del string del banco
-		int id_banco = 0;
+		int id_banco_bd = 0;
 		try{
-			id_banco = getIdBanco(banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
 		}
 		
-		//Si no nay banco, no hacer nada
-		if(id_banco<0)
-			return;
+		//Obtenemos el numero del codigo de movimiento
+		int cod_tmovimiento = codigo_m.getNum();
 		
-		//Comprobamos si existen la tarjeta y las cuentas en la BD, sino, las insertamos
-		comprueba_tarjeta(tarjeta);
-		if(cuenta_orig>0)
-			comprueba_cuenta(tarjeta,cuenta_orig);
-		if(cuenta_dest>0)
-			comprueba_cuenta(tarjeta,cuenta_dest);
+		//Obtiene el tiempo actual y lo añade con el formato indicado
+	  	Calendar time = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		
+		//Obtiene los strings con la fecha y las cuentas
 		String cuentas = ((cuenta_orig<0)? "NULL":cuenta_orig) + "," + ((cuenta_dest<0)? "NULL":cuenta_dest);
 		String fecha = sdf.format(time.getTime());
 		
 		System.out.println("INSERT INTO Movimiento" +
 				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
 				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + fecha + "," +
-				importe + "," + ((codonline)? 0:1) + "," + id_banco + ")");
-		
+				importe + "," + ((codonline)? 0:1) + "," + id_banco_bd + ")");
+
+		//Inserta el movimiento en la BD
 		try {
 			this.statement.executeUpdate("INSERT INTO Movimiento" +
 				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
 				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + ", STR_TO_DATE('" + fecha + "','%d/%m/%Y')," +
-				importe + "," + ((codonline)? 0:1) + "," + id_banco + ")");
+				importe + "," + ((codonline)? 0:1) + "," + id_banco_bd + ")");
 		} catch (SQLException e) {
-			System.out.println("Error insertando movimiento.");
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
@@ -530,7 +696,8 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT codBanco FROM Banco " +
+			//Obtiene el codigo que identifica al banco en la BD
+			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco " +
 					"WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
@@ -540,19 +707,20 @@ public class Database_lib {
 				}
 			}else{
 				//Añadir BANCO a la BD
-				insertar_banco(id_banco,1,puerto,ip,num_canales);
+				insertar_banco(id_banco,SesAberta.instance(),puerto,ip,num_canales);
 			}
 			
+			//Borrar todos los canales del banco
 			borrar_canales(id_banco);
 
 			int id_canal = 0;
-			//Añadir todos los CANALES del BANCO
+			//Añadir todos los nuevos CANALES del BANCO
 			for(id_canal=0;id_canal<num_canales;id_canal++)
 				anhadir_canal(id_banco,id_canal);
 			
 		}catch (SQLException e) {
-				System.out.println("Error abriendo sesion.");
 				e.printStackTrace();
+				System.exit(-1);
 		}
 	}
 	
@@ -565,6 +733,7 @@ public class Database_lib {
 
 		ResultSet resultSet;
 		try{
+			//Obtiene el codigo que identifica al banco en la BD
 			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco " +
 					"WHERE codbanco = '" + id_banco +"'");
 			
@@ -574,10 +743,11 @@ public class Database_lib {
 				borrar_canales(id_banco);
 			}
 		}catch (SQLException e) {
-			System.out.println("Error cerrando sesion.");
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
+	
 	
 	/**
 	 * Comprueba en BANCO si el banco introducido por parámetro tiene sesión.
@@ -587,21 +757,18 @@ public class Database_lib {
 	public boolean hasSesion(String id_banco){
 		
 		ResultSet resultSet;
-		int res = 0;
 		try {
-		
-			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco" +
+			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco" +
 					" WHERE codBanco = '" + id_banco + "' AND codEBanco = 1");
 			
-			if(resultSet.next())
-				res = resultSet.getInt(1);
-			
-			return (res==1);
+			return resultSet.next();
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return false;
+			System.exit(-1);
 		}
+		return false;
 	}
+	
 	
 	/**
 	 * Comprueba si la SESION admite envios o no.
@@ -611,44 +778,18 @@ public class Database_lib {
 	public boolean consultar_protocolo(String id_banco){
 
 		ResultSet resultSet;
-		int res = 0;
-		try {
-			resultSet = this.statement.executeQuery("SELECT count(*) FROM Banco" +
-					" WHERE codBanco = '" + id_banco + "' AND ((codEBanco = 1 ) || (codEBanco = 4))");
-			
-			if(resultSet.next())
-				res = resultSet.getInt(1);
-			
-			return (res==1);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-	
-	//------GETTERS Y SETTERS
-	
-	/**
-	 * Obtiene el codigo real que identifica al primer banco cuyo codBanco es igual al banco pasado por parametro.
-	 * @param banco El string con el codigo del banco
-	 * @return El int con el codigo que lo identifica en la BD
-	 * @throws ConsorcioBDException 
-	 */
-	public int getIdBanco(String banco) throws ConsorcioBDException{
-		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco" +
-					" WHERE codBanco = '" + banco + "'");
+					" WHERE codBanco = '" + id_banco + "' AND ((codEBanco = 1 ) || (codEBanco = 4))");
 			
-			if(resultSet.next())
-				return resultSet.getInt(1);
-			else
-				throw new ConsorcioBDException("El banco de id:"+banco+" no existe en la BD del consorcio.");
+			return resultSet.next();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
-		return -1;
+		return false;
 	}
+	
 	
 	/**
 	 * Getter en BANCO del estado de la conexion con el banco.
@@ -657,6 +798,15 @@ public class Database_lib {
 	 */
 	public EstadoSesion getEstado_conexion_banco(String id_banco){
 		
+		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con la sesion cerrada.
+		try {
+			this.comprueba_banco(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		//Obtenemos el estado del banco
 		ResultSet resultSet;
 		int codEBanco = 0;
 		try {
@@ -666,13 +816,15 @@ public class Database_lib {
 			if(resultSet.next())
 				codEBanco = resultSet.getInt(1);
 			
-			return EstadoSesion.getEstadoSesion_fromInt(codEBanco);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			System.exit(-1);
 		}
+		//Devolvemos la sesion, si no hay banco devuelve sesion cerrada
+		return EstadoSesion.getEstadoSesion_fromInt(codEBanco);
 	}
 
+	
 	/**
 	 * Getter en BANCO del numero de canales
 	 * @param id_banco El banco a buscar.
@@ -680,6 +832,15 @@ public class Database_lib {
 	 */
 	public int getNum_canales(String id_banco){
 		
+		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con los canales a 0
+		try {
+			this.comprueba_banco(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		//Consultamos los canales del banco indicado
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT bamaxCanales FROM Banco" +
@@ -687,9 +848,10 @@ public class Database_lib {
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return 0;
+			System.exit(-1);
 		}
 		return 0;
 	}
@@ -701,6 +863,14 @@ public class Database_lib {
 	 */
 	public int getPortBanco(String id_banco){
 
+		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con el puerto a NULL
+		try {
+			this.comprueba_banco(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT bapuerto FROM Banco" +
@@ -815,7 +985,10 @@ public class Database_lib {
 	 * @param ip La ip en la que se encuentra el banco.
 	 * @param num_canales El numero maximo de canales.
 	 */
-	private void insertar_banco(String id_banco, int estado ,int puerto,String ip,int num_canales){
+	private void insertar_banco(String id_banco, EstadoSesion state ,int puerto,String ip,int num_canales){
+		
+		//Obtiene el int que identifica al estado introducido
+		int estado = EstadoSesion.getInt_fromEstadoSesion(state);
 		
 		System.out.println("INSERTAR BANCO: "+id_banco+"-"+estado+"-"+puerto+"-"+ip+"-"+num_canales);
 		try {
@@ -893,7 +1066,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = getIdBanco(id_banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1037,7 +1210,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = getIdBanco(id_banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1061,7 +1234,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = getIdBanco(id_banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1083,7 +1256,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = getIdBanco(id_banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1127,12 +1300,21 @@ public class Database_lib {
 	 */
 	public InetAddress getIpEnvio(String id_banco, int canal){
 	
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		ResultSet resultSet;
 		String temp = "";
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.ueip FROM UltimoEnvio ue JOIN Canal c " +
 					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal );
+					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal );
 			
 			if(resultSet.next())
 				temp = resultSet.getString(1);
@@ -1156,12 +1338,21 @@ public class Database_lib {
 	 */
 	public int getPortEnvio(String id_banco, int canal){
 		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		ResultSet resultSet;
 		int res = 0;
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.uepuerto FROM UltimoEnvio ue JOIN Canal c " +
 					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
+					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 			
 			if(resultSet.next())
 				res = resultSet.getInt(1);
@@ -1289,7 +1480,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = getIdBanco(id_banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1339,7 +1530,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = getIdBanco(id_banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1424,7 +1615,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = getIdBanco(id_banco);
+			id_banco_bd = this.comprueba_banco(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
