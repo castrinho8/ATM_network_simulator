@@ -1,21 +1,25 @@
 
--- tacod Codigo tarjeta
+
+-- tacod Codigo de la tarjeta
+-- tagastoOffline Gasto de la tarjeta realizado offline
 CREATE TABLE Tarjeta(
-	codTarjeta VARCHAR(11),
-	tagastoOffline INTEGER,
+	codTarjeta VARCHAR(11) NOT NULL,
+	tagastoOffline INTEGER NOT NULL DEFAULT 0,
 	CONSTRAINT ta_pk PRIMARY KEY (codTarjeta)
 );
 
 
--- cucod Codigo cuenta
--- cusaldo Saldo cuenta
+-- codTarjeta Codigo de la tarjeta
+-- codCuenta Codigo de la cuenta
+-- cusaldo Saldo actual de la cuenta
 CREATE TABLE Cuenta(
-	codTarjeta VARCHAR(11),
-	codCuenta INTEGER,
-	cusaldo INTEGER DEFAULT 0,
+	codTarjeta VARCHAR(11) NOT NULL,
+	codCuenta INTEGER NOT NULL,
+	cusaldo INTEGER NOT NULL DEFAULT 0,
 	CONSTRAINT ct_tcod_fk FOREIGN KEY (codTarjeta) REFERENCES Tarjeta(codTarjeta) ON DELETE CASCADE,
 	CONSTRAINT cu_pk PRIMARY KEY (codCuenta,codTarjeta)
 );
+
 
 /*-- tacod Codigo Tarjeta
 -- ctnum Numero entre 1 y 3 que indica las 3 cuentas de cada tarjeta
@@ -31,11 +35,12 @@ CREATE TABLE CuentaTarjeta(
 );
 */
 
+
 -- tmcod Cogido de tipo de movimiento
 -- tmnombre Nombre del tipo 
 CREATE TABLE TipoMovimiento(
-	codTMovimiento INTEGER,
-	tmnombre  CHAR(30) UNIQUE,
+	codTMovimiento INTEGER NOT NULL,
+	tmnombre  CHAR(30) NOT NULL UNIQUE,
 	CONSTRAINT tm_pk PRIMARY KEY (codTMovimiento)
 );
 
@@ -43,43 +48,49 @@ CREATE TABLE TipoMovimiento(
 -- codEBanco Codigo del Estado del banco
 -- ebnombre Nombre del estado del banco
 CREATE TABLE EstadoBanco(
-	codEBanco INTEGER,
-	ebnombre CHAR(30) UNIQUE,
+	codEBanco INTEGER NOT NULL,
+	ebnombre CHAR(30) NOT NULL UNIQUE,
 	CONSTRAINT eb_pk PRIMARY KEY (codEBanco)
 );
 
--- codBanco Codigo del banco
+
+-- codigo El codigo generado por la BD que asegura la correcta identificacion del banco.
+-- codBanco Codigo unico que identifica al banco(funciona como un nombre)
 -- codEBanco Codigo del Estado del banco
 -- bapuerto El puerto del banco
 -- baip La ip del banco
 -- bamaxCanales El numero maximo de canales
 CREATE TABLE Banco(
-	codigo INTEGER AUTO_INCREMENT,	
-	codBanco VARCHAR(20) UNIQUE,
+	codigo INTEGER NOT NULL AUTO_INCREMENT,	
+	codBanco VARCHAR(20) NOT NULL UNIQUE,
 	codEBanco INTEGER DEFAULT 2,
 	bapuerto INTEGER,
 	baip VARCHAR(20),
-	bamaxCanales INTEGER DEFAULT 0 ,
+	bamaxCanales INTEGER NOT NULL DEFAULT 0 ,
 	CONSTRAINT ba_codEBanco_fk FOREIGN KEY (codEBanco) REFERENCES EstadoBanco(codEBanco) ON DELETE SET NULL,
 	CONSTRAINT ba_pk PRIMARY KEY (codigo)
 );
 
--- codCuentaOrig Codigo cuenta origen
--- codCuentaDest Codigo cuenta destino
--- mocod COdigo movimiento
--- tmcod COdigo de tipo de movimiento
+
+-- codMovimiento El codigo que identifica al movimiento
+-- codTarjeta La tarjeta que realiza el movimiento
+-- codCuentaOrig La cuenta origen del movimiento 
+-- codCuentaDest La cuenta destino del movimiento 
+-- codTMovimiento El tipo de movimiento
+-- mofecha La fecha en la que se realiza el movimiento
 -- moimporte Importe del movimiento
--- mooffline Booleano que indica si es offline
+-- mooffline Booleano que indica si es offline (FALSE=OFFLINE, TRUE=ONLINE)
+-- codBanco El codigo que identifica al banco en el que se realiza el movimiento
 CREATE TABLE Movimiento(
-	codMovimiento INTEGER AUTO_INCREMENT,
-	codTarjeta VARCHAR(11),
+	codMovimiento INTEGER NOT NULL AUTO_INCREMENT,
+	codTarjeta VARCHAR(11) NOT NULL,
 	codCuentaOrig INTEGER,
-	codCuentaDest INTEGER,
-	codTMovimiento INTEGER,
+	codCuentaDest INTEGER NOT NULL,
+	codTMovimiento INTEGER DEFAULT 99,
 	mofecha DATE,
-	moimporte INTEGER,
-	mooffline BOOLEAN,
-	codBanco INTEGER,
+	moimporte INTEGER NOT NULL DEFAULT 0,
+	mooffline BOOLEAN NOT NULL DEFAULT 0,
+	codBanco INTEGER NOT NULL,
 	CONSTRAINT mo_codCuentaOrig_fk FOREIGN KEY (codCuentaOrig,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
 	CONSTRAINT mo_codCuentaDest_fk FOREIGN KEY (codCuentaDest,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
 
@@ -91,28 +102,34 @@ CREATE TABLE Movimiento(
 );
 
 
+-- codTOrigDest El codigo numerico que identifica al tipo de origen/destino
+-- todnombre El nombre en caracteres del tipo de origen/destino
 CREATE TABLE TipoOrigDest(
-	codTOrigDest INTEGER,
-	todnombre CHAR(30) UNIQUE,
+	codTOrigDest INTEGER NOT NULL,
+	todnombre CHAR(30) NOT NULL UNIQUE,
 	CONSTRAINT tod_pk PRIMARY KEY (codTOrigDest)
 );
 
 
 -- codMensaje El codigo del mensaje
--- meoffline Booleano que indica si es offline o no
--- mees_envio Booleano que indica si es envio o no
--- 
+-- meNumMensaje El numero de mensaje
+-- codTOrigen El tipo del origen del mensaje(CAJERO,BANCO,CONSORCIO)
+-- meorigen El origen del mensaje
+-- codTDestino El tipo del destino del mensaje(CAJERO,BANCO,CONSORCIO)
+-- medestino El destino del mensaje
 -- codBanco El codigo del banco correspondiente al mensaje
+-- meoffline Booleano que indica si es offline o no (FALSE=OFFLINE, TRUE=ONLINE)
+-- mestringMensaje El mensaje en formato toString
 CREATE TABLE Mensaje(
-	codMensaje INTEGER AUTO_INCREMENT,
-	meNumMensaje INTEGER,
+	codMensaje INTEGER NOT NULL AUTO_INCREMENT,
+	meNumMensaje INTEGER NOT NULL DEFAULT 0,
 	codTOrigen INTEGER,
-	meorigen VARCHAR(30),
+	meorigen VARCHAR(30) NOT NULL,
 	codTDestino INTEGER,
-	medestino VARCHAR(30),
-	codBanco INTEGER,
-	meoffline BOOLEAN DEFAULT 0,
-	mestringMensaje VARCHAR(500),
+	medestino VARCHAR(30) NOT NULL,
+	codBanco INTEGER NOT NULL,
+	meoffline BOOLEAN NOT NULL DEFAULT 0,
+	mestringMensaje VARCHAR(500) NOT NULL,
 
 	CONSTRAINT me_codTOrigen_fk FOREIGN KEY (codTOrigen) REFERENCES TipoOrigDest(codTOrigDest) ON DELETE SET NULL,
 	CONSTRAINT me_codTDestino_fk FOREIGN KEY (codTDestino) REFERENCES TipoOrigDest(codTOrigDest) ON DELETE SET NULL,
@@ -121,18 +138,27 @@ CREATE TABLE Mensaje(
 );
 
 
---	++++++++++++++++ mensaje
+-- codigoue El codigo del ultimo envio
+--	ueNumUltimoEnvio  El numero de mensaje del ultimo envio
+--	uecontestado Flag booleano que indica si el mensaje ha sido contestado
+--	uecodCajero El identificador del cajero que envia el mensaje
+--	uepuerto El puerto del cajero que envia el mensaje
+--	ueip La ip del cajero que envia el mensaje
+--	codBanco El codigo que identifica al banco.
+--	codTarjeta La tarjeta que realiza el movimiento
+--	codCuenta La cuenta destino del movimiento
+--	uestringMensaje El mensaje en formato toString
 CREATE TABLE UltimoEnvio(
-	codigoue INTEGER AUTO_INCREMENT,
-	codUltimoEnvio INTEGER,
-	uecontestado BOOLEAN DEFAULT 1,
+	codigoue INTEGER NOT NULL AUTO_INCREMENT,
+	ueNumUltimoEnvio INTEGER NOT NULL DEFAULT 0,
+	uecontestado BOOLEAN NOT NULL DEFAULT 1,
 	uecodCajero VARCHAR(20),
 	uepuerto INTEGER,
 	ueip VARCHAR(20),
-	codBanco INTEGER,
-	codTarjeta VARCHAR(11),
-	codCuenta INTEGER,
-	uestringMensaje VARCHAR(500),
+	codBanco INTEGER NOT NULL,
+	codTarjeta VARCHAR(11) NOT NULL,
+	codCuenta INTEGER NOT NULL,
+	uestringMensaje VARCHAR(500) NOT NULL,
 
 	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
 	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
@@ -141,12 +167,17 @@ CREATE TABLE UltimoEnvio(
 );
 
 
+-- codBanco El codigo del banco que lo identifica
+-- codCanal El codigo del canal
+-- cabloqueado Un flag booleano que indica si el canal se encuentra bloqueado (TRUE=BLOQUEADO, FALSE=DESBLOQUEADO)
+-- codUltimoEnvio El codigo que identifica al ultimo envio de este canal
+-- canext_numMensaje El siguiente numero de mensaje que se deberia asignar para este canal
 CREATE TABLE Canal(
-	codBanco INTEGER,
-	codCanal INTEGER,
-	cabloqueado BOOLEAN DEFAULT 0,
+	codBanco INTEGER NOT NULL,
+	codCanal INTEGER NOT NULL,
+	cabloqueado BOOLEAN NOT NULL DEFAULT 0,
 	codUltimoEnvio INTEGER DEFAULT NULL,
-	canext_numMensaje INTEGER DEFAULT 1,
+	canext_numMensaje INTEGER NOT NULL DEFAULT 1,
 
 	CONSTRAINT ca_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
 	CONSTRAINT ca_codUltimoEnvio_fk FOREIGN KEY (codUltimoEnvio) REFERENCES UltimoEnvio(codigoue) ON DELETE CASCADE,
@@ -198,7 +229,6 @@ INSERT INTO TipoMovimiento VALUES(50,'Abono');
 INSERT INTO TipoMovimiento VALUES(51,'Cobro de cheque');
 INSERT INTO TipoMovimiento VALUES(99,'Otros');
 
-SELECT codMovimiento,moimporte,mofecha,codTMovimiento FROM Movimiento WHERE ((codCuentaOrig = 2) || (codCuentaDest = 2));
 
 -- Movimientos
 
@@ -226,13 +256,13 @@ INSERT INTO Canal(codBanco,codCanal) VALUES (1,3);
 
 
 -- Ultimos envios
-INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta,uestringMensaje) 
+INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta,uestringMensaje) 
 VALUES (1,'1',90,'192.168.0.1',1,'pastor42 01',0000,'El mensaje enviado');
 
-INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
+INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
 VALUES (2,'1',90,'192.168.0.1',1,'pastor42 01',0000);
 
-INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
+INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta) 
 VALUES (3,'2',91,'192.168.0.2',1,'pastor42 01',0001);
 
 

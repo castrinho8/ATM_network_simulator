@@ -1075,7 +1075,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT c.cabloqueado || (ue.uecontestado=0)" +
-					" FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codUltimoEnvio" +
+					" FROM Canal c JOIN UltimoEnvio ue ON c.ueNumUltimoEnvio = ue.ueNumUltimoEnvio" +
 					" WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 
 			if(resultSet.next())
@@ -1097,7 +1097,7 @@ public class Database_lib {
 	public boolean hayMensajesSinResponder(String id_banco){
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT COUNT(codUltimoEnvio) FROM UltimoEnvio " +
+			resultSet = this.statement.executeQuery("SELECT COUNT(ueNumUltimoEnvio) FROM UltimoEnvio " +
 					"WHERE codBanco = '" + id_banco + "' AND uecontestado = 0");
 
 			if(resultSet.next())
@@ -1186,7 +1186,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT uecontestado " +
-					"FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codUltimoEnvio " +
+					"FROM Canal c JOIN UltimoEnvio ue ON c.ueNumUltimoEnvio = ue.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = '" + id_banco +"' AND c.codCanal = " + canal);
 
 			if(resultSet.next())
@@ -1313,7 +1313,7 @@ public class Database_lib {
 		String temp = "";
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.ueip FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal );
 			
 			if(resultSet.next())
@@ -1351,7 +1351,7 @@ public class Database_lib {
 		int res = 0;
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.uepuerto FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 			
 			if(resultSet.next())
@@ -1376,7 +1376,7 @@ public class Database_lib {
 		int res = 0;
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 			
 			if(resultSet.next())
@@ -1401,8 +1401,8 @@ public class Database_lib {
 		try {
 			int codigo=0;
 			
-			resultSet = this.statement.executeQuery("SELECT ue.codUltimoEnvio " +
-					"FROM UltimoEnvio ue JOIN Canal c ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+			resultSet = this.statement.executeQuery("SELECT ue.ueNumUltimoEnvio " +
+					"FROM UltimoEnvio ue JOIN Canal c ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 		
 			if(resultSet.next()){
@@ -1491,7 +1491,7 @@ public class Database_lib {
 		
 		//Ejecuta la insercion en la BD
 		try {
-			this.statement.executeUpdate("INSERT INTO UltimoEnvio(codUltimoEnvio,uecodCajero,uepuerto,ueip," +
+			this.statement.executeUpdate("INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero,uepuerto,ueip," +
 					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
 					" VALUES (" + num_mensaje + "," + ((codCajero==null)?"NULL":"'"+codCajero+"'") + "," + puerto_cajero + ",'" + ip_cajero + 
 					"'," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + cuenta + ",'" + mensaje.toString() +"')");
@@ -1507,7 +1507,7 @@ public class Database_lib {
 	 */
 	private void eliminar_ultimo_envio(int codigo_ultimo_envio){
 		try {
-			this.statement.executeUpdate("DELETE FROM UltimoEnvio WHERE codUltimoEnvio=" + codigo_ultimo_envio);
+			this.statement.executeUpdate("DELETE FROM UltimoEnvio WHERE ueNumUltimoEnvio=" + codigo_ultimo_envio);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -1550,9 +1550,9 @@ public class Database_lib {
 		
 		//Selecciona el codigo del ultimo envio para el banco y canal indicados
 		try {
-			resultSet = this.statement.executeQuery("SELECT codUltimoEnvio" +
+			resultSet = this.statement.executeQuery("SELECT ueNumUltimoEnvio" +
 					" FROM Canal" +
-					" WHERE codCanal=" + canal + " AND codBanco=" + id_banco_bd + " AND codUltimoEnvio IS NOT NULL");
+					" WHERE codCanal=" + canal + " AND codBanco=" + id_banco_bd + " AND ueNumUltimoEnvio IS NOT NULL");
 			if(resultSet.next()){
 				codigo_ultimo_envio = resultSet.getInt(1);
 				
@@ -1581,7 +1581,7 @@ public class Database_lib {
 		Mensaje res = null;
 		try {
 			resultSet = this.statement.executeQuery("SELECT ue.uestringMensaje " +
-					"FROM UltimoEnvio ue JOIN Canal c ON ue.codUltimoEnvio = c.codUltimoEnvio " +
+					"FROM UltimoEnvio ue JOIN Canal c ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
 			
 			if(resultSet.next()){
