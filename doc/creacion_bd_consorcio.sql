@@ -53,13 +53,13 @@ CREATE TABLE EstadoBanco(
 	CONSTRAINT eb_pk PRIMARY KEY (codEBanco)
 );
 
-
 -- codigo El codigo generado por la BD que asegura la correcta identificacion del banco.
 -- codBanco Codigo unico que identifica al banco(funciona como un nombre)
 -- codEBanco Codigo del Estado del banco
 -- bapuerto El puerto del banco
 -- baip La ip del banco
 -- bamaxCanales El numero maximo de canales
+-- balastChannelUsed El número del ultimo canal que ha sido usado en este banco
 CREATE TABLE Banco(
 	codigo INTEGER NOT NULL AUTO_INCREMENT,	
 	codBanco VARCHAR(20) NOT NULL UNIQUE,
@@ -67,6 +67,7 @@ CREATE TABLE Banco(
 	bapuerto INTEGER,
 	baip VARCHAR(20),
 	bamaxCanales INTEGER NOT NULL DEFAULT 0 ,
+	balastChannelUsed INTEGER NOT NULL DEFAULT 0,
 	CONSTRAINT ba_codEBanco_fk FOREIGN KEY (codEBanco) REFERENCES EstadoBanco(codEBanco) ON DELETE SET NULL,
 	CONSTRAINT ba_pk PRIMARY KEY (codigo)
 );

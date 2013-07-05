@@ -79,8 +79,13 @@ public abstract class MensajeDatos extends Mensaje {
 		
 	}
 	
+	public String getNumTarjeta() throws CodigoNoValidoException{
+    	throw new CodigoNoValidoException("Error: El método getNumTarjeta no puede ser llamado en este tipo de mensaje.");
+	}
 	
-	
+	public int getNum_cuenta() throws CodigoNoValidoException{
+    	throw new CodigoNoValidoException("Error: El método getNum_cuenta no puede ser llamado en este tipo de mensaje.");
+	}
 	
 	
 }

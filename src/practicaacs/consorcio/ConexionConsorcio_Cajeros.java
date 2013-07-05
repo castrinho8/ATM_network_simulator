@@ -129,8 +129,9 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);
 		}catch (IOException e) {
-			System.out.println("Error al enviar");
-			System.exit ( 0 );
+			e.getStackTrace();
+			System.out.println("Error al enviar CONSORCIO->CAJERO (Mensaje de datos)");
+			System.exit (-1);
 		}
 	}
 	
@@ -145,12 +146,16 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		String cajero = message.getOrigen();
 		String destino = null;
+		
 		//Cambiamos origen y destino
 		try{
 			destino = numTarjeta.substring(0,numTarjeta.length()-3); //Id_banco
-		}catch(IndexOutOfBoundsException i){
-			
+		}catch(IndexOutOfBoundsException e){
+			e.getStackTrace();
+			System.out.println("Error obteniendo el banco destino a partir del número de tarjeta.");
+			System.exit (-1);
 		}
+		
 		String origen = this.consorcio.getId_consorcio(); //Id_consorcio
 		message.setDestino(destino);
 		message.setOrigen(origen);

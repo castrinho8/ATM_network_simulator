@@ -349,7 +349,13 @@ public class Database_lib {
 				//Obtiene el tipo
 				CodigosMovimiento tipo = null;
 				try {
-					tipo = CodigosMovimiento.getTipoMovimiento(resultSet.getInt(4));
+					int type = resultSet.getInt(4);
+					//Comprueba si el valor de la BD !=NULL
+					if(type!=0)
+						tipo = CodigosMovimiento.getTipoMovimiento(type);
+					else
+						tipo = CodigosMovimiento.OTRO;
+						
 				} catch (CodigoNoValidoException e) {
 					System.out.println("Codigo de movimiento no valido");
 					e.printStackTrace();
@@ -357,8 +363,13 @@ public class Database_lib {
 				
 				//Obtiene la fecha
 				try {
-					String sqlDate = sdf.format(resultSet.getDate(3));
-				    fecha = sdf.parse(sqlDate);
+					Date data = resultSet.getDate(3);
+					//Comprueba si el valor de la BD !=NULL
+					if(data!=null){
+						String sqlDate = sdf.format(data);
+				    	fecha = sdf.parse(sqlDate);
+					}else
+						fecha = null;
 				} catch (ParseException ex) {
 				    ex.printStackTrace();
 				}
@@ -701,9 +712,17 @@ public class Database_lib {
 					"WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
-				//Si ya está el banco, settear la sesion a abierta
+				//Si ya está el banco, settear la sesion a abierta y los datos
 				if(resultSet.getString(1).equals(id_banco)){
-					setEstado_conexion_banco(id_banco,SesAberta.instance());
+					try{
+						this.setEstado_conexion_banco(id_banco,SesAberta.instance());
+					}catch(ConsorcioBDException c){
+						c.printStackTrace();
+						System.exit(-1);
+					}
+					this.setPuertoBanco(id_banco, puerto);
+					this.setIpBanco(id_banco, ip);
+					this.setNumCanalesBanco(id_banco, num_canales);
 				}
 			}else{
 				//Añadir BANCO a la BD
@@ -738,8 +757,13 @@ public class Database_lib {
 					"WHERE codbanco = '" + id_banco +"'");
 			
 			if(resultSet.next()){
-				//Si hay un banco, settear la sesion a cerrada y borrar canales
-				this.setEstado_conexion_banco(id_banco,SesNonAberta.instance());
+				try{
+					//Si hay un banco, settear la sesion a cerrada y borrar canales
+					this.setEstado_conexion_banco(id_banco,SesNonAberta.instance());
+				}catch(ConsorcioBDException c){
+					c.printStackTrace();
+					System.exit(-1);
+				}
 				borrar_canales(id_banco);
 			}
 		}catch (SQLException e) {
@@ -748,6 +772,29 @@ public class Database_lib {
 		}
 	}
 	
+	
+	/**
+	 * Método que inserta un BANCO
+	 * @param id_banco El id del banco
+	 * @param estado El estado en el que se encuentra.
+	 * @param puerto El puerto en el que escucha el banco.
+	 * @param ip La ip en la que se encuentra el banco.
+	 * @param num_canales El numero maximo de canales.
+	 */
+	private void insertar_banco(String id_banco, EstadoSesion state ,int puerto,String ip,int num_canales){
+		
+		//Obtiene el int que identifica al estado introducido
+		int estado = EstadoSesion.getInt_fromEstadoSesion(state);
+		
+		System.out.println("INSERTAR BANCO: "+id_banco+"-"+estado+"-"+puerto+"-"+ip+"-"+num_canales);
+		try {
+			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
+			" VALUES('" + id_banco + "'," + estado + "," + puerto + ",'" + ip + "'," + num_canales+")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
 	
 	/**
 	 * Comprueba en BANCO si el banco introducido por parámetro tiene sesión.
@@ -791,6 +838,9 @@ public class Database_lib {
 	}
 	
 	
+	//--GETTERS BANCOS--
+
+	
 	/**
 	 * Getter en BANCO del estado de la conexion con el banco.
 	 * @param id_banco El banco a buscar.
@@ -815,7 +865,6 @@ public class Database_lib {
 			
 			if(resultSet.next())
 				codEBanco = resultSet.getInt(1);
-			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -858,6 +907,7 @@ public class Database_lib {
 	
 	/**
 	 * Getter en BANCO del puerto del banco
+	 * Devuelve 0 en caso de que no exista
 	 * @param id_banco El banco a buscar.
 	 * @return El puerto correspondiente. 
 	 */
@@ -871,6 +921,7 @@ public class Database_lib {
 			System.exit(-1);
 		}
 		
+		//Consultamos el puerto del banco
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT bapuerto FROM Banco" +
@@ -881,19 +932,29 @@ public class Database_lib {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return 0;
+			System.exit(-1);
 		}
 		return 0;
 	}
 	
 	/**
 	 * Getter en BANCO de la ip del banco.
+	 * Devuelve NULL en caso de que no exista
 	 * @param id_banco El banco a buscar.
 	 * @return La ip correspondiente. 
 	 * @throws UnknownHostException 
 	 */
 	public InetAddress getIpBanco(String id_banco){
 		
+		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con la ip a NULL
+		try {
+			this.comprueba_banco(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		//Consultamos la ip del banco
 		ResultSet resultSet;
 		String temp = "";
 		try {
@@ -906,19 +967,55 @@ public class Database_lib {
 			return InetAddress.getByName(temp);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			System.exit(-1);
 		} catch (UnknownHostException ex){
-			ex.printStackTrace();
 			return null;
 		}
+		return null;
+	}
+	
+	
+	/**
+	 * Getter del ultimo canal utilizado por el BANCO
+	 * @param id_banco El banco del que obtener el ultimo canal utilizado
+	 * @return El int que identifica al ultimo canal utilizado.
+	 */
+	public int getLastChannelUsed(String id_banco){
+		
+		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con con lastchannel = 0
+		try {
+			this.comprueba_banco(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		int canal = 0;
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT balastChannelUsed FROM Banco" +
+					" WHERE codBanco = '" + id_banco + "'");
+			
+			if(resultSet.next()){
+				canal = resultSet.getInt(1);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return canal;
 	}
 	
 	/**
-	 * Método que obtiene una lista con los identificadores de todos los BANCO que tienen sesión abierta.
-	 * @return Un array list de String con los id de todos los BANCOS que tienen sesion abierta.
+	 * Método que obtiene una lista con los identificadores de todos los BANCO que tienen sesión 
+	 * con el codigo de sesion que se pasa por parámetro.
+	 * @param codigo_estado El codigo de sesión por el que filtrar los bancos
+	 * @return Un array list de String con los id de todos los BANCOS que tienen la sesión del tipo indicado.
 	 */
 	public ArrayList<String> getSesiones(int codigo_estado) {
 		
+		//Realiza la búsqueda
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codBanco FROM Banco " +
@@ -932,72 +1029,119 @@ public class Database_lib {
 			
 			return res;
 		} catch (SQLException e) {
-			System.err.println(e);
+			e.printStackTrace();
+			System.exit(-1);
 			return null;
 		}
 	}
+	
+	
+	//--SETTERS BANCO--
+	
 	
 	/**
 	 * Setter en BANCO del estado de la conexion
 	 * @param id_banco El banco al que cambiar el estado.
 	 * @param estado El nuevo estado.
+	 * @throws ConsorcioBDException Se produce cuando se trata de settear a un estado que no esta insertado en la BD.
 	 */
-	public void setEstado_conexion_banco(String id_banco,EstadoSesion estado){
+	public void setEstado_conexion_banco(String id_banco,EstadoSesion estado) throws ConsorcioBDException{
+		
+		//Obtiene el valor a introducir en la BD del estado correspondiente.
+		int state = EstadoSesion.getInt_fromEstadoSesion(estado);
+		
+		//Consultamos si el estado está introducido en la BD
+		ResultSet resultSet;
 		try {
-			//Obtiene el valor a introducir en la BD del estado correspondiente.
-			int state = EstadoSesion.getInt_fromEstadoSesion(estado);
+			resultSet = this.statement.executeQuery("SELECT codEBanco FROM EstadoBanco" +
+					" WHERE codEBanco = " + state);
 			
+			if(!resultSet.next()){
+				throw new ConsorcioBDException("setEstado_conexion_banco: La sesión a settear no se encuentra disponible en la BD.");
+			}
+				
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+		try {
 			this.statement.executeUpdate("UPDATE Banco SET codEbanco = " + state + 
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
-			System.out.println("Error seteando el estado de la conexión del banco.");
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
 	/**
-	 * Setter en BANCO del puerto
+	 * Setter del puerto en BANCO
 	 * @param id_banco El banco al que cambiar el puerto.
 	 * @param puerto El nuevo puerto.
 	 */
-	public void setPuertoBanco(String id_banco, String puerto){
-
+	public void setPuertoBanco(String id_banco, int puerto){
+		
 		try {
-			int port = Integer.getInteger(puerto);
-
-			this.statement.executeUpdate("UPDATE Banco SET bapuerto = " + port + 
+			this.statement.executeUpdate("UPDATE Banco SET bapuerto = " + puerto + 
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
-			System.out.println("Error seteando el puerto del banco.");
 			e.printStackTrace();
+			System.exit(-1);
 		}
-		
 	}
 	
 	
 	/**
-	 * Método que inserta un BANCO
-	 * @param id_banco El id del banco
-	 * @param estado El estado en el que se encuentra.
-	 * @param puerto El puerto en el que escucha el banco.
-	 * @param ip La ip en la que se encuentra el banco.
-	 * @param num_canales El numero maximo de canales.
+	 * Setter de la ip en el BANCO
+	 * @param id_banco El banco al que cambiar el puerto.
+	 * @param ip La nueva ip
 	 */
-	private void insertar_banco(String id_banco, EstadoSesion state ,int puerto,String ip,int num_canales){
+	public void setIpBanco(String id_banco,String ip){
 		
-		//Obtiene el int que identifica al estado introducido
-		int estado = EstadoSesion.getInt_fromEstadoSesion(state);
-		
-		System.out.println("INSERTAR BANCO: "+id_banco+"-"+estado+"-"+puerto+"-"+ip+"-"+num_canales);
 		try {
-			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
-			" VALUES('" + id_banco + "'," + estado + "," + puerto + ",'" + ip + "'," + num_canales+")");
+			this.statement.executeUpdate("UPDATE Banco SET baip = '" + ip + 
+					"' WHERE codBanco = '" + id_banco + "'");
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
+	}
+	
+	
+	/**
+	 * Setter del maximo de canales en el BANCO
+	 * @param id_banco El banco al que cambiar el puerto.
+	 * @param num_canales El nuevo número máximo de canales
+	 */
+	public void setNumCanalesBanco(String id_banco, int num_canales){
 		
+		try {
+			this.statement.executeUpdate("UPDATE Banco SET bamaxCanales = " + num_canales + 
+					" WHERE codBanco = '" + id_banco + "'");
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	/**
+	 * Setter del ultimo canal usado del BANCO.
+	 * @param id_banco El id del banco 
+	 * @param last_channel El valor del ultimo canal utilizado que se va a actualizar en la BD
+	 */
+	public void setLastChannelUsed(String id_banco, int last_channel){
+		try {
+			this.statement.executeUpdate("UPDATE Banco SET balastChannelUsed = " + last_channel + 
+					" WHERE codBanco = '" + id_banco + "'");
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 	
 	/*---------------------------------------------------
@@ -1007,53 +1151,103 @@ public class Database_lib {
 
 	/**
 	 * Obtiene en CANAL el siguiente canal disponible para realizar un envio.
-	 * El algoritmo de selección consiste simplemente en obtener el que tenga el número 
-	 * mínimo de canal de los que están libres.
+	 * El algorítmo de selección consiste en (ULTIMO_CANAL_USADO+1) MOD TOTALCANALES 
+	 * ERROR: Devuelve -1 en caso de que no haya canales que puedan ser usados
 	 * @param id_banco El banco de donde obtener un nuevo canal.
 	 * @return Un entero con el canal correspondiente.
 	 */
 	public int seleccionarCanal(String id_banco){
-		//selecciona el primero de( envio == null || envio.contestado=false)
 
+		int id_banco_bd = 0;
+		//Comprueba si está el banco, sino lo inserta con valores predeterminados
+		try {
+			id_banco_bd = this.comprueba_banco(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		//Obtiene el ultimo canal usado en el banco
+		int last_channel = this.getLastChannelUsed(id_banco);
+		int max_channel = this.getNum_canales(id_banco);
+		int selected_channel = last_channel+1%max_channel;
+		
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT MIN(codCanal) FROM Canal c JOIN UltimoEnvio ue " +
-					"ON c.codBanco = '" + id_banco + "' WHERE c.cabloqueado = 0 AND ue.uecontestado = 1" );
+			//Consultamos los canales libres en la BD
+			resultSet = this.statement.executeQuery("SELECT DISTINCT c.codCanal FROM Canal c JOIN UltimoEnvio ue " +
+					"ON c.codBanco = " + id_banco_bd + " WHERE c.cabloqueado = 0 AND ue.uecontestado = 1");
 			
-			if(resultSet.next())
-				return resultSet.getInt(1);
+			//Obtenemos todos los canales que estan libres para ser usados
+			ArrayList<Integer> canales_posibles = new ArrayList<Integer>();
+			while(resultSet.next()){
+				canales_posibles.add(resultSet.getInt(1));
+			}
+			
+			//Si no hay canales que puedan ser usados
+			if(canales_posibles.isEmpty())
+				return -1;
+				
+			//Buscar el canal seleccionado en el array, si no está avanzar el numero y comprobar de nuevo
+			while(!canales_posibles.contains(selected_channel)){
+				selected_channel=(selected_channel+1)%max_channel;
+			}
+				
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return 0;
+			System.exit(-1);
 		}
-		return 0;
+		
+		//Coloca el canal seleccionado como ultimo canal usado en la tabla del Banco
+		this.setLastChannelUsed(id_banco, selected_channel);
+		
+		return selected_channel;
 	}
+	
 	
 	/**
 	 * Obtiene en CANAL el siguiente numero de mensaje para el banco y canal indicado 
 	 * y le suma 1.
+	 * ERROR: Devuelve -1 en caso de que no haya un next_numMensaje para el banco y canal indicados
 	 * @param id_banco El banco en el que se encuentra el canal.
 	 * @param id_canal El canal de donde seleccionar el numero de mensaje.
 	 * @return Un entero con el número de mensaje a utilizar.
 	 */
 	public int selecciona_num_mensaje(String id_banco,int id_canal){
 
+		int id_banco_bd = 0;
+		//Comprueba si está el banco, sino lo inserta con valores predeterminados
+		try {
+			id_banco_bd = this.comprueba_banco(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		int num_mensaje = 0;
 		ResultSet resultSet;
 		try {
+			//Obtiene el siguiente Numero de Mensaje del canal indicado
 			resultSet = this.statement.executeQuery("SELECT canext_numMensaje FROM Canal " +
-					"WHERE codBanco = '" + id_banco + "' AND codCanal = " + id_canal);
+					"WHERE codBanco = " + id_banco_bd + " AND codCanal = " + id_canal);
 			
-			this.statement.executeUpdate("UPDATE Canal SET canext_numMensaje = canext_numMensaje+1" +
-					" WHERE codBanco = '" + id_banco + "' AND codCanal = " + id_canal);
-			
+			//Si no hay un elemento se devuelve -1
 			if(resultSet.next())
-				return resultSet.getInt(1);
+				num_mensaje = resultSet.getInt(1);
+			else
+				return -1;
+			
+			//Se actualiza el numero de mensaje sumandole 1
+			this.statement.executeUpdate("UPDATE Canal SET canext_numMensaje = canext_numMensaje+1" +
+					" WHERE codBanco = " + id_banco_bd + " AND codCanal = " + id_canal);
+
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return 0;
+			System.exit(-1);
 		}
-		return 0;
+		return num_mensaje;
 	}
+	
 	
 	/**
 	 * Comprueba si el canal está ocupado o el envio está sin contestar y devuelve un booleano.
@@ -1083,11 +1277,12 @@ public class Database_lib {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return true;
+			System.exit(-1);
 		}
 		return false;
 	}
 
+	
 	/**
 	 * Devuelve True si hay mensajes sin responder en el banco indicado.
 	 * Recorre ULTIMOENVIO con el banco indicado comprobando si está contestado.
@@ -1095,33 +1290,54 @@ public class Database_lib {
 	 * @return True si hay algun mensaje sin responder y False en caso contrario.
 	 */
 	public boolean hayMensajesSinResponder(String id_banco){
+		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT COUNT(ueNumUltimoEnvio) FROM UltimoEnvio " +
-					"WHERE codBanco = '" + id_banco + "' AND uecontestado = 0");
+					"WHERE codBanco = " + id_banco_bd + " AND uecontestado = 0");
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) != 0);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return true;
+			System.exit(-1);
 		}
-		return true;
+		return false;
 	}
 
+	
 	/**
 	 * Devuelve los ultimos mensajes enviados hacia el banco introducido
 	 * por parámetro, por todos los canales.
+	 * En caso de que no haya mensaje devuelve una lista vacia.
 	 * @param id_banco El banco en el que buscar.
 	 * @return Un ArrayList con todos los ultimos mensajes de cada canal.
 	 */
 	public ArrayList<Mensaje> recupera_ultimos_mensajes(String id_banco){
 		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		ResultSet resultSet;
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT uestringMensaje FROM UltimoEnvio " +
-					"WHERE codBanco = '" + id_banco + "'");
+					"WHERE codBanco = " + id_banco_bd);
 			
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
@@ -1130,24 +1346,38 @@ public class Database_lib {
 			
 			return res;
 		} catch (SQLException | MensajeNoValidoException e) {
-			System.err.println(e);
-			return null;
+			e.printStackTrace();
+			System.exit(-1);
 		}
+		return null;
 	}
 
+	
 	/**
 	 * Settea a True la variable bloqueado de CANAL para el banco y canal correspondiente. 
 	 * @param id_banco El banco en el que se encuentra.
 	 * @param canal El canal concreto a bloquear.
 	 */
 	public void bloquearCanal(String id_banco, int canal){
+		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		try {
 			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 1 " +
-					"WHERE codBanco = '" + id_banco + "' AND codCanal = " + canal);
+					"WHERE codBanco = " + id_banco_bd + " AND codCanal = " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
+	
 	
 	/**
 	 * Comprueba si el tipo de mensaje pasado por parámetro se corresponde con la respuesta adecuada a la 
@@ -1162,16 +1392,28 @@ public class Database_lib {
 		return true;
 	}
 	
+	
 	/**
 	 * Desbloquea todos los canales del banco
 	 * @param id_banco El banco para el cual desbloquear todos los canales.
 	 */
 	public void desbloquearCanales(String id_banco){
+		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		try {
 			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 0 " +
-					"WHERE codBanco = '" + id_banco + "'");
+					"WHERE codBanco = " + id_banco_bd);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
@@ -1183,21 +1425,29 @@ public class Database_lib {
 	 */
 	public boolean isContestado(String id_banco, int canal){
 		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT uecontestado " +
 					"FROM Canal c JOIN UltimoEnvio ue ON c.ueNumUltimoEnvio = ue.ueNumUltimoEnvio " +
-					"WHERE c.codBanco = '" + id_banco +"' AND c.codCanal = " + canal);
+					"WHERE c.codBanco = " + id_banco_bd +" AND c.codCanal = " + canal);
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) == 1);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return true;
+			System.exit(-1);
 		}
 		return true;
 	}
-	
 	
 	
 	/**
@@ -1224,6 +1474,7 @@ public class Database_lib {
 		}
 	}
 	
+	
 	/**
 	 * Metodo que elimina un CANAL de la BD.
 	 * @param id_banco El id del banco en el que se encuentra.
@@ -1244,8 +1495,10 @@ public class Database_lib {
 			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = " + id_banco_bd + " AND codCanal = " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
+	
 	
 	/**
 	 * Obtiene todos los canales de un banco concreto y los elimina.
@@ -1265,6 +1518,7 @@ public class Database_lib {
 		ArrayList<Integer> canales = new ArrayList<Integer>();
 		ResultSet resultSet = null;
 		try {
+			//Realiza la consulta
 			resultSet = this.statement.executeQuery("SELECT codCanal " +
 					"FROM Canal " +
 					"WHERE codBanco = " + id_banco_bd);
@@ -1287,19 +1541,23 @@ public class Database_lib {
 	}
 	
 	
+	
 	/*---------------------------------------------------
 	 --------------------- ULTIMOENVIO -----------------------
 	 ----------------------------------------------------*/
 	
-	
 	/**
-	 * Getter de la IP del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
-	 * @param id_banco El banco correspondiente.
-	 * @param num_canal El canal del que obtener.
-	 * @return La ip correspondiente.
+	 * Cambia el ultimo envio del canal indicado, por el pasado por parametro.
+	 * Si el canal esta ocupado no se inserta como ultimo envio.
+	 * @param message El mensaje a añadir.
+	 * @param ip La ip de la que proviene el envio (Cajero)
+	 * @param port El puerto del que proviene el envio (Cajero)
+	 * @param canal El canal correspondiente.
 	 */
-	public InetAddress getIpEnvio(String id_banco, int canal){
-	
+	public void anhadir_ultimo_envio(Mensaje message,String codCajero,String ip_cajero, int puerto_cajero,int canal){
+
+		String id_banco = message.getDestino();
+		
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
@@ -1310,34 +1568,46 @@ public class Database_lib {
 		}
 		
 		ResultSet resultSet;
-		String temp = "";
+		int codigo_ultimo_envio = 0;
+		
+		//if canal==0->mensaje de control sin canal
+		//Comprueba si el canal esta ocupado o el mensaje del canal no ha sido respondido
+		if (this.isCanal_ocupado(id_banco, canal)){
+			System.out.println("El canal se encuentra ocupado, no se ha realizado la inserción.");
+			return;
+		}
+		
+		//Selecciona el codigo del ultimo envio para el banco y canal indicados
 		try {
-			resultSet = this.statement.executeQuery("SELECT ue.ueip FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal );
+			resultSet = this.statement.executeQuery("SELECT ueNumUltimoEnvio" +
+					" FROM Canal" +
+					" WHERE codCanal=" + canal + " AND codBanco=" + id_banco_bd + " AND ueNumUltimoEnvio IS NOT NULL");
 			
-			if(resultSet.next())
-				temp = resultSet.getString(1);
+			if(resultSet.next()){
+				codigo_ultimo_envio = resultSet.getInt(1);
 				
-			return InetAddress.getByName(temp);
+				//Borra el envio para el banco y canal indicado
+				this.eliminar_ultimo_envio(codigo_ultimo_envio);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return null;
+			System.exit(-1);
 		}
+		 
+		//Inserta el nuevo envio para el banco y canal indicado
+		this.insertar_ultimo_envio(message,codCajero, ip_cajero, puerto_cajero);
 	}
-		
-		
+	
+	
 	/**
-	 * Getter del puerto del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
-	 * @param id_banco El banco correspondiente.
-	 * @param num_canal El canal del que obtener.
-	 * @return La puerto correspondiente.
+	 * Devuelve el ULTIMOENVIO de un canal.
+	 * ERROR: Devuelve NULL en caso de que no haya ningun ultimo envio para el banco/canal indicados
+	 * @param id_banco El banco que identifica al envio.
+	 * @param canal EL canal que indentifica al envio.
+	 * @return El mensaje correspondiente al ULTIMOENVIO realizado por el canal indicado.
 	 */
-	public int getPortEnvio(String id_banco, int canal){
-		
+	public Mensaje obtener_ultimo_envio(String id_banco, int canal){
+	
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
@@ -1347,114 +1617,38 @@ public class Database_lib {
 			System.exit(-1);
 		}
 		
+		String str_mensaje;
 		ResultSet resultSet;
-		int res = 0;
+		Mensaje res = null;
 		try {
-			resultSet = this.statement.executeQuery("SELECT ue.uepuerto FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
+			//Obtiene el mensaje del Ultimo envio
+			resultSet = this.statement.executeQuery("SELECT ue.uestringMensaje " +
+					"FROM UltimoEnvio ue JOIN Canal c ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 			
-			if(resultSet.next())
-				res = resultSet.getInt(1);
-				
-			return res;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return 0;
-		}
-	}
-	
-	/**
-	 * Getter del id del Cajero del ULTIMOENVIO.
-	 * @param id_banco El banco en el que obtener el id.
-	 * @param num_canal El canal en el que se encuentra el Envio con la id del cajero que lo realizó.
-	 * @return Un string que identifica al cajero que realizó el envio.
-	 */
-	public String getIdCajero(String id_banco, int canal){
-		
-		ResultSet resultSet;
-		int res = 0;
-		try {
-			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
-					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
-			
-			if(resultSet.next())
-				res = resultSet.getInt(1);
-				
-			return Integer.toString(res);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}	
-	}
-	
-	/**
-	 * Método que pone el atributo "contestado" del ULTIMOENVIO a True.
-	 * En caso de que no haya ultimo movimiento para el canal indicado, no hace nada.
-	 * @param id_banco El banco que identifica al envio.
-	 * @param num_canal El canal que identifica al envio.
-	 */
-	public void setContestadoEnvio(String id_banco, int canal){
-		
-		ResultSet resultSet;
-		try {
-			int codigo=0;
-			
-			resultSet = this.statement.executeQuery("SELECT ue.ueNumUltimoEnvio " +
-					"FROM UltimoEnvio ue JOIN Canal c ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
-					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
-		
+			//Si hay mensaje se parsea y se asigna al resultado
 			if(resultSet.next()){
-				codigo = resultSet.getInt(1);
-				this.statement.executeUpdate("UPDATE UltimoEnvio SET uecontestado = 1 " + codigo);
+				str_mensaje = resultSet.getString(1);
+				res = Mensaje.parse(str_mensaje);
 			}
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
+		} catch (MensajeNoValidoException e) {
+			e.printStackTrace();
+			System.exit(-1);
 		}
+		return res;
 	}
-	
-	private String getTarjetaEnvio(MensajeDatos mensaje){
-		switch(mensaje.getTipoMensaje()){
-			case SOLSALDO:
-				return ((SolSaldo)mensaje).getNum_tarjeta();
-			case SOLMOVIMIENTOS:
-				return ((SolMovimientos)mensaje).getNum_tarjeta();
-			case SOLREINTEGRO:
-				return ((SolReintegro)mensaje).getNum_tarjeta();
-			case SOLABONO:
-				return ((SolAbono)mensaje).getNum_tarjeta();
-			case SOLTRASPASO:
-				return ((SolTraspaso)mensaje).getNum_tarjeta();
-			default:
-				return null;
-		}
-	}
-	
-	private int getCuentaEnvio(MensajeDatos mensaje){
-		switch(mensaje.getTipoMensaje()){
-			case SOLSALDO:
-				return ((SolSaldo)mensaje).getNum_cuenta();
-			case SOLMOVIMIENTOS:
-				return ((SolMovimientos)mensaje).getNum_cuenta();
-			case SOLREINTEGRO:
-				return ((SolReintegro)mensaje).getNum_cuenta();
-			case SOLABONO:
-				return ((SolAbono)mensaje).getNum_cuenta();
-			case SOLTRASPASO:
-				return ((SolTraspaso)mensaje).getNum_cuenta_origen();
-			default:
-				return -1;
-		}	
-	}
+
 	
 	/**
-	 * 
-	 * @param mensaje
-	 * @param codCajero
-	 * @param ip_cajero
-	 * @param puerto_cajero
+	 * Método privado que inserta el ultimo envio en la tabla
+	 * @param mensaje El mensaje a insertar
+	 * @param codCajero El cajero del que proviene
+	 * @param ip_cajero La ip del cajero del que proviene
+	 * @param puerto_cajero El puerto del cajero del que proviene
 	 */
 	private void insertar_ultimo_envio(Mensaje mensaje,String codCajero,String ip_cajero, int puerto_cajero){
 		
@@ -1466,9 +1660,9 @@ public class Database_lib {
 		//Comprueba que los datos son correctos
 		if(mensaje.es_datos()){
 			try{
-				if((tarjeta = getTarjetaEnvio((MensajeDatos)mensaje)) == null)
+				if((tarjeta = ((MensajeDatos)mensaje).getNumTarjeta()) == null)
 					throw new CodigoNoValidoException();
-				if((cuenta = getCuentaEnvio((MensajeDatos)mensaje)) == -1)
+				if((cuenta = ((MensajeDatos)mensaje).getNum_cuenta()) == -1)
 					throw new CodigoNoValidoException();
 				num_mensaje = ((MensajeDatos)mensaje).getNmsg();
 			}catch (CodigoNoValidoException a){
@@ -1501,31 +1695,72 @@ public class Database_lib {
 		}
 	}
 	
+	
 	/**
-	 * 
-	 * @param codigo_ultimo_envio
+	 * Método que elimina el ultimo envio con el codigo pasado por parámetro.
+	 * Si no hay ninguno con el codigo indicado no se hace nada.
+	 * @param codigo_ultimo_envio EL codigo de ultimo envio a eliminar
 	 */
 	private void eliminar_ultimo_envio(int codigo_ultimo_envio){
 		try {
 			this.statement.executeUpdate("DELETE FROM UltimoEnvio WHERE ueNumUltimoEnvio=" + codigo_ultimo_envio);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 		
 	}
 	
+	
+	//---GETTERS ULTIMO ENVIO------
+	
+	
 	/**
-	 * Cambia el ultimo envio del canal indicado por el pasado por parametro.
-	 * Tambien añade el mensaje a la tabla de MENSAJES del consorcio.
-	 * Si el canal esta ocupado no se inserta como ultimo envio.
-	 * @param message El mensaje a añadir.
-	 * @param ip La ip de la que proviene el envio (Cajero)
-	 * @param port El puerto del que proviene el envio (Cajero)
-	 * @param canal El canal correspondiente.
+	 * Getter de la IP del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
+	 * @param id_banco El banco correspondiente.
+	 * @param num_canal El canal del que obtener.
+	 * @return La ip correspondiente.
 	 */
-	public void anhadir_ultimo_envio(Mensaje message,String codCajero,String ip_cajero, int puerto_cajero,int canal){
-
-		String id_banco = message.getDestino();
+	public InetAddress getIpEnvio(String id_banco, int canal){
+	
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
+		ResultSet resultSet;
+		String temp = "";
+		try {
+			resultSet = this.statement.executeQuery("SELECT ue.ueip FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal );
+			
+			if(resultSet.next())
+				temp = resultSet.getString(1);
+				
+			return InetAddress.getByName(temp);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		} catch (UnknownHostException e) {
+			return null;
+		}
+		return null;
+	}
+		
+		
+	/**
+	 * Getter del puerto del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
+	 * ERROR: Devuelve 0 cuando no hay puerto o ha habido un error
+	 * @param id_banco El banco correspondiente.
+	 * @param num_canal El canal del que obtener.
+	 * @return La puerto correspondiente.
+	 */
+	public int getPortEnvio(String id_banco, int canal){
 		
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
@@ -1537,72 +1772,105 @@ public class Database_lib {
 		}
 		
 		ResultSet resultSet;
-		int codigo_ultimo_envio = 0;
-		
-		//if canal==0->mensaje de control sin canal
-		//Comprueba si el canal esta ocupado o el mensaje del canal no ha sido respondido
+		int res = 0;
 		try {
-			if (this.isCanal_ocupado(id_banco, canal))
-				throw new ConsorcioBDException("El canal se encuentra ocupado, no se ha realizado la inserción.");
-		} catch (ConsorcioBDException e) {
-			return;
-		}
-		
-		//Selecciona el codigo del ultimo envio para el banco y canal indicados
-		try {
-			resultSet = this.statement.executeQuery("SELECT ueNumUltimoEnvio" +
-					" FROM Canal" +
-					" WHERE codCanal=" + canal + " AND codBanco=" + id_banco_bd + " AND ueNumUltimoEnvio IS NOT NULL");
-			if(resultSet.next()){
-				codigo_ultimo_envio = resultSet.getInt(1);
+			resultSet = this.statement.executeQuery("SELECT ue.uepuerto FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
+			
+			if(resultSet.next())
+				res = resultSet.getInt(1);
 				
-				//Borra el envio para el banco y canal indicado
-				eliminar_ultimo_envio(codigo_ultimo_envio);
-			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		 
-		//Inserta el nuevo envio para el banco y canal indicado
-		insertar_ultimo_envio(message,codCajero, ip_cajero, puerto_cajero);
+		return res;
 	}
+	
 	
 	/**
-	 * Devuelve el ULTIMOENVIO de un canal.
-	 * @param id_banco El banco que identifica al envio.
-	 * @param canal EL canal que indentifica al envio.
-	 * @return El mensaje correspondiente al ULTIMOENVIO realizado por el canal indicado.
+	 * Getter del id del Cajero del ULTIMOENVIO.
+	 * ERROR: Devuelve NULL cuando no existe cajero.
+	 * @param id_banco El banco en el que obtener el id.
+	 * @param num_canal El canal en el que se encuentra el Envio con la id del cajero que lo realizó.
+	 * @return Un string que identifica al cajero que realizó el envio.
 	 */
-	public Mensaje obtener_ultimo_envio(String id_banco, int canal){
-	
-		String str_mensaje;
+	public String getIdCajero(String id_banco, int canal){
+		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
 		ResultSet resultSet;
-		Mensaje res = null;
+		int res = 0;
 		try {
-			resultSet = this.statement.executeQuery("SELECT ue.uestringMensaje " +
-					"FROM UltimoEnvio ue JOIN Canal c ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
-					"WHERE c.codBanco = '" + id_banco + "' AND c.codCanal = " + canal);
+			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.ueNumUltimoEnvio = c.ueNumUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 			
-			if(resultSet.next()){
-				str_mensaje = resultSet.getString(1);
-				res = Mensaje.parse(str_mensaje);
-			}
-			
-			return res;
+			if(resultSet.next())
+				res = resultSet.getInt(1);
+				
+			return Integer.toString(res);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
-		} catch (MensajeNoValidoException e) {
+			System.exit(-1);
+		}
+		return null;
+	}
+	
+	
+	//---SETTERS ULTIMO ENVIO ----
+	
+	/**
+	 * Método que pone el atributo "contestado" del ULTIMOENVIO a True.
+	 * En caso de que no haya ultimo movimiento para el canal indicado, no hace nada.
+	 * @param id_banco El banco que identifica al envio.
+	 * @param num_canal El canal que identifica al envio.
+	 */
+	public void setEnvioContestado(String id_banco, int canal){
+		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.comprueba_banco(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
+		ResultSet resultSet;
+		try {
+			int codigo=0;
+			//Obtiene el codigo que identifica al ultimo envio para el banco/canal indicados
+			resultSet = this.statement.executeQuery("SELECT ue.codigoue " +
+					"FROM UltimoEnvio ue JOIN Canal c ON ue.codigoue = c.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
+		
+			//Si existe ultimo envio se actualiza a contestado = TRUE
+			if(resultSet.next()){
+				codigo = resultSet.getInt(1);
+				this.statement.executeUpdate("UPDATE UltimoEnvio SET uecontestado = 1 WHERE codigoue=" + codigo);
+			}
+			
+		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			System.exit(-1);
 		}
 	}
-
+	
+	
 	
 	/*---------------------------------------------------
 	 --------------------- MENSAJE ---------------------
 	 ----------------------------------------------------*/
+	
 	
 	/**
 	 * Método que devuelve un ArrayList con los MENSAJE que se han realizado offline para el banco
