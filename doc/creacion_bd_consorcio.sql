@@ -123,12 +123,12 @@ CREATE TABLE TipoOrigDest(
 -- mestringMensaje El mensaje en formato toString
 CREATE TABLE Mensaje(
 	codMensaje INTEGER NOT NULL AUTO_INCREMENT,
-	meNumMensaje INTEGER NOT NULL DEFAULT 0,
+	meNumMensaje INTEGER DEFAULT 0,
 	codTOrigen INTEGER,
 	meorigen VARCHAR(30) NOT NULL,
 	codTDestino INTEGER,
 	medestino VARCHAR(30) NOT NULL,
-	codBanco INTEGER NOT NULL,
+	codBanco INTEGER,
 	meoffline BOOLEAN NOT NULL DEFAULT 0,
 	mestringMensaje VARCHAR(500) NOT NULL,
 
@@ -186,7 +186,45 @@ CREATE TABLE Canal(
 );
 
 
+-- DATOS INICIALES REALES
 
+INSERT INTO EstadoBanco VALUES(1,'Abierta');
+INSERT INTO EstadoBanco VALUES(2,'Cerrada');
+INSERT INTO EstadoBanco VALUES(3,'Trafico detenido');
+INSERT INTO EstadoBanco VALUES(4,'En recuperacion');
+
+INSERT INTO TipoMovimiento VALUES(10,'Reintegro');
+INSERT INTO TipoMovimiento VALUES(11,'Transpaso emitido');
+INSERT INTO TipoMovimiento VALUES(12,'Transpaso recibido');
+INSERT INTO TipoMovimiento VALUES(13,'Pago recibo');
+INSERT INTO TipoMovimiento VALUES(50,'Abono');
+INSERT INTO TipoMovimiento VALUES(51,'Cobro de cheque');
+INSERT INTO TipoMovimiento VALUES(99,'Otros');
+
+INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
+VALUES (1,'Banco');
+INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
+VALUES (2,'Consorcio');
+INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
+VALUES (3,'Cajero');
+
+
+INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor42',1,80,'127.0.0.1',3);
+
+INSERT INTO Tarjeta VALUES ('pastor42 01',0);
+
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42 01',0000,0);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42 01',0001,0);
+
+INSERT INTO Canal(codBanco,codCanal) VALUES (1,0);
+INSERT INTO Canal(codBanco,codCanal) VALUES (1,1);
+INSERT INTO Canal(codBanco,codCanal) VALUES (1,2);
+
+
+
+
+
+-- DATOS INICIALES PARA TESTS MANUALES DE LA BASE DE DATOS
 
 -- Estados del banco
 
@@ -195,8 +233,9 @@ INSERT INTO EstadoBanco VALUES(2,'Cerrada');
 INSERT INTO EstadoBanco VALUES(3,'Trafico detenido');
 INSERT INTO EstadoBanco VALUES(4,'En recuperacion');
 
+
 -- Bancos
-INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES(1,1,80,'127.0.0.1',5);
+INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES(1,1,80,'127.0.0.1',3);
 INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES(2,1,80,'127.0.0.1',5);
 INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES(3,2,80,'127.0.0.1',2);
 INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES(4,1,80,'127.0.0.1',2);

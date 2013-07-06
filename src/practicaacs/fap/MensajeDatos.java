@@ -79,13 +79,37 @@ public abstract class MensajeDatos extends Mensaje {
 		
 	}
 	
-	public String getNumTarjeta() throws CodigoNoValidoException{
+	public String getNum_tarjeta() throws CodigoNoValidoException{
     	throw new CodigoNoValidoException("Error: El método getNumTarjeta no puede ser llamado en este tipo de mensaje.");
 	}
 	
 	public int getNum_cuenta() throws CodigoNoValidoException{
     	throw new CodigoNoValidoException("Error: El método getNum_cuenta no puede ser llamado en este tipo de mensaje.");
 	}
+	
+	public String getIdBancoFromTarjeta(){
+		
+		String tarjeta = null;
+		String banco = null;
+		
+		//Obtiene la tarjeta
+		try {
+			tarjeta = this.getNum_tarjeta();
+		} catch (CodigoNoValidoException e1) {
+			e1.printStackTrace();
+			System.exit (-1);
+		}
+
+		//Obtiene el id_banco
+		try{
+			banco = tarjeta.substring(0,tarjeta.length()-3);
+		}catch(IndexOutOfBoundsException e){
+			e.getStackTrace();
+			System.exit (-1);
+		}
+		return banco;
+	}
+	
 	
 	
 }

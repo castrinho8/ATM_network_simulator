@@ -58,7 +58,7 @@ public class Cajero{
 		}
 		
 		//Direccion del consorcio
-		this.id_consorcio = prop.getProperty("consorcio.id");
+		this.id_consorcio = new String(prop.getProperty("consorcio.id"));
 		this.consorcio_address = InetAddress.getByName(prop.getProperty("consorcio.address"));
 		this.consorcio_port = new Integer(prop.getProperty("consorcio.cash_server.port"));
 		this.cajero_address = InetAddress.getByName(prop.getProperty("cajero.address"));

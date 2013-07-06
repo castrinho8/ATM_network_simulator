@@ -263,12 +263,12 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     public void actualizarListaCajeros(){
-    	ArrayList<String> lista = Database_lib.getInstance().MensajesCajeroToString();
+    	ArrayList<String> lista = Database_lib.getInstance().getMensajesCajeroToString();
         this.cajerosList.setListData(lista.toArray());
     }
     
     public void actualizarListaBancos(){
-    	ArrayList<String> lista = Database_lib.getInstance().MensajesBancoToString();
+    	ArrayList<String> lista = Database_lib.getInstance().getMensajesBancoToString();
         this.BancosLIst.setListData(lista.toArray());
     }
    

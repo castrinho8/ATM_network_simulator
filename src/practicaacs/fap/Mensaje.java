@@ -89,6 +89,16 @@ public abstract class Mensaje implements java.io.Serializable {
 				);
 	}
 	
+	public boolean es_solicitudDatos(){
+		return ((tipoMensaje == CodigosMensajes.SOLSALDO) ||
+				(tipoMensaje == CodigosMensajes.SOLMOVIMIENTOS) ||
+				(tipoMensaje == CodigosMensajes.SOLABONO) ||
+				(tipoMensaje == CodigosMensajes.SOLREINTEGRO)
+				);
+	}
+	
+	
+	
 	@Override
 	public String toString(){
 		return this.printCabecera() + this.printCuerpo(); 

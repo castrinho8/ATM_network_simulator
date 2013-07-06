@@ -8,7 +8,7 @@ public enum CodigosRespuesta {
 	CUENTANVALIDA(13,"Consulta Denegada, Cuenta especificada no válida."), 
 	IMPORTEEXCLIMITE(14,"Consulta Denegada, la IMPORTE especificada	excede el Límite para la Cuenta especificada."), 
 	TRANSCUENTASIGUALES(21,"Consulta Denegada, En operación de Traspaso la Cuenta Origen es igual a la Cuenta Destino."),
-	TRANSSINFONDOS(22,"Consulta Denegada, En operación de Traspaso la Cuenta Origen no tiene fondos suficientes para traspasar la IMPORTE especificada."), 
+	TRANSSINFONDOS(22,"Consulta Denegada, En operación de Traspaso la Cuenta Origen no tiene fondos suficientes para traspasar el IMPORTE especificado."), 
 	TRANSCUENTAORINVALIDA(23,"Consulta Denegada, En operación de Traspaso la Cuenta Origen no es válida."), 
 	TRANSCUENTADESNVALIDA(24,"Consulta Denegada, En operación de Traspaso la Cuenta Destino no es válida.");
 	
@@ -17,6 +17,7 @@ public enum CodigosRespuesta {
 	
 	private CodigosRespuesta(int valor, String msg){
 		this.valor = valor;
+		this.msg = msg;
 	}
 	
 	public String getMensaje(){

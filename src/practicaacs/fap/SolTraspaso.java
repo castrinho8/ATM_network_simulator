@@ -41,6 +41,10 @@ public class SolTraspaso extends MensajeDatos {
 		return num_cuenta_destino;
 	}
 
+	public int getNum_cuenta(){
+		return num_cuenta_destino;
+	}
+
 
 	public int getImporte() {
 		return importe;
