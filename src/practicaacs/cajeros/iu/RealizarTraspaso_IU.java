@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespAbono;
@@ -282,9 +283,19 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
     
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
-		this.SaldoText.setText(String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
-				"\nDESTINO: " + String.valueOf(((RespTraspaso)respuesta).getSaldoDestino())));
-        this.EsperandoRespuestaLabel.setVisible(false);
+		String texto = "";
+		CodigosRespuesta codigo = ((RespTraspaso)respuesta).getCod_resp();
+		
+		if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
+			texto = String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
+				"\nDESTINO: " + String.valueOf(((RespTraspaso)respuesta).getSaldoDestino()));
+		else
+			texto = String.valueOf(codigo.getMensaje());
+		
+		System.out.println("CODIGO:"+codigo+" GETTEXTO:-"+codigo.getMensaje()+"- TEXTO:-" +texto+"-");
+		
+		this.SaldoText.setText(texto);
+		this.EsperandoRespuestaLabel.setVisible(false);
         this.ErrorLabel.setVisible(false);
         this.SaldoLabel.setVisible(true);
         this.SaldoText.setVisible(true);

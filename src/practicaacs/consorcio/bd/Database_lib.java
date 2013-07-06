@@ -26,6 +26,7 @@ import practicaacs.consorcio.aux.Movimiento;
 import practicaacs.consorcio.aux.TipoOrigDest;
 import practicaacs.fap.*;
 
+
 /**
  * Libreria de acceso a la base de datos
  */
@@ -200,6 +201,48 @@ public class Database_lib {
 		throw new ConsorcioBDException("No existe el banco y no puede ser añadido.");
 	}
 	
+	/**
+	 * Método que comprueba si existe la tarjeta indicada y devuelve un booleano que lo indica.
+	 * @param tarjeta La tarjeta a comprobar
+	 * @return True si existe y False en caso contrario
+	 */
+	private boolean existeTarjeta(String tarjeta){
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codTarjeta FROM Tarjeta WHERE codTarjeta ='" + tarjeta + "'");
+
+			return resultSet.next();
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Método que comprueba si existe la cuenta para la tarjeta indicadas y devuelve un booleano que lo indica.
+	 * @param tarjeta La tarjeta a la que pertenece la cuenta
+	 * @param cuenta La cuenta a comprobar
+	 * @return True si existe y False en caso contrario
+	 */
+	private boolean existeCuenta(String tarjeta, int cuenta){
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codCuenta FROM Cuenta " +
+					"WHERE codTarjeta='"+tarjeta+"' AND codCuenta =" + cuenta);
+
+			return resultSet.next();
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		return false;
+	}
+	
+	
 	/*---------------------------------------------------
 	 --------------------- CONSULTAS --------------------
 	 ----------------------------------------------------*/	
@@ -218,6 +261,18 @@ public class Database_lib {
 	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino,
 			CodigosMensajes tipo, int importe){
 		
+		if (!this.existeTarjeta(tarjeta))
+			return CodigosRespuesta.TARJETANVALIDA;
+		
+		if (!(tipo.equals(CodigosMensajes.SOLTRASPASO)) && (!this.existeCuenta(tarjeta,cuenta_destino)))
+			return CodigosRespuesta.CUENTANVALIDA;
+		
+		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (!this.existeCuenta(tarjeta,cuenta_origen)))
+			return CodigosRespuesta.TRANSCUENTAORINVALIDA;
+
+		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (!this.existeCuenta(tarjeta,cuenta_destino)))
+			return CodigosRespuesta.TRANSCUENTADESNVALIDA;
+		
 		if (this.consultarGastoOffline(tarjeta) > 1000)
 			return CodigosRespuesta.IMPORTEEXCLIMITE;
 
@@ -235,13 +290,9 @@ public class Database_lib {
 			System.exit(-1);
 		}
 		
-			return CodigosRespuesta.CONSACEPTADA;
+		return CodigosRespuesta.CONSACEPTADA;
 /*		CONSDEN(10,"Consulta Denegada."), 
 		CAPTARJ(11,"Consulta Denegada con Captura de Tarjeta."), 
-		TARJETANVALIDA(12,"Consulta Denegada, Tarjeta no Válida."),
-		CUENTANVALIDA(13,"Consulta Denegada, Cuenta especificada no válida."), 
-		TRANSCUENTAORINVALIDA(23,"Consulta Denegada, En operación de Traspaso la Cuenta Origen no es válida."), 
-		TRANSCUENTADESNVALIDA(24,"Consulta Denegada, En operación de Traspaso la Cuenta Destino no es válida.");
 	*/	
 	}
 	
@@ -274,10 +325,12 @@ public class Database_lib {
 	 */
 	private void recalcular_saldoActual(int cuenta,String tarjeta, int importe, char signo){
 
-		//Comprueba si existe la tarjeta y sino la añade
-		this.comprueba_tarjeta(tarjeta);
-		//Comprueba si existe la cuenta y sino la añade
-		this.comprueba_cuenta(tarjeta, cuenta);
+		//Comprueba si existe la tarjeta
+		if(!this.existeTarjeta(tarjeta))
+			throw new ConsorcioBDException("recalcular_saldoActual: La tarjeta indicada no existe.");
+		//Comprueba si existe la cuenta
+		if(!this.existeCuenta(tarjeta, cuenta))
+			throw new ConsorcioBDException("recalcular_saldoActual: La cuenta indicada no existe.");
 
 		try {
 			this.statement.executeUpdate("UPDATE Cuenta SET cusaldo = cusaldo"+ signo + importe +
@@ -553,7 +606,7 @@ public class Database_lib {
 		int id_banco_bd = -1;
 		//Obtiene codigo que identifica al banco en la BD a partir del string del banco
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -655,7 +708,7 @@ public class Database_lib {
 		//Obtiene codigo que identifica al banco en la BD a partir del string del banco
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -840,6 +893,30 @@ public class Database_lib {
 	
 	//--GETTERS BANCOS--
 
+	/**
+	 * Método que obtiene el ID real que identifica al banco pasado por 
+	 * parámetro en la BD.
+	 * @param id_banco El id del banco que funciona como el nombre
+	 * @return El int que indentifica al banco con el string pasado por parámetro, dentro de la BD.
+	 * @throws ConsorcioBDException Si no existe el banco se lanza la excepción.
+	 */
+	private int getIdBancoBD(String id_banco) throws ConsorcioBDException{
+		
+		//Comprueba si existe, si existe devuelve el codigo de la BD que lo identifica
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
+		
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		System.out.println("BANCO:"+id_banco+"-");
+		throw new ConsorcioBDException("No existe el banco con el que se trata de realizar la operacion.");
+	}
 	
 	/**
 	 * Getter en BANCO del estado de la conexion con el banco.
@@ -848,9 +925,9 @@ public class Database_lib {
 	 */
 	public EstadoSesion getEstado_conexion_banco(String id_banco){
 		
-		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con la sesion cerrada.
+		//Comprobamos si esta el banco
 		try {
-			this.comprueba_banco(id_banco);
+			this.getIdBancoBD(id_banco);
 		} catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -881,9 +958,9 @@ public class Database_lib {
 	 */
 	public int getNum_canales(String id_banco){
 		
-		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con los canales a 0
+		//Comprobamos si esta el banco
 		try {
-			this.comprueba_banco(id_banco);
+			this.getIdBancoBD(id_banco);
 		} catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -913,9 +990,9 @@ public class Database_lib {
 	 */
 	public int getPortBanco(String id_banco){
 
-		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con el puerto a NULL
+		//Comprobamos si esta el banco
 		try {
-			this.comprueba_banco(id_banco);
+			this.getIdBancoBD(id_banco);
 		} catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -946,9 +1023,9 @@ public class Database_lib {
 	 */
 	public InetAddress getIpBanco(String id_banco){
 		
-		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con la ip a NULL
+		//Comprobamos si esta el banco
 		try {
-			this.comprueba_banco(id_banco);
+			this.getIdBancoBD(id_banco);
 		} catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -982,9 +1059,9 @@ public class Database_lib {
 	 */
 	public int getLastChannelUsed(String id_banco){
 		
-		//Comprobamos si esta el banco, en caso de que no lo esté lo insertamos con con lastchannel = 0
+		//Comprobamos si esta el banco
 		try {
-			this.comprueba_banco(id_banco);
+			this.getIdBancoBD(id_banco);
 		} catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -1159,9 +1236,9 @@ public class Database_lib {
 	public int seleccionarCanal(String id_banco){
 
 		int id_banco_bd = 0;
-		//Comprueba si está el banco, sino lo inserta con valores predeterminados
+		//Comprueba si está el banco
 		try {
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		} catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -1216,9 +1293,9 @@ public class Database_lib {
 	public int selecciona_num_mensaje(String id_banco,int id_canal){
 
 		int id_banco_bd = 0;
-		//Comprueba si está el banco, sino lo inserta con valores predeterminados
+		//Comprueba si está el banco y obtiene su id
 		try {
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		} catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -1260,7 +1337,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1294,7 +1371,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1327,7 +1404,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1363,7 +1440,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1402,7 +1479,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1428,7 +1505,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1460,7 +1537,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1485,7 +1562,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1509,7 +1586,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1561,7 +1638,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1611,7 +1688,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1660,7 +1737,7 @@ public class Database_lib {
 		//Comprueba que los datos son correctos
 		if(mensaje.es_datos()){
 			try{
-				if((tarjeta = ((MensajeDatos)mensaje).getNumTarjeta()) == null)
+				if((tarjeta = ((MensajeDatos)mensaje).getNum_tarjeta()) == null)
 					throw new CodigoNoValidoException();
 				if((cuenta = ((MensajeDatos)mensaje).getNum_cuenta()) == -1)
 					throw new CodigoNoValidoException();
@@ -1674,7 +1751,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1726,7 +1803,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1765,7 +1842,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1801,7 +1878,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1839,7 +1916,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1875,7 +1952,9 @@ public class Database_lib {
 	/**
 	 * Método que devuelve un ArrayList con los MENSAJE que se han realizado offline para el banco
 	 * indicado por parámetro.
-	 * @param id_banco EL banco del que obtener los mensajes offline.
+	 * También pone el flag offline a FALSE una vez acaba de todos los mensajes del banco 
+	 * ya que ahora ya han sido enviados en online.
+	 * @param id_banco El banco del que obtener los mensajes offline.
 	 * @return Un arraylist con los Mensajes que han sido offline.
 	 */
 	public ArrayList<Mensaje> getMensajesOffline(String id_banco){
@@ -1883,7 +1962,7 @@ public class Database_lib {
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
-			id_banco_bd = this.comprueba_banco(id_banco);
+			id_banco_bd = this.getIdBancoBD(id_banco);
 		}catch(ConsorcioBDException c){
 			c.printStackTrace();
 			System.exit(-1);
@@ -1895,8 +1974,9 @@ public class Database_lib {
 			//Obtenemos todos los mensajes OFFLINE
 			resultSet = this.statement.executeQuery("SELECT mestringMensaje" +
 					" FROM Mensaje " +
-					" WHERE codBanco = " + id_banco_bd + " AND (meoffline IS NOT NULL || meoffline != 0) AND codTDestino=1");
+					" WHERE codBanco = " + id_banco_bd + " AND meoffline=1 AND codTDestino=1");
 			
+			//Parseamos los mensajes
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
 				res.add(m);
@@ -1905,14 +1985,98 @@ public class Database_lib {
 			//Ponemos OFFLINE a false para todos los mensajes del id_banco
 			this.statement.executeUpdate("UPDATE Mensaje SET meoffline = 0 WHERE codBanco = " + id_banco_bd);
 			
-			return res;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			System.exit(-1);
 		} catch (MensajeNoValidoException e) {
 			e.printStackTrace();
-			return null;
+			System.exit(-1);
 		}
+		return res;
+	}
+	
+	
+	/**
+	 * Método que obtiene todos los mensajes hacia/desde el CAJERO.
+	 * Devuelve un arraylist con los Strings a mostrar en la interfaz grafica.
+	 * @return Un arraylist de strings.
+	 */
+	public ArrayList<String> getMensajesCajeroToString(){
+		
+		ResultSet resultSet = null;
+		ArrayList<String> res = new ArrayList<String>();
+		try {
+			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
+					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
+					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
+					" WHERE ta.todnombre='Cajero' || tb.todnombre='Cajero' ORDER BY codMensaje");
+
+			while(resultSet.next()){
+				
+				//str1/str2 = nombre del tipo de origen (CAJERO,BANCO o CONSORCIO)
+				String str1 = resultSet.getString(1);
+				String str2 = resultSet.getString(2);
+				Mensaje m = null;
+				
+				//Parseamos el mensaje
+				try {
+					m = Mensaje.parse(resultSet.getString(3));
+				} catch (MensajeNoValidoException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				
+				//Creamos el string a imprimir
+				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
+				res.add(elemento);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return res;
+	}
+	
+	
+	/**
+	 * Método que obtiene todos los mensajes hacia/desde el BANCO.
+	 * Devuelve un arraylist con los Strings a mostrar en la interfaz grafica.
+	 * @return Un arraylist de strings.
+	 */
+	public ArrayList<String> getMensajesBancoToString(){
+		
+		ResultSet resultSet = null;
+		ArrayList<String> res = new ArrayList<String>();
+		try {
+			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
+					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
+					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
+					" WHERE ta.todnombre='Banco' || tb.todnombre='Banco' ORDER BY codMensaje");
+
+			while(resultSet.next()){
+				
+				//str1/str2 = nombre del tipo de origen (CAJERO,BANCO o CONSORCIO)
+				String str1 = resultSet.getString(1);
+				String str2 = resultSet.getString(2);
+				Mensaje m = null;
+				
+				//Parseamos el mensaje
+				try {
+					m = Mensaje.parse(resultSet.getString(3));
+				} catch (MensajeNoValidoException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				
+				//Creamos el string a imprimir
+				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
+				res.add(elemento);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return res;
 	}
 	
 
@@ -1924,92 +2088,44 @@ public class Database_lib {
 
 		int num_mensaje = -1;
 		boolean offline = true;
+		String id_banco = null;
+		int id_banco_bd = -1;
+	
+		//Añade el id_banco, origen, destino o se obtiene de la tarjeta
+		if(torigen.equals(TipoOrigDest.BANCO))
+			id_banco = origen;
+		if(tdestino.equals(TipoOrigDest.BANCO))
+			id_banco = destino;
+		if((id_banco==null) && (message.es_solicitudDatos())){
+			id_banco = ((MensajeDatos) message).getIdBancoFromTarjeta();
+		}
 		
-		//Si el mensaje es de datos obtenemos el numero de mensaje y 
+		//Si el mensaje es de datos obtenemos el numero de mensaje y si es offline
 		if(message.es_datos()){
 			num_mensaje = ((MensajeDatos) message).getNmsg();
 			offline = !((MensajeDatos) message).getCodonline();
 		}
+
+		//Si hay banco, obtiene el identificar del banco en la BD
+		if(id_banco!=null){
+			try {
+				id_banco_bd = this.getIdBancoBD(id_banco);
+			} catch (ConsorcioBDException e1) {
+				e1.printStackTrace();
+				System.exit(-1);
+			}
+		}
 		
 		try {
-			String q = "INSERT INTO Mensaje(meNumMensaje,meoffline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
-					"VALUES (" + ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((offline)? 1:0) + "," + torigen.getNum() +
+			String q = "INSERT INTO Mensaje(codBanco,meNumMensaje,meoffline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
+					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((offline)? 1:0) + "," + torigen.getNum() +
 					",'" + origen + "'," + tdestino.getNum() + ",'" + destino + "','" + message.toString() +"')";
 			
 			this.statement.executeUpdate(q);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
-	
-	/**
-	 * Método que obtiene todos los mensajes hacia/desde el CAJERO.
-	 * Devuelve un arraylist con los Strings a mostrar en la interfaz grafica.
-	 * @return Un arraylist de strings.
-	 */
-	public ArrayList<String> MensajesCajeroToString(){
-		
-		ResultSet resultSet = null;
-		ArrayList<String> res = new ArrayList<String>();
-		try {
-			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
-					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
-					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
-					" WHERE ta.todnombre='Cajero' || tb.todnombre='Cajero' ORDER BY codMensaje");
-
-			while(resultSet.next()){
-				String str1 = resultSet.getString(1);
-				String str2 = resultSet.getString(2);
-				Mensaje m = null;
-				try {
-					m = Mensaje.parse(resultSet.getString(3));
-				} catch (MensajeNoValidoException e) {
-					e.printStackTrace();
-				}
-				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
-				res.add(elemento);
-			}
-			return res;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	/**
-	 * Método que obtiene todos los mensajes hacia/desde el BANCO.
-	 * Devuelve un arraylist con los Strings a mostrar en la interfaz grafica.
-	 * @return Un arraylist de strings.
-	 */
-	public ArrayList<String> MensajesBancoToString(){
-		
-		ResultSet resultSet = null;
-		ArrayList<String> res = new ArrayList<String>();
-		try {
-			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
-					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
-					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
-					" WHERE ta.todnombre='Banco' || tb.todnombre='Banco' ORDER BY codMensaje");
-
-			while(resultSet.next()){
-				String str1 = resultSet.getString(1);
-				String str2 = resultSet.getString(2);
-				Mensaje m = null;
-				try {
-					m = Mensaje.parse(resultSet.getString(3));
-				} catch (MensajeNoValidoException e) {
-					e.printStackTrace();
-				}
-				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
-				res.add(elemento);
-			}
-			return res;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	
 	
 }
