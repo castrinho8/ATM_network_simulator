@@ -7,8 +7,10 @@ import javax.swing.JFrame;
 import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
+import practicaacs.fap.RespAbono;
 import practicaacs.fap.RespSaldo;
 
 public class ConsultarSaldo_IU extends ConsultaAbstracta {
@@ -158,11 +160,20 @@ public class ConsultarSaldo_IU extends ConsultaAbstracta {
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
 		this.ConsultandoLabel.setVisible(false);
+
 		RespSaldo m = (RespSaldo)respuesta;
-		if(m.getCodonline())
-			this.jTextField1.setText(String.valueOf(m.getSaldo()));
-		else
-			this.jTextField1.setText("Error: No hay conexion");
+		String texto = "";
+		
+		if(m.getCodonline()){
+			CodigosRespuesta codigo = m.getCod_resp();
+			if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
+				texto = String.valueOf(((RespSaldo)respuesta).getSaldo());
+			else
+				texto = String.valueOf(codigo.getMensaje());
+		}else
+			texto = String.valueOf("Error: No hay conexion");
+		this.jTextField1.setText(texto);
+
     }
 
 }

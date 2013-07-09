@@ -17,6 +17,7 @@ import practicaacs.cajeros.Envio;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.CodigoNoValidoException;
 import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespMovimientos;
@@ -178,7 +179,12 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 		while(it.hasNext()){
 			RespMovimientos m = (RespMovimientos) it.next();
 			if(m.getCodonline()){
-				texto = m.getTipoMov() + " - Importe: " + ((m.getSigno())?"+":"-")+m.getImporte()+"€  Fecha: "+m.getFecha();
+				CodigosRespuesta codigo = m.getCod_resp();
+				if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
+					texto = m.getTipoMov() + " - Importe: " + ((m.getSigno())?"+":"-")+m.getImporte()+"€  Fecha: "+m.getFecha();
+				else
+					texto = String.valueOf(codigo.getMensaje());
+				
 				strlist.add(texto);
 			}else{
 				String[] s = {"Error: No hay conexion"};

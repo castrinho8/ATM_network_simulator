@@ -292,8 +292,6 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
 		else
 			texto = String.valueOf(codigo.getMensaje());
 		
-		System.out.println("CODIGO:"+codigo+" GETTEXTO:-"+codigo.getMensaje()+"- TEXTO:-" +texto+"-");
-		
 		this.SaldoText.setText(texto);
 		this.EsperandoRespuestaLabel.setVisible(false);
         this.ErrorLabel.setVisible(false);

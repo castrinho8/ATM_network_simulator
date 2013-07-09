@@ -157,8 +157,8 @@ CREATE TABLE UltimoEnvio(
 	uepuerto INTEGER,
 	ueip VARCHAR(20),
 	codBanco INTEGER NOT NULL,
-	codTarjeta VARCHAR(11) NOT NULL,
-	codCuenta INTEGER NOT NULL,
+	codTarjeta VARCHAR(11),
+	codCuenta INTEGER,
 	uestringMensaje VARCHAR(500) NOT NULL,
 
 	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
@@ -181,7 +181,7 @@ CREATE TABLE Canal(
 	canext_numMensaje INTEGER NOT NULL DEFAULT 1,
 
 	CONSTRAINT ca_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
-	CONSTRAINT ca_codUltimoEnvio_fk FOREIGN KEY (codUltimoEnvio) REFERENCES UltimoEnvio(codigoue) ON DELETE CASCADE,
+	CONSTRAINT ca_codUltimoEnvio_fk FOREIGN KEY (codUltimoEnvio) REFERENCES UltimoEnvio(codigoue) ON DELETE SET NULL,
 	CONSTRAINT ca_pk PRIMARY KEY (codBanco,codCanal)
 );
 

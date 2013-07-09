@@ -6,9 +6,11 @@ import javax.swing.JFrame;
 import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
 import practicaacs.fap.CodigosMensajes;
+import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespAbono;
+import practicaacs.fap.RespReintegro;
 
 public class RealizarAbono_IU extends ConsultaAbstracta {
 
@@ -226,7 +228,16 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
     
 	@Override
     public void actualizarIU(MensajeDatos respuesta){
-    	this.SaldoText.setText(String.valueOf(((RespAbono)respuesta).getSaldo()));
+		
+		String texto = "";
+		CodigosRespuesta codigo = ((RespAbono)respuesta).getCod_resp();
+		
+		if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
+			texto = String.valueOf(((RespAbono)respuesta).getSaldo());
+		else
+			texto = String.valueOf(codigo.getMensaje());
+		
+    	this.SaldoText.setText(texto);
         this.EsperandoRespuestaLabel.setVisible(false);
         this.ErrorLabel.setVisible(false);
         this.SaldoLabel.setVisible(true);
