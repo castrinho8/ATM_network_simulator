@@ -284,16 +284,18 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String id_banco = m.getOrigen(); //el banco de donde ha llegado el mensaje
 				
 		//Solicitar ABRIR SESION y ya hay SESION ABIERTA
-		if((m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)) 
-				&& (Database_lib.getInstance().hasSesion(id_banco)))
+		if((Database_lib.getInstance().hasSesion(id_banco)) && 
+				(m.getTipoMensaje().equals(CodigosMensajes.SOLABRIRSESION)))
 			return CodigosError.YAABIERTA;
 		
 		//El numero de mensaje entrante es != del que deberia ser (deberia recibirse el mismo numero de mensaje que se envia)
-		if(!(Database_lib.getInstance().isContestado(id_banco,canal)))
+		if((Database_lib.getInstance().hasSesion(id_banco)) && 
+				(!(Database_lib.getInstance().isContestado(id_banco,canal))))
 			return CodigosError.FUERASEC;
 		
 		//Solicitar utilizar un canal que aun no ha obtenido respuesta (que esta ocupado)
-		if(Database_lib.getInstance().isCanal_ocupado(id_banco,canal))
+		if((Database_lib.getInstance().hasSesion(id_banco)) && 
+				(Database_lib.getInstance().isCanal_ocupado(id_banco,canal)))
 			return CodigosError.CANALOCUP;
 		
 		//Solicitar REANUDAR TRAFICO y no esta TRAFICO DETENIDO

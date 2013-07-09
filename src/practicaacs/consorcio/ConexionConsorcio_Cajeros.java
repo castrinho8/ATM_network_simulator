@@ -247,7 +247,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLABONO,0);
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLSALDO,0,codonline);
 
 		RespSaldo respuesta = null;
 		
@@ -256,6 +256,8 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				//La respuesta en caso de error.
 				respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 
+				System.out.println(nmsg+":"+origen+"->"+destino+"CANAL:"+numcanal+"CODONLINE:"+codonline+"codresp:"+cod_resp);
+				
 				//Enviamos el mensaje
 				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
@@ -281,7 +283,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLMOVIMIENTOS,0);
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLMOVIMIENTOS,0,codonline);
 		
 		RespMovimientos respuesta = null;
 		Calendar c = Calendar.getInstance();
@@ -334,7 +336,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLREINTEGRO,recibido.getImporte());
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLREINTEGRO,recibido.getImporte(),codonline);
 
 		RespReintegro respuesta = null;
 		
@@ -380,7 +382,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLABONO,recibido.getImporte());
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLABONO,recibido.getImporte(),codonline);
 		
 		RespAbono respuesta = null;
 		
@@ -425,7 +427,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		int nmsg = 0;
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
 		CodigosRespuesta cod_resp = 
-				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),CodigosMensajes.SOLTRASPASO,recibido.getImporte());
+				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),CodigosMensajes.SOLTRASPASO,recibido.getImporte(),codonline);
 			
 		RespTraspaso respuesta = null;
 		
@@ -446,12 +448,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				
 				//Obtiene el nuevo saldo en el origen
 				int saldoOrigen = -1;
-				try {
-					saldoOrigen = Database_lib.getInstance().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen());
-				} catch (ConsorcioBDException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
+				saldoOrigen = Database_lib.getInstance().consultar_saldo(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen());
 				
 				boolean signoOrigen = (saldoOrigen>=0);
 				

@@ -187,4 +187,41 @@ public abstract class Mensaje implements java.io.Serializable {
 		this.destino = destino;
 	}
 
+	
+	public boolean esContestacionCorrecta(CodigosMensajes codigo_contestacion){
+		
+		switch(tipoMensaje){
+			case SOLABONO: 
+				return codigo_contestacion.equals(CodigosMensajes.RESABONO);
+			case SOLMOVIMIENTOS:
+				return codigo_contestacion.equals(CodigosMensajes.RESMOVIMIENTOS);
+			case SOLSALDO:
+				return codigo_contestacion.equals(CodigosMensajes.RESSALDO);
+			case SOLREINTEGRO:
+				return codigo_contestacion.equals(CodigosMensajes.RESREINTEGRO);
+			case SOLTRASPASO:
+				return codigo_contestacion.equals(CodigosMensajes.RESTRASPASO);
+			case SOLINIREC:
+				return codigo_contestacion.equals(CodigosMensajes.RESINIREC);
+			case SOLFINREC:
+				return codigo_contestacion.equals(CodigosMensajes.RESFINREC);
+			case SOLABRIRSESION:
+				return codigo_contestacion.equals(CodigosMensajes.RESABRIRSESION);
+			case SOLCIERRESESION:
+				return codigo_contestacion.equals(CodigosMensajes.RESCIERRESESION);
+			case SOLDETENERTRAFICO:
+				return codigo_contestacion.equals(CodigosMensajes.RESDETENERTRAFICO);
+			case SOLREANUDARTRAFICO:
+				return codigo_contestacion.equals(CodigosMensajes.RESREANUDARTRAFICO);
+		}
+		return false;
+	}
 }
+
+
+
+
+
+
+
+
