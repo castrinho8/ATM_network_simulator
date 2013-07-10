@@ -11,13 +11,16 @@ import practicaacs.consorcio.bd.Database_lib;
 public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
 
 	Consorcio consorcio;
+	MostrarBD_IU interfaz_bd;
 	
     /**
      * Creates new form PantallaInicial
      */
     public PantallaInicialConsorcio_IU(Consorcio cons) {
 		this.consorcio = cons;
+		this.interfaz_bd = new MostrarBD_IU();
         initComponents();
+        this.interfaz_bd.actualizar();
     	actualizarListaCajeros();
     	actualizarListaBancos();
     	this.setLocationRelativeTo(null);
@@ -265,11 +268,13 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     public void actualizarListaCajeros(){
     	ArrayList<String> lista = Database_lib.getInstance().getMensajesCajeroToString();
         this.cajerosList.setListData(lista.toArray());
-    }
+    	this.interfaz_bd.actualizar();
+   }
     
     public void actualizarListaBancos(){
     	ArrayList<String> lista = Database_lib.getInstance().getMensajesBancoToString();
         this.BancosLIst.setListData(lista.toArray());
+    	this.interfaz_bd.actualizar();
     }
    
     

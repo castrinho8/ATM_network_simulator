@@ -10,6 +10,7 @@ import java.util.logging.*;
 import practicaacs.banco.bd.ClienteBDBanco;
 import practicaacs.fap.*;
 import practicaacs.consorcio.bd.*;
+import practicaacs.consorcio.iu.MostrarBD_IU;
 import practicaacs.consorcio.iu.PantallaInicialConsorcio_IU;
 
 public class Consorcio {

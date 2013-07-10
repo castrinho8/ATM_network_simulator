@@ -2284,7 +2284,6 @@ public class Database_lib {
 		try {
 			resultSet = this.statement.executeQuery("SELECT codigo,codBanco,codEBanco,bapuerto,baip,bamaxCanales,balastChannelUsed FROM Banco");
 
-			String texto = "";
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
 				int cod = resultSet.getInt(1);
@@ -2295,14 +2294,11 @@ public class Database_lib {
 				int canales = resultSet.getInt(6);
 				int ultimo_canal = resultSet.getInt(7);
 				
-				texto = cod+"-"+nombre+"-"+estado+"\t-"+puerto+"\t-"+ip+"\t-"+canales+"-"+ultimo_canal;
-				System.out.println(texto);
-				
 				linea.add(String.valueOf(cod));
 				linea.add(nombre);
-				linea.add(String.valueOf(estado));
-				linea.add(String.valueOf(puerto));
-				linea.add(ip);
+				linea.add((estado==0)?"NULL":String.valueOf(estado));
+				linea.add((puerto==0)?"NULL":String.valueOf(puerto));
+				linea.add((ip==null)?"NULL":ip);
 				linea.add(String.valueOf(canales));
 				linea.add(String.valueOf(ultimo_canal));
 				elementos.add(linea);
@@ -2320,25 +2316,23 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje FROM Canal");
+			resultSet = this.statement.executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje" +
+					" FROM Canal");
 
-			String texto = "";
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
-
+				boolean a = false;
 				int cod = resultSet.getInt(1);
 				int canal = resultSet.getInt(2);
 				int bloqueado = resultSet.getInt(3);
+				a = resultSet.getString(4)==null;
 				int ultimo_envio = resultSet.getInt(4);
 				int siguiente_mensaje = resultSet.getInt(5);
 				
-				texto = cod+"-"+canal+"-"+bloqueado+"-"+ultimo_envio+"-"+siguiente_mensaje;
-				System.out.println(texto);
-
 				linea.add(String.valueOf(cod));
 				linea.add(String.valueOf(canal));
 				linea.add(String.valueOf(bloqueado));
-				linea.add(String.valueOf(ultimo_envio));
+				linea.add((a)?"NULL":String.valueOf(ultimo_envio));//NULL?
 				linea.add(String.valueOf(siguiente_mensaje));
 				elementos.add(linea);
 			}
@@ -2350,31 +2344,96 @@ public class Database_lib {
 		return elementos;
 	}
 
+	public ArrayList<ArrayList<String>> getTarjetas(){
+
+		ResultSet resultSet;
+		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
+		try {
+			resultSet = this.statement.executeQuery("SELECT codTarjeta,tagastoOffline" +
+					" FROM Tarjeta");
+
+			while(resultSet.next()){
+				ArrayList<String> linea = new ArrayList<String>();
+
+				String codTarjeta = resultSet.getString(1);
+				int tagastoOffline = resultSet.getInt(2);
+				
+				linea.add(codTarjeta);
+				linea.add(String.valueOf(tagastoOffline));
+				elementos.add(linea);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return elementos;
+	}
+	
+	
+	public ArrayList<ArrayList<String>> getCuentas(){
+		
+		ResultSet resultSet;
+		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
+		try {
+			resultSet = this.statement.executeQuery("SELECT codTarjeta,codCuenta,cusaldo" +
+					" FROM Cuenta");
+
+			while(resultSet.next()){
+				ArrayList<String> linea = new ArrayList<String>();
+
+				String codTarjeta = resultSet.getString(1);
+				int codCuenta = resultSet.getInt(2);
+				int cusaldo = resultSet.getInt(3);
+				
+				linea.add(codTarjeta);
+				linea.add(String.valueOf(codCuenta));
+				linea.add(String.valueOf(cusaldo));
+				elementos.add(linea);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return elementos;
+	}
+	
+	
 	public ArrayList<ArrayList<String>> getUltimosEnvios(){
 		
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje FROM Canal");
+			resultSet = this.statement.executeQuery("SELECT codigoue,ueNumUltimoEnvio,uecontestado,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta,uestringMensaje" +
+					" FROM UltimoEnvio");
 
-			String texto = "";
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
-
-				int cod = resultSet.getInt(1);
-				int canal = resultSet.getInt(2);
-				int bloqueado = resultSet.getInt(3);
-				int ultimo_envio = resultSet.getInt(4);
-				int siguiente_mensaje = resultSet.getInt(5);
+				boolean a = false;
 				
-				texto = cod+"-"+canal+"-"+bloqueado+"-"+ultimo_envio+"-"+siguiente_mensaje;
-				System.out.println(texto);
+				int codigoue = resultSet.getInt(1);
+				int ueNumUltimoEnvio = resultSet.getInt(2);
+				int uecontestado = resultSet.getInt(3);
+				String uecodCajero = resultSet.getString(4);
+				int uepuerto = resultSet.getInt(5);
+				String ueip = resultSet.getString(6);
+				int codBanco = resultSet.getInt(7);
+				String codTarjeta = resultSet.getString(8);
+				a = resultSet.getString(9)==null;
+				int codCuenta = resultSet.getInt(9);
+				String uestringMensaje = resultSet.getString(10);
 
-				linea.add(String.valueOf(cod));
-				linea.add(String.valueOf(canal));
-				linea.add(String.valueOf(bloqueado));
-				linea.add(String.valueOf(ultimo_envio));
-				linea.add(String.valueOf(siguiente_mensaje));
+				linea.add(String.valueOf(codigoue));
+				linea.add(String.valueOf(ueNumUltimoEnvio));
+				linea.add(String.valueOf(uecontestado));
+				linea.add((uecodCajero==null)?"NULL":uecodCajero);
+				linea.add((uepuerto==0)?"NULL":String.valueOf(uepuerto));
+				linea.add((ueip==null)?"NULL":ueip);
+				linea.add(String.valueOf(codBanco));
+				linea.add((codTarjeta==null)?"NULL":codTarjeta);
+				linea.add((a)?"NULL":String.valueOf(codCuenta));//NULL?
+				linea.add(uestringMensaje);
 				elementos.add(linea);
 			}
 			
@@ -2389,26 +2448,33 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje FROM Canal");
+			resultSet = this.statement.executeQuery("SELECT codMovimiento,codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco" +
+					" FROM Movimiento");
 
-			String texto = "";
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
 
-				int cod = resultSet.getInt(1);
-				int canal = resultSet.getInt(2);
-				int bloqueado = resultSet.getInt(3);
-				int ultimo_envio = resultSet.getInt(4);
-				int siguiente_mensaje = resultSet.getInt(5);
+				int codMovimiento = resultSet.getInt(1);
+				String codTarjeta = resultSet.getString(2);
+				int codCuentaOrig = resultSet.getInt(3);
+				int codCuentaDest = resultSet.getInt(4);
+				int codTMovimiento = resultSet.getInt(5);
+				Date mofecha = resultSet.getDate(6);
+				int moimporte = resultSet.getInt(7);
+				int mooffline = resultSet.getInt(8);
+				int codBanco = resultSet.getInt(9);
 				
-				texto = cod+"-"+canal+"-"+bloqueado+"-"+ultimo_envio+"-"+siguiente_mensaje;
-				System.out.println(texto);
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-				linea.add(String.valueOf(cod));
-				linea.add(String.valueOf(canal));
-				linea.add(String.valueOf(bloqueado));
-				linea.add(String.valueOf(ultimo_envio));
-				linea.add(String.valueOf(siguiente_mensaje));
+				linea.add(String.valueOf(codMovimiento));
+				linea.add(codTarjeta);
+				linea.add(String.valueOf(codCuentaOrig));//NULL?
+				linea.add(String.valueOf(codCuentaDest));
+				linea.add((codTMovimiento==0)?"NULL":String.valueOf(codTMovimiento));
+				linea.add((mofecha==null)?"NULL":sdf.format(mofecha));
+				linea.add(String.valueOf(moimporte));
+				linea.add(String.valueOf(mooffline));
+				linea.add(String.valueOf(codBanco));
 				elementos.add(linea);
 			}
 			
@@ -2420,32 +2486,39 @@ public class Database_lib {
 	}
 	
 	public ArrayList<ArrayList<String>> getMensajes(){
+		
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje FROM Canal");
+			resultSet = this.statement.executeQuery("SELECT codMensaje,meNumMensaje,codTOrigen,meorigen,codTDestino,medestino,codBanco,meoffline,mestringMensaje " +
+					"FROM Mensaje");
 
-			String texto = "";
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
-
-				int cod = resultSet.getInt(1);
-				int canal = resultSet.getInt(2);
-				int bloqueado = resultSet.getInt(3);
-				int ultimo_envio = resultSet.getInt(4);
-				int siguiente_mensaje = resultSet.getInt(5);
+				boolean a = false;
+					
+				int codMensaje = resultSet.getInt(1);
+				a = resultSet.getString(2)==null;
+				int meNumMensaje = resultSet.getInt(2);
+				int codTOrigen = resultSet.getInt(3);
+				String meorigen = resultSet.getString(4);
+				int codTDestino = resultSet.getInt(5);
+				String medestino = resultSet.getString(6);
+				int codBanco = resultSet.getInt(7);
+				int meoffline = resultSet.getInt(8);
+				String mestringMensaje = resultSet.getString(9);
 				
-				texto = cod+"-"+canal+"-"+bloqueado+"-"+ultimo_envio+"-"+siguiente_mensaje;
-				System.out.println(texto);
-
-				linea.add(String.valueOf(cod));
-				linea.add(String.valueOf(canal));
-				linea.add(String.valueOf(bloqueado));
-				linea.add(String.valueOf(ultimo_envio));
-				linea.add(String.valueOf(siguiente_mensaje));
+				linea.add(String.valueOf(codMensaje));
+				linea.add((a)?"NULL":String.valueOf(meNumMensaje));//NULL?
+				linea.add((codTOrigen==0)?"NULL":String.valueOf(codTOrigen));
+				linea.add(meorigen);
+				linea.add((codTDestino==0)?"NULL":String.valueOf(codTDestino));
+				linea.add(medestino);
+				linea.add((codBanco==0)?"NULL":String.valueOf(codBanco));
+				linea.add(String.valueOf(meoffline));
+				linea.add(mestringMensaje);
 				elementos.add(linea);
 			}
-			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
