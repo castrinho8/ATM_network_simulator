@@ -6,7 +6,7 @@ public enum CodigosRespuesta {
 	CAPTARJ(11,"Consulta Denegada con Captura de Tarjeta."), 
 	TARJETANVALIDA(12,"Consulta Denegada, Tarjeta no Válida."),
 	CUENTANVALIDA(13,"Consulta Denegada, Cuenta especificada no válida."), 
-	IMPORTEEXCLIMITE(14,"Consulta Denegada, la IMPORTE especificada	excede el Límite para la Cuenta especificada."), 
+	IMPORTEEXCLIMITE(14,"Consulta Denegada,el importe especificado excede el límite para la Tarjeta especificada."), 
 	TRANSCUENTASIGUALES(21,"Consulta Denegada, En operación de Traspaso la Cuenta Origen es igual a la Cuenta Destino."),
 	TRANSSINFONDOS(22,"Consulta Denegada, En operación de Traspaso la Cuenta Origen no tiene fondos suficientes para traspasar el IMPORTE especificado."), 
 	TRANSCUENTAORINVALIDA(23,"Consulta Denegada, En operación de Traspaso la Cuenta Origen no es válida."), 

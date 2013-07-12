@@ -2,6 +2,8 @@ package practicaacs.consorcio.iu;
 
 import java.util.ArrayList;
 
+import javax.swing.table.DefaultTableModel;
+
 import practicaacs.consorcio.bd.Database_lib;
 
 public class MostrarBD_IU extends javax.swing.JFrame {
@@ -44,6 +46,7 @@ public class MostrarBD_IU extends javax.swing.JFrame {
         MensajesLabel = new javax.swing.JLabel();
         jScrollPane7 = new javax.swing.JScrollPane();
         MensajesTable = new javax.swing.JTable();
+        RefreshButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("BD Actualmente");
@@ -587,6 +590,13 @@ public class MostrarBD_IU extends javax.swing.JFrame {
         });
         jScrollPane7.setViewportView(MensajesTable);
 
+        RefreshButton.setText("Actualizar");
+        RefreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RefreshButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -598,12 +608,14 @@ public class MostrarBD_IU extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 593, Short.MAX_VALUE)
                             .addComponent(BancoLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 84, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(RefreshButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(CanalesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 629, Short.MAX_VALUE)
                             .addComponent(jScrollPane1)))
-                    .addComponent(MensajesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 1306, Short.MAX_VALUE)
-                    .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 1306, Short.MAX_VALUE)
+                    .addComponent(MensajesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 1326, Short.MAX_VALUE)
+                    .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 1326, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(TarjetasLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -626,13 +638,18 @@ public class MostrarBD_IU extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(BancoLabel1)
-                    .addComponent(CanalesLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(BancoLabel1)
+                            .addComponent(CanalesLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(RefreshButton)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(TarjetasLabel)
@@ -658,6 +675,10 @@ public class MostrarBD_IU extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>                        
+
+    private void RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {         
+    	this.actualizar();
+    }                                             
 
     /**
      * @param args the command line arguments
@@ -704,6 +725,7 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     private javax.swing.JTable MensajesTable;
     private javax.swing.JLabel MovimientosLabel;
     private javax.swing.JTable MovimientosTable;
+    private javax.swing.JButton RefreshButton;
     private javax.swing.JLabel TarjetasLabel;
     private javax.swing.JTable TarjetasTable;
     private javax.swing.JLabel UltimosEnviosLabel;
@@ -715,8 +737,7 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
-    // End of variables declaration                   
-
+    // End of variables declaration               
     
     public void actualizar(){
     	this.actualizarListaBancos();
@@ -728,79 +749,133 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     	this.actualizarListaMensajes();
     }
     
+    private void clearTable(final javax.swing.JTable table) {
+	   for (int i = 0; i < table.getRowCount(); i++){
+	      for(int j = 0; j < table.getColumnCount(); j++) {
+	          table.setValueAt("", i, j);
+	      }
+	   }
+    }
+
     private void actualizarListaBancos(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getBancos();
     	
+    	DefaultTableModel modelo=(DefaultTableModel) this.BancosTable.getModel();
+    	this.clearTable(this.BancosTable);
+    	int rows = this.BancosTable.getRowCount();
+    	
+
     	int i=0,j=0;
     	for(i=0;i<lista.size();i++){
     		for(j=0;j<7;j++){
     			this.BancosTable.setValueAt(lista.get(i).get(j),i,j);
     		}
+    		if((lista.size()>rows) && (i>=(rows-1)))
+    			modelo.addRow(new Object[7]);
     	}
     }
     
     private void actualizarListaCanales(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getCanales();
     	
+    	DefaultTableModel modelo=(DefaultTableModel) this.CanalesTable.getModel();
+    	this.clearTable(this.CanalesTable);
+    	int rows = this.CanalesTable.getRowCount();
+    	
+
     	int i=0,j=0;
     	for(i=0;i<lista.size();i++){
     		for(j=0;j<5;j++){
 	    		this.CanalesTable.setValueAt(lista.get(i).get(j),i,j);
     		}
+    		if((lista.size()>rows) && (i>=(rows-1)))
+    			modelo.addRow(new Object[5]);
     	}
     }
    
     private void actualizarListaTarjetas(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getTarjetas();
     	
+    	DefaultTableModel modelo=(DefaultTableModel) this.TarjetasTable.getModel();
+    	this.clearTable(this.TarjetasTable);
+    	int rows = this.TarjetasTable.getRowCount();
+    	
+
     	int i=0,j=0;
     	for(i=0;i<lista.size();i++){
     		for(j=0;j<2;j++){
 	    		this.TarjetasTable.setValueAt(lista.get(i).get(j),i,j);
     		}
+    		if((lista.size()>rows) && (i>=(rows-1)))
+    			modelo.addRow(new Object[2]);
     	}
     }
     
     private void actualizarListaCuentas(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getCuentas();
     	
+    	DefaultTableModel modelo=(DefaultTableModel) this.CuentasTable.getModel();
+    	this.clearTable(this.CuentasTable);
+    	int rows = this.CuentasTable.getRowCount();
+    	
+
     	int i=0,j=0;
     	for(i=0;i<lista.size();i++){
     		for(j=0;j<3;j++){
 	    		this.CuentasTable.setValueAt(lista.get(i).get(j),i,j);
     		}
+    		if((lista.size()>rows) && (i>=(rows-1)))
+    			modelo.addRow(new Object[3]);
     	}
     }
     public void actualizarListaUltimosEnvios(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getUltimosEnvios();
+    	
+    	DefaultTableModel modelo=(DefaultTableModel) this.UltimosEnviosTable.getModel();
+    	this.clearTable(this.UltimosEnviosTable);
+    	int rows = this.UltimosEnviosTable.getRowCount();
     	
     	int i=0,j=0;
     	for(i=0;i<lista.size();i++){
     		for(j=0;j<10;j++){
 	    		this.UltimosEnviosTable.setValueAt(lista.get(i).get(j),i,j);
     		}
+    		if((lista.size()>rows) && (i>=(rows-1)))
+    			modelo.addRow(new Object[10]);
     	}
     }
     
     public void actualizarListaMovimientos(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getMovimientos();
+
+    	DefaultTableModel modelo=(DefaultTableModel) this.MovimientosTable.getModel();
+    	this.clearTable(this.MovimientosTable);
+    	int rows = this.MovimientosTable.getRowCount();
     	
     	int i=0,j=0;
     	for(i=0;i<lista.size();i++){
-    		for(j=0;j<5;j++){
+    		for(j=0;j<9;j++){
 	    		this.MovimientosTable.setValueAt(lista.get(i).get(j),i,j);
     		}
+    		if((lista.size()>rows) && (i>=(rows-1)))
+    			modelo.addRow(new Object[9]);
     	}
     }
     
     public void actualizarListaMensajes(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getMensajes();
     	
+    	DefaultTableModel modelo=(DefaultTableModel) this.MensajesTable.getModel();
+    	this.clearTable(this.MensajesTable);
+    	int rows = this.MensajesTable.getRowCount();
+    	
     	int i=0,j=0;
     	for(i=0;i<lista.size();i++){
     		for(j=0;j<9;j++){
 	    		this.MensajesTable.setValueAt(lista.get(i).get(j),i,j);
     		}
+    		if((lista.size()>rows) && (i>=(rows-1)))
+    			modelo.addRow(new Object[9]);
     	}
     }
 }

@@ -277,7 +277,7 @@ public class Database_lib {
 				&& (!codonline))
 			return CodigosRespuesta.CONSDEN;
 		*/
-		if (this.consultarGastoOffline(tarjeta) > 1000)
+		if ((this.consultarGastoOffline(tarjeta)+importe) > 1000)
 			return CodigosRespuesta.IMPORTEEXCLIMITE;
 
 		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (importe > 9999))
@@ -2282,13 +2282,14 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codigo,codBanco,codEBanco,bapuerto,baip,bamaxCanales,balastChannelUsed FROM Banco");
+			resultSet = this.statement.executeQuery("SELECT b.codigo,b.codBanco,e.ebnombre,b.bapuerto,b.baip,b.bamaxCanales,b.balastChannelUsed" +
+					" FROM Banco b JOIN EstadoBanco e ON b.codEBanco=e.codEBanco ORDER BY b.codigo");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
 				int cod = resultSet.getInt(1);
 				String nombre = resultSet.getString(2);
-				int estado = resultSet.getInt(3);
+				String estado = resultSet.getString(3);
 				int puerto = resultSet.getInt(4);
 				String ip = resultSet.getString(5);
 				int canales = resultSet.getInt(6);
@@ -2296,7 +2297,7 @@ public class Database_lib {
 				
 				linea.add(String.valueOf(cod));
 				linea.add(nombre);
-				linea.add((estado==0)?"NULL":String.valueOf(estado));
+				linea.add((estado==null)?"NULL":estado);
 				linea.add((puerto==0)?"NULL":String.valueOf(puerto));
 				linea.add((ip==null)?"NULL":ip);
 				linea.add(String.valueOf(canales));
@@ -2317,7 +2318,7 @@ public class Database_lib {
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje" +
-					" FROM Canal");
+					" FROM Canal ORDER BY codBanco");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
@@ -2331,7 +2332,7 @@ public class Database_lib {
 				
 				linea.add(String.valueOf(cod));
 				linea.add(String.valueOf(canal));
-				linea.add(String.valueOf(bloqueado));
+				linea.add((bloqueado==0)?"NO":"SI");
 				linea.add((a)?"NULL":String.valueOf(ultimo_envio));//NULL?
 				linea.add(String.valueOf(siguiente_mensaje));
 				elementos.add(linea);
@@ -2350,7 +2351,7 @@ public class Database_lib {
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT codTarjeta,tagastoOffline" +
-					" FROM Tarjeta");
+					" FROM Tarjeta ORDER BY codTarjeta");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
@@ -2377,7 +2378,7 @@ public class Database_lib {
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT codTarjeta,codCuenta,cusaldo" +
-					" FROM Cuenta");
+					" FROM Cuenta ORDER BY codTarjeta");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
@@ -2406,7 +2407,7 @@ public class Database_lib {
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT codigoue,ueNumUltimoEnvio,uecontestado,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta,uestringMensaje" +
-					" FROM UltimoEnvio");
+					" FROM UltimoEnvio ORDER BY codigoue");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
@@ -2426,7 +2427,7 @@ public class Database_lib {
 
 				linea.add(String.valueOf(codigoue));
 				linea.add(String.valueOf(ueNumUltimoEnvio));
-				linea.add(String.valueOf(uecontestado));
+				linea.add((uecontestado==0)?"NO":"SI");
 				linea.add((uecodCajero==null)?"NULL":uecodCajero);
 				linea.add((uepuerto==0)?"NULL":String.valueOf(uepuerto));
 				linea.add((ueip==null)?"NULL":ueip);
@@ -2448,18 +2449,20 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codMovimiento,codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco" +
-					" FROM Movimiento");
+			resultSet = this.statement.executeQuery("SELECT m.codMovimiento,m.codTarjeta,m.codCuentaOrig,m.codCuentaDest,t.tmnombre,m.mofecha,m.moimporte,m.mooffline,m.codBanco" +
+					" FROM Movimiento m JOIN TipoMovimiento t ON m.codTMovimiento=t.codTMovimiento ORDER BY m.codMovimiento");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
+				boolean a = false; 
 
 				int codMovimiento = resultSet.getInt(1);
 				String codTarjeta = resultSet.getString(2);
+				a = resultSet.getString(3)==null;
 				int codCuentaOrig = resultSet.getInt(3);
 				int codCuentaDest = resultSet.getInt(4);
-				int codTMovimiento = resultSet.getInt(5);
-				Date mofecha = resultSet.getDate(6);
+				String codTMovimiento = resultSet.getString(5);
+				Date mofecha = new java.util.Date(resultSet.getDate(6).getTime());
 				int moimporte = resultSet.getInt(7);
 				int mooffline = resultSet.getInt(8);
 				int codBanco = resultSet.getInt(9);
@@ -2468,12 +2471,12 @@ public class Database_lib {
 
 				linea.add(String.valueOf(codMovimiento));
 				linea.add(codTarjeta);
-				linea.add(String.valueOf(codCuentaOrig));//NULL?
+				linea.add((a)?"NULL":String.valueOf(codCuentaOrig));//NULL?
 				linea.add(String.valueOf(codCuentaDest));
-				linea.add((codTMovimiento==0)?"NULL":String.valueOf(codTMovimiento));
+				linea.add((codTMovimiento==null)?"NULL":codTMovimiento);
 				linea.add((mofecha==null)?"NULL":sdf.format(mofecha));
 				linea.add(String.valueOf(moimporte));
-				linea.add(String.valueOf(mooffline));
+				linea.add((mooffline==0)?"OFFLINE":"ONLINE");
 				linea.add(String.valueOf(codBanco));
 				elementos.add(linea);
 			}
@@ -2491,7 +2494,7 @@ public class Database_lib {
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
 			resultSet = this.statement.executeQuery("SELECT codMensaje,meNumMensaje,codTOrigen,meorigen,codTDestino,medestino,codBanco,meoffline,mestringMensaje " +
-					"FROM Mensaje");
+					"FROM Mensaje ORDER BY codMensaje");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
@@ -2501,8 +2504,12 @@ public class Database_lib {
 				a = resultSet.getString(2)==null;
 				int meNumMensaje = resultSet.getInt(2);
 				int codTOrigen = resultSet.getInt(3);
+				String tipo_orig = (codTOrigen==1)?"Banco":(codTOrigen==2)?"Consorcio":(codTOrigen==3)?"Cajero":"NULL";
+				
 				String meorigen = resultSet.getString(4);
 				int codTDestino = resultSet.getInt(5);
+				String tipo_dest = (codTDestino==1)?"Banco":(codTDestino==2)?"Consorcio":(codTDestino==3)?"Cajero":"NULL";
+				
 				String medestino = resultSet.getString(6);
 				int codBanco = resultSet.getInt(7);
 				int meoffline = resultSet.getInt(8);
@@ -2510,12 +2517,12 @@ public class Database_lib {
 				
 				linea.add(String.valueOf(codMensaje));
 				linea.add((a)?"NULL":String.valueOf(meNumMensaje));//NULL?
-				linea.add((codTOrigen==0)?"NULL":String.valueOf(codTOrigen));
+				linea.add(tipo_orig);
 				linea.add(meorigen);
-				linea.add((codTDestino==0)?"NULL":String.valueOf(codTDestino));
+				linea.add(tipo_dest);
 				linea.add(medestino);
 				linea.add((codBanco==0)?"NULL":String.valueOf(codBanco));
-				linea.add(String.valueOf(meoffline));
+				linea.add((meoffline==0)?"OFFLINE":"ONLINE");
 				linea.add(mestringMensaje);
 				elementos.add(linea);
 			}

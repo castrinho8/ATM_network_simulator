@@ -147,12 +147,24 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
         try{
 	    	inicializa_visibilidades();
 	        String importe = this.ImporteText.getText();
+	        int importe_abono = 0;
 	        
 	        //Comprobamos si no se ha introducido el importe
 	        if(importe.equals("")){
-	        	throw new NumberFormatException();
+	        	throw new NumberFormatException("No ha introducido importe...");
 	        }
-	        int importe_abono = Integer.parseInt(importe);
+	        
+	        //Comprobamos si es correcto el importe introducido (si es un numero)
+	        try{
+	        	importe_abono = Integer.parseInt(importe);
+	        }catch(NumberFormatException nfe){
+        		throw new NumberFormatException("Importe incorrecto...");
+	        }
+	        
+	        //Comprobamos que el valor es positivo
+	        if(importe_abono<0)
+        		throw new NumberFormatException("El importe debe ser positivo...");
+	        
 	        this.EsperandoRespuestaLabel.setVisible(true);
 	        
 	        //Añadimos los componentes del envio
@@ -161,6 +173,7 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
 	        envia_consulta(this.envio);
 	        
         }catch(NumberFormatException nfe){
+        	this.ErrorLabel.setText(nfe.getMessage());
             this.ErrorLabel.setVisible(true);
             return;
         }

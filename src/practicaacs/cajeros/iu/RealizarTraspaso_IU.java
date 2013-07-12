@@ -186,6 +186,10 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
         		throw new NumberFormatException("Importe incorrecto...");
 	        }
 	        
+	        //Comprobamos que el valor es positivo
+	        if(importe_traspaso<0)
+        		throw new NumberFormatException("El importe debe ser positivo...");
+	        
 	        //Comprobamos si es correcta la cuenta introducida
 	        try{
 	            if(cdestino.length()!=1)

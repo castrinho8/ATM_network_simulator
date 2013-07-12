@@ -241,16 +241,20 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void consultar_saldo(SolSaldo recibido){
 			
+		String id_banco = recibido.getIdBancoFromTarjeta();
+
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
+		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLSALDO,0,codonline);
 
 		RespSaldo respuesta = null;
 		
+		System.out.println("ONLINE:"+codonline+"-"+cod_resp+"-"+"TIPO:"+obtiene_tipo_envio(recibido,codonline,cod_resp));
+
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.
@@ -277,11 +281,13 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void consultar_movimientos(SolMovimientos recibido){
 
+		String id_banco = recibido.getIdBancoFromTarjeta();
+
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
+		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLMOVIMIENTOS,0,codonline);
 		
@@ -330,11 +336,13 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void realizar_reintegro(SolReintegro recibido){
 		
+		String id_banco = recibido.getIdBancoFromTarjeta();
+
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
+		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLREINTEGRO,recibido.getImporte(),codonline);
 
@@ -376,11 +384,13 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void realizar_abono(SolAbono recibido){
 		
+		String id_banco = recibido.getIdBancoFromTarjeta();
+
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
+		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLABONO,recibido.getImporte(),codonline);
 		
@@ -421,11 +431,13 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void realizar_traspaso(SolTraspaso recibido){
 		
+		String id_banco = recibido.getIdBancoFromTarjeta();
+
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
 		int nmsg = 0;
-		boolean codonline = Database_lib.getInstance().consultar_protocolo(destino);
+		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),CodigosMensajes.SOLTRASPASO,recibido.getImporte(),codonline);
 			
