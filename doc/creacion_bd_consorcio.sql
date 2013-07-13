@@ -80,7 +80,7 @@ CREATE TABLE Banco(
 -- codTMovimiento El tipo de movimiento
 -- mofecha La fecha en la que se realiza el movimiento
 -- moimporte Importe del movimiento
--- mooffline Booleano que indica si es offline (FALSE=OFFLINE, TRUE=ONLINE)
+-- moonline Booleano que indica si es online (FALSE=OFFLINE, TRUE=ONLINE)
 -- codBanco El codigo que identifica al banco en el que se realiza el movimiento
 CREATE TABLE Movimiento(
 	codMovimiento INTEGER NOT NULL AUTO_INCREMENT,
@@ -90,7 +90,7 @@ CREATE TABLE Movimiento(
 	codTMovimiento INTEGER DEFAULT 99,
 	mofecha DATE,
 	moimporte INTEGER NOT NULL DEFAULT 0,
-	mooffline BOOLEAN NOT NULL DEFAULT 0,
+	moonline BOOLEAN NOT NULL DEFAULT 0,
 	codBanco INTEGER NOT NULL,
 	CONSTRAINT mo_codCuentaOrig_fk FOREIGN KEY (codCuentaOrig,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
 	CONSTRAINT mo_codCuentaDest_fk FOREIGN KEY (codCuentaDest,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
@@ -119,7 +119,7 @@ CREATE TABLE TipoOrigDest(
 -- codTDestino El tipo del destino del mensaje(CAJERO,BANCO,CONSORCIO)
 -- medestino El destino del mensaje
 -- codBanco El codigo del banco correspondiente al mensaje
--- meoffline Booleano que indica si es offline o no (FALSE=OFFLINE, TRUE=ONLINE)
+-- meonline Booleano que indica si es online o no (FALSE=OFFLINE, TRUE=ONLINE)
 -- mestringMensaje El mensaje en formato toString
 CREATE TABLE Mensaje(
 	codMensaje INTEGER NOT NULL AUTO_INCREMENT,
@@ -129,7 +129,7 @@ CREATE TABLE Mensaje(
 	codTDestino INTEGER,
 	medestino VARCHAR(30) NOT NULL,
 	codBanco INTEGER,
-	meoffline BOOLEAN NOT NULL DEFAULT 0,
+	meonline BOOLEAN NOT NULL DEFAULT 0,
 	mestringMensaje VARCHAR(500) NOT NULL,
 
 	CONSTRAINT me_codTOrigen_fk FOREIGN KEY (codTOrigen) REFERENCES TipoOrigDest(codTOrigDest) ON DELETE SET NULL,
@@ -209,7 +209,7 @@ INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
 VALUES (3,'Cajero');
 
 
-INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor42',1,80,'127.0.0.1',3);
+INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor42',2,80,'127.0.0.1',3);
 
 INSERT INTO Tarjeta VALUES ('pastor42 01',0);
 

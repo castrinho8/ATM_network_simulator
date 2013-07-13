@@ -787,16 +787,16 @@ public class Database_lib {
 		String fecha = sdf.format(time.getTime());
 		
 		System.out.println("INSERT INTO Movimiento" +
-				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
+				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,moonline,codBanco)" +
 				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + fecha + "," +
-				importe + "," + ((codonline)? 0:1) + "," + id_banco_bd + ")");
+				importe + "," + (codonline) + "," + id_banco_bd + ")");
 
 		//Inserta el movimiento en la BD
 		try {
 			this.statement.executeUpdate("INSERT INTO Movimiento" +
-				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,mooffline,codBanco)" +
+				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,moonline,codBanco)" +
 				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + ", STR_TO_DATE('" + fecha + "','%d/%m/%Y')," +
-				importe + "," + ((codonline)? 0:1) + "," + id_banco_bd + ")");
+				importe + "," + (codonline) + "," + id_banco_bd + ")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -2118,7 +2118,7 @@ public class Database_lib {
 			//Obtenemos todos los mensajes OFFLINE
 			resultSet = this.statement.executeQuery("SELECT mestringMensaje" +
 					" FROM Mensaje " +
-					" WHERE codBanco = " + id_banco_bd + " AND meoffline=0 AND codTDestino=1");
+					" WHERE codBanco = " + id_banco_bd + " AND meonline=0 AND codTDestino=1");
 			
 			//Parseamos los mensajes
 			while(resultSet.next()){
@@ -2127,7 +2127,7 @@ public class Database_lib {
 			}
 			
 			//Ponemos OFFLINE a false para todos los mensajes del id_banco
-			this.statement.executeUpdate("UPDATE Mensaje SET meoffline =1 WHERE codBanco = " + id_banco_bd);
+			this.statement.executeUpdate("UPDATE Mensaje SET meonline =1 WHERE codBanco = " + id_banco_bd);
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2231,7 +2231,7 @@ public class Database_lib {
 	public void almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
 
 		int num_mensaje = -1;
-		boolean offline = true;
+		boolean online = false;
 		String id_banco = null;
 		int id_banco_bd = -1;
 	
@@ -2247,7 +2247,7 @@ public class Database_lib {
 		//Si el mensaje es de datos obtenemos el numero de mensaje y si es offline
 		if(message.es_datos()){
 			num_mensaje = ((MensajeDatos) message).getNmsg();
-			offline = !((MensajeDatos) message).getCodonline();
+			online = ((MensajeDatos) message).getCodonline();
 		}
 
 		//Si hay banco, obtiene el identificar del banco en la BD
@@ -2260,8 +2260,8 @@ public class Database_lib {
 		}
 		
 		try {
-			String q = "INSERT INTO Mensaje(codBanco,meNumMensaje,meoffline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
-					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((offline)? 1:0) + "," + torigen.getNum() +
+			String q = "INSERT INTO Mensaje(codBanco,meNumMensaje,meonline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
+					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + (online) + "," + torigen.getNum() +
 					",'" + origen + "'," + tdestino.getNum() + ",'" + destino + "','" + message.toString() +"')";
 			
 			this.statement.executeUpdate(q);
@@ -2449,7 +2449,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT m.codMovimiento,m.codTarjeta,m.codCuentaOrig,m.codCuentaDest,t.tmnombre,m.mofecha,m.moimporte,m.mooffline,m.codBanco" +
+			resultSet = this.statement.executeQuery("SELECT m.codMovimiento,m.codTarjeta,m.codCuentaOrig,m.codCuentaDest,t.tmnombre,m.mofecha,m.moimporte,m.moonline,m.codBanco" +
 					" FROM Movimiento m JOIN TipoMovimiento t ON m.codTMovimiento=t.codTMovimiento ORDER BY m.codMovimiento");
 
 			while(resultSet.next()){
@@ -2464,7 +2464,7 @@ public class Database_lib {
 				String codTMovimiento = resultSet.getString(5);
 				Date mofecha = new java.util.Date(resultSet.getDate(6).getTime());
 				int moimporte = resultSet.getInt(7);
-				int mooffline = resultSet.getInt(8);
+				int moonline = resultSet.getInt(8);
 				int codBanco = resultSet.getInt(9);
 				
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -2476,7 +2476,7 @@ public class Database_lib {
 				linea.add((codTMovimiento==null)?"NULL":codTMovimiento);
 				linea.add((mofecha==null)?"NULL":sdf.format(mofecha));
 				linea.add(String.valueOf(moimporte));
-				linea.add((mooffline==0)?"OFFLINE":"ONLINE");
+				linea.add((moonline==0)?"OFFLINE":"ONLINE");
 				linea.add(String.valueOf(codBanco));
 				elementos.add(linea);
 			}
@@ -2493,7 +2493,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codMensaje,meNumMensaje,codTOrigen,meorigen,codTDestino,medestino,codBanco,meoffline,mestringMensaje " +
+			resultSet = this.statement.executeQuery("SELECT codMensaje,meNumMensaje,codTOrigen,meorigen,codTDestino,medestino,codBanco,meonline,mestringMensaje " +
 					"FROM Mensaje ORDER BY codMensaje");
 
 			while(resultSet.next()){
@@ -2512,7 +2512,7 @@ public class Database_lib {
 				
 				String medestino = resultSet.getString(6);
 				int codBanco = resultSet.getInt(7);
-				int meoffline = resultSet.getInt(8);
+				int meonline = resultSet.getInt(8);
 				String mestringMensaje = resultSet.getString(9);
 				
 				linea.add(String.valueOf(codMensaje));
@@ -2522,7 +2522,7 @@ public class Database_lib {
 				linea.add(tipo_dest);
 				linea.add(medestino);
 				linea.add((codBanco==0)?"NULL":String.valueOf(codBanco));
-				linea.add((meoffline==0)?"OFFLINE":"ONLINE");
+				linea.add((meonline==0)?"OFFLINE":"ONLINE");
 				linea.add(mestringMensaje);
 				elementos.add(linea);
 			}
