@@ -37,13 +37,13 @@ public class ServidorConsorcio_Cajeros extends Thread{
 			 System.exit(-1);
 		 }
 		//Establece un timeout
-		try {
+		/*try {
 			socketServidor.setSoTimeout(100000);
 		} catch (SocketException e) {
 			 System.out.println("Error estableciendo el timeout");
 			 e.printStackTrace();
 			 System.exit(-1);
-		}
+		}*/
 	}
 	
 	public int getPuerto() {

@@ -565,7 +565,8 @@ public class Database_lib {
 		
 		//Insertamos en la tabla MOVIMIENTO
 		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,CodigosMovimiento.TRANSEMITIDO,importe,codonline,id_banco);
-
+		this.insertar_movimiento(tarjeta,cuenta_origen,cuenta_destino,CodigosMovimiento.TRANSRECIB,importe,codonline,id_banco);
+		
 		//Recalculamos el saldo actual de las CUENTAS
 		this.recalcular_saldoActual(cuenta_origen,tarjeta, importe,'-');
 		this.recalcular_saldoActual(cuenta_destino,tarjeta, importe,'+');
@@ -1748,7 +1749,6 @@ public class Database_lib {
 	public void anhadir_ultimo_envio(Mensaje message,String codCajero,String ip_cajero, int puerto_cajero,int canal){
 
 		String id_banco = message.getDestino();
-		
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
@@ -1859,7 +1859,7 @@ public class Database_lib {
 	private int insertar_ultimo_envio(Mensaje mensaje,String codCajero,String ip_cajero, int puerto_cajero){
 		
 		String tarjeta = null;
-		int cuenta = 0;
+		int cuenta = -1;
 		int num_mensaje = 0;
 		String id_banco = mensaje.getDestino();
 		
@@ -1893,8 +1893,8 @@ public class Database_lib {
 		try {
 			this.statement.executeUpdate("INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero,uepuerto,ueip," +
 					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
-					" VALUES (" + num_mensaje + "," + ((codCajero==null)?"NULL":"'"+codCajero+"'") + "," + puerto_cajero + ",'" + ip_cajero + 
-					"'," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + cuenta + ",'" + mensaje.toString() +"')");
+					" VALUES (" + num_mensaje + "," + ((codCajero==null)?"NULL":"'"+codCajero+"'") + "," + ((puerto_cajero==0)?"NULL":puerto_cajero) + ",'" + ((ip_cajero==null)?"NULL":ip_cajero) + 
+					"'," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + ((cuenta<0)?"NULL":cuenta) + ",'" + mensaje.toString() +"')");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2127,7 +2127,7 @@ public class Database_lib {
 			}
 			
 			//Ponemos OFFLINE a false para todos los mensajes del id_banco
-			this.statement.executeUpdate("UPDATE Mensaje SET meonline =1 WHERE codBanco = " + id_banco_bd);
+			this.statement.executeUpdate("UPDATE Mensaje SET meonline = 1 WHERE codBanco = " + id_banco_bd + " AND meonline=0");
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2231,10 +2231,11 @@ public class Database_lib {
 	public void almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
 
 		int num_mensaje = -1;
-		boolean online = false;
 		String id_banco = null;
 		int id_banco_bd = -1;
-	
+		boolean online = true;
+		boolean es_mensaje_datos = message.es_datos();
+		
 		//Añade el id_banco, origen, destino o se obtiene de la tarjeta
 		if(torigen.equals(TipoOrigDest.BANCO))
 			id_banco = origen;
@@ -2245,11 +2246,11 @@ public class Database_lib {
 		}
 		
 		//Si el mensaje es de datos obtenemos el numero de mensaje y si es offline
-		if(message.es_datos()){
+		if(es_mensaje_datos){
 			num_mensaje = ((MensajeDatos) message).getNmsg();
 			online = ((MensajeDatos) message).getCodonline();
 		}
-
+			
 		//Si hay banco, obtiene el identificar del banco en la BD
 		if(id_banco!=null){
 			try {
@@ -2261,7 +2262,7 @@ public class Database_lib {
 		
 		try {
 			String q = "INSERT INTO Mensaje(codBanco,meNumMensaje,meonline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
-					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + (online) + "," + torigen.getNum() +
+					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((es_mensaje_datos)?online:"NULL") + "," + torigen.getNum() +
 					",'" + origen + "'," + tdestino.getNum() + ",'" + destino + "','" + message.toString() +"')";
 			
 			this.statement.executeUpdate(q);
@@ -2499,7 +2500,8 @@ public class Database_lib {
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
 				boolean a = false;
-					
+				boolean b = false;
+				
 				int codMensaje = resultSet.getInt(1);
 				a = resultSet.getString(2)==null;
 				int meNumMensaje = resultSet.getInt(2);
@@ -2512,6 +2514,7 @@ public class Database_lib {
 				
 				String medestino = resultSet.getString(6);
 				int codBanco = resultSet.getInt(7);
+				b = resultSet.getString(8)==null;
 				int meonline = resultSet.getInt(8);
 				String mestringMensaje = resultSet.getString(9);
 				
@@ -2522,7 +2525,7 @@ public class Database_lib {
 				linea.add(tipo_dest);
 				linea.add(medestino);
 				linea.add((codBanco==0)?"NULL":String.valueOf(codBanco));
-				linea.add((meonline==0)?"OFFLINE":"ONLINE");
+				linea.add((b)?"NULL":(meonline==0)?"OFFLINE":"ONLINE");
 				linea.add(mestringMensaje);
 				elementos.add(linea);
 			}

@@ -185,11 +185,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Como solo envia mensajes de control
 		int canal = 0;
+		String ip_cajero = null;
+		int puerto_cajero = 0;
 		
-		String ip_string = ip.getAddress().toString();
-
     	//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,"NO CAJERO",ip_string,puerto,canal);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,"NO CAJERO",ip_cajero,puerto_cajero,canal);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());

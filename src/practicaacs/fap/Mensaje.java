@@ -85,7 +85,9 @@ public abstract class Mensaje implements java.io.Serializable {
 				(tipoMensaje == CodigosMensajes.RESSALDO) ||				
 				(tipoMensaje == CodigosMensajes.SOLSALDO) ||				
 				(tipoMensaje == CodigosMensajes.RESREINTEGRO) ||
-				(tipoMensaje == CodigosMensajes.SOLREINTEGRO)
+				(tipoMensaje == CodigosMensajes.SOLREINTEGRO) ||
+				(tipoMensaje == CodigosMensajes.RESTRASPASO) ||
+				(tipoMensaje == CodigosMensajes.SOLTRASPASO)
 				);
 	}
 	
@@ -93,7 +95,8 @@ public abstract class Mensaje implements java.io.Serializable {
 		return ((tipoMensaje == CodigosMensajes.SOLSALDO) ||
 				(tipoMensaje == CodigosMensajes.SOLMOVIMIENTOS) ||
 				(tipoMensaje == CodigosMensajes.SOLABONO) ||
-				(tipoMensaje == CodigosMensajes.SOLREINTEGRO)
+				(tipoMensaje == CodigosMensajes.SOLREINTEGRO)||
+				(tipoMensaje == CodigosMensajes.SOLTRASPASO)
 				);
 	}
 	

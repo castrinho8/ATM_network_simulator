@@ -129,7 +129,7 @@ CREATE TABLE Mensaje(
 	codTDestino INTEGER,
 	medestino VARCHAR(30) NOT NULL,
 	codBanco INTEGER,
-	meonline BOOLEAN NOT NULL DEFAULT 0,
+	meonline BOOLEAN DEFAULT NULL,
 	mestringMensaje VARCHAR(500) NOT NULL,
 
 	CONSTRAINT me_codTOrigen_fk FOREIGN KEY (codTOrigen) REFERENCES TipoOrigDest(codTOrigDest) ON DELETE SET NULL,
