@@ -206,7 +206,7 @@ public class Database_lib {
 	 * @param tarjeta La tarjeta a comprobar
 	 * @return True si existe y False en caso contrario
 	 */
-	private boolean existeTarjeta(String tarjeta){
+	public boolean existeTarjeta(String tarjeta){
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codTarjeta FROM Tarjeta WHERE codTarjeta ='" + tarjeta + "'");
@@ -227,7 +227,7 @@ public class Database_lib {
 	 * @param cuenta La cuenta a comprobar
 	 * @return True si existe y False en caso contrario
 	 */
-	private boolean existeCuenta(String tarjeta, int cuenta){
+	public boolean existeCuenta(String tarjeta, int cuenta){
 		ResultSet resultSet;
 		try {
 			resultSet = this.statement.executeQuery("SELECT codCuenta FROM Cuenta " +
@@ -240,6 +240,40 @@ public class Database_lib {
 			System.exit(-1);
 		}
 		return false;
+	}
+	
+	public int getNumCuentas(String tarjeta){
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT count(codCuenta) FROM Cuenta " +
+					"WHERE codTarjeta='"+tarjeta+"'");
+
+			if(resultSet.next())
+				return resultSet.getInt(1);
+				
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		return 0;
+	}
+	
+	public void insertarTarjeta(String tarjeta){
+		try {
+			this.statement.executeUpdate("INSERT INTO Tarjeta(codTarjeta) VALUES ('" + tarjeta + "')");
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	public void insertarCuenta(String tarjeta, int cuenta){
+		try {
+			this.statement.executeUpdate("INSERT INTO Cuenta(codTarjeta,codCuenta) VALUES ('" + tarjeta + "'," + cuenta + ")");
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
 	}
 	
 	

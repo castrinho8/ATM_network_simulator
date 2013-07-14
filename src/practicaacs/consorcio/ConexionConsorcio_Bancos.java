@@ -399,14 +399,14 @@ public class ConexionConsorcio_Bancos extends Thread {
 	    	System.out.println("APERTURA: Sesion con el banco: '"+ id_banco +"' comenzada a las " + time.getTime());
 	
 	    	//Añadimos al hashmap de Sesiones abiertas
-	    	Sesion ses = new Sesion(id_banco,this.servidor,recibido.getNcanales());
+	    	Sesion ses = new Sesion(id_banco,this.servidor,recibido.getNcanales()+1);
 	    	this.servidor.insertaSesion(ses);
 	    	
 	    	int port = recibido.getPuerto();
 	    	String ip = recibido.getIp();
 	    	
 			//Guardamos la sesion en la BD
-			Database_lib.getInstance().abrir_sesion(id_banco,ip,port,recibido.getNcanales());
+			Database_lib.getInstance().abrir_sesion(id_banco,ip,port,recibido.getNcanales()+1);
 
 			//Envia la respuesta
 			this.sendToBanco(new RespAperturaSesion(origen,destino,cod_resp,cod_error),ip_banco,puerto_banco);
