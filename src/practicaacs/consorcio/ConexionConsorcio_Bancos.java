@@ -55,14 +55,20 @@ public class ConexionConsorcio_Bancos extends Thread {
 	//ENVIO
 	private MensajeDatos envio;
 	private String id_cajero;
-	private InetAddress ip_cajero;
-	private int puerto_cajero;
 	
 	
 	/*---------------------------------------------
 	  --------------- CONSTRUCTORES ---------------
 	  ---------------------------------------------*/
 
+	/**
+	 * Constructor CONEXION BANCO/CONSORCIO
+	 * @param tipo
+	 * @param paquete
+	 * @param cons
+	 * @param s
+	 * @param socket
+	 */
 	public ConexionConsorcio_Bancos(TipoAccion tipo, DatagramPacket paquete,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
 		this.consorcio = cons;
@@ -73,7 +79,18 @@ public class ConexionConsorcio_Bancos extends Thread {
 		this.output_socket =  socket;
 	}
 
-	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,String caj,InetAddress ip_caj, int puerto_caj, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
+	/**
+	 * Constructor SEND TO BANCO
+	 * @param tipo
+	 * @param env
+	 * @param caj
+	 * @param ip_caj
+	 * @param puerto_caj
+	 * @param cons
+	 * @param s
+	 * @param socket
+	 */
+	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,String caj, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
 		this.consorcio = cons;
 		this.servidor = s;
@@ -81,11 +98,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 		this.tipo_accion = tipo;
 		this.envio = env;
 		this.id_cajero = caj;
-		this.ip_cajero = ip_caj;
-		this.puerto_cajero = puerto_caj;
 		this.output_socket =  socket;
 	}
 	
+	/**
+	 * Constructor SOLICITAR/FIN RECUPERACION
+	 * @param tipo
+	 * @param id_b
+	 * @param cons
+	 * @param s
+	 * @param socket
+	 */
 	public ConexionConsorcio_Bancos(TipoAccion tipo,String id_b,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
 		this.consorcio = cons;
@@ -162,7 +185,7 @@ public class ConexionConsorcio_Bancos extends Thread {
     	String id_banco = respuesta.getOrigen();
     	
     	//Cambiar origen y destino
-		String destino = Database_lib.getInstance().getIdCajero(respuesta.getOrigen(),respuesta.getNumcanal());//Id_cajero
+		String destino = Database_lib.getInstance().getNombreCajero(respuesta.getOrigen(),respuesta.getNumcanal());//Id_cajero
 		String origen = this.consorcio.getId_consorcio(); //Id_consorcio
 		respuesta.setDestino(destino);
 		respuesta.setOrigen(origen);
@@ -171,6 +194,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 		InetAddress ip_dest = Database_lib.getInstance().getIpEnvio(id_banco,respuesta.getNumcanal());
 		int puerto_dest = Database_lib.getInstance().getPortEnvio(id_banco,respuesta.getNumcanal());
 
+		System.out.println("IP DEST:"+ip_dest+"PUERTO DEST"+puerto_dest);
+		
 		//Delegar en el ServidorCajeros para el reenvio y el almacenamiento del envio
 		this.consorcio.getCajeros_server().sendToCajero(respuesta,ip_dest,puerto_dest);
 	}
@@ -185,11 +210,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Como solo envia mensajes de control
 		int canal = 0;
-		String ip_cajero = null;
-		int puerto_cajero = 0;
 		
     	//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,"NO CAJERO",ip_cajero,puerto_cajero,canal);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,"NO CAJERO",canal);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -243,7 +266,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			envio.setNmsg(n_mensaje);
 			
 			//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-			Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,this.ip_cajero.toString(),this.puerto_cajero,canal);
+			Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,canal);
 	
 			//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 			Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -682,7 +705,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		int canal = recibido.getNumcanal();
 		CodigosMensajes tipo_mensaje = recibido.getTipoMensaje();
 		
-		//En caso de que fose todo correctamente
+		//En caso de que fuese todo correctamente
 		if(recibido.getCod_resp().equals(CodigosRespuesta.CONSACEPTADA)){
 
 			//Comprueba que el orden es correcto y marca el envio anterior en ese canal como contestado.

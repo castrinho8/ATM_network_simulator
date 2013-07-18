@@ -295,6 +295,9 @@ public class Database_lib {
 	public CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino,
 			CodigosMensajes tipo, int importe, boolean codonline){
 		
+		if(codonline)
+			return CodigosRespuesta.CONSACEPTADA;
+
 		if (!this.existeTarjeta(tarjeta))
 			return CodigosRespuesta.TARJETANVALIDA;
 		
@@ -840,8 +843,34 @@ public class Database_lib {
 	
 	
 	/*---------------------------------------------------
+	 --------------------- CAJEROS ----------------------
+	 ----------------------------------------------------*/
+	
+	
+	private int getIdCajeroBD(String id_cajero) throws ConsorcioBDException{
+		
+		//Comprueba si existe, si existe devuelve el codigo de la BD que lo identifica
+		ResultSet resultSet;
+		try {
+			resultSet = this.statement.executeQuery("SELECT codCajero FROM Cajero WHERE cajNombre ='" + id_cajero + "'");
+		
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		System.out.println("CAJERO:"+id_cajero+"-");
+		throw new ConsorcioBDException("No existe en la BD el cajero con el que se trata de realizar la operacion.");
+	}
+	
+	
+
+	/*---------------------------------------------------
 	 ----------------- SESIONES/BANCOS -------------------
 	 ----------------------------------------------------*/
+	
 	
 	/**
 	 * Método que abre una sesion con el banco indicado.
@@ -1776,11 +1805,9 @@ public class Database_lib {
 	 * Cambia el ultimo envio del canal indicado, por el pasado por parametro.
 	 * Si el canal esta ocupado no se inserta como ultimo envio.
 	 * @param message El mensaje a añadir.
-	 * @param ip La ip de la que proviene el envio (Cajero)
-	 * @param port El puerto del que proviene el envio (Cajero)
 	 * @param canal El canal correspondiente.
 	 */
-	public void anhadir_ultimo_envio(Mensaje message,String codCajero,String ip_cajero, int puerto_cajero,int canal){
+	public void anhadir_ultimo_envio(Mensaje message,String codCajero,int canal){
 
 		String id_banco = message.getDestino();
 		//Obtiene el id real que identifica al banco en la BD.
@@ -1820,7 +1847,7 @@ public class Database_lib {
 		}
 		
 		//Inserta el nuevo envio para el banco y canal indicado
-		int nuevo_ultimo_envio = this.insertar_ultimo_envio(message,codCajero, ip_cajero, puerto_cajero);
+		int nuevo_ultimo_envio = this.insertar_ultimo_envio(message,codCajero);
 		
 		//Setea el codigo del nuevo envio en la tabla de Canales para el canal concreto
 		this.settearCodigoUltimoEnvioEnCanal(id_banco_bd, canal, nuevo_ultimo_envio);
@@ -1890,7 +1917,7 @@ public class Database_lib {
 	 * @param puerto_cajero El puerto del cajero del que proviene
 	 * @return El codigo de ultimo envio
 	 */
-	private int insertar_ultimo_envio(Mensaje mensaje,String codCajero,String ip_cajero, int puerto_cajero){
+	private int insertar_ultimo_envio(Mensaje mensaje,String id_cajero){
 		
 		String tarjeta = null;
 		int cuenta = -1;
@@ -1919,16 +1946,23 @@ public class Database_lib {
 			c.printStackTrace();
 			System.exit(-1);
 		}
+
+		//Obtiene el id real que identifica al cajero en la BD
+		int id_cajero_bd = 0;
+		try{
+			id_cajero_bd = this.getIdCajeroBD(id_cajero);
+		}catch(ConsorcioBDException c){
+			id_cajero_bd = 0;
+		}
 		
-		System.out.println("ULTIMO ENVIO:"+num_mensaje+"-CAJERO:"+codCajero+"-PUERTO:"+puerto_cajero+"-IP:"+ip_cajero+"-BANCO:"
+		System.out.println("ULTIMO ENVIO:"+num_mensaje+"-CAJERO:"+id_cajero_bd+"-BANCO:"
 		+id_banco_bd+"-TARJETA:"+tarjeta+"-CUENTA:"+cuenta);
 		
 		//Ejecuta la insercion en la BD
 		try {
-			this.statement.executeUpdate("INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero,uepuerto,ueip," +
+			this.statement.executeUpdate("INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero," +
 					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
-					" VALUES (" + num_mensaje + "," + ((codCajero==null)?"NULL":"'"+codCajero+"'") + "," + ((puerto_cajero==0)?"NULL":puerto_cajero) + ",'" + ((ip_cajero==null)?"NULL":ip_cajero) + 
-					"'," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + ((cuenta<0)?"NULL":cuenta) + ",'" + mensaje.toString() +"')");
+					" VALUES (" + num_mensaje + "," + ((id_cajero_bd==0)?"NULL":id_cajero_bd) + "," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + ((cuenta<0)?"NULL":cuenta) + ",'" + mensaje.toString() +"')");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1970,14 +2004,8 @@ public class Database_lib {
 	//---GETTERS ULTIMO ENVIO------
 	
 	
-	/**
-	 * Getter de la IP del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
-	 * @param id_banco El banco correspondiente.
-	 * @param num_canal El canal del que obtener.
-	 * @return La ip correspondiente.
-	 */
-	public InetAddress getIpEnvio(String id_banco, int canal){
-	
+	private int getCodCajeroBD(String id_banco, int canal){
+		
 		//Obtiene el id real que identifica al banco en la BD.
 		int id_banco_bd = 0;
 		try{
@@ -1987,22 +2015,65 @@ public class Database_lib {
 			System.exit(-1);
 		}
 		
+		//Obtenemos el codigo del cajero para el id_banco/canal indicados
 		ResultSet resultSet;
-		String temp = "";
+		int cod_cajero = 0;
 		try {
-			resultSet = this.statement.executeQuery("SELECT ue.ueip FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.ueNumUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal );
+			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.codigoue = c.codUltimoEnvio " +
+					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 			
 			if(resultSet.next())
-				temp = resultSet.getString(1);
-				
-			return InetAddress.getByName(temp);
+				cod_cajero = resultSet.getInt(1);
+			else
+				throw new ConsorcioBDException("No existe el banco: " + id_banco_bd + " o el canal: " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
+		}
+		return cod_cajero;
+	}
+	
+	/**
+	 * Getter de la IP del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
+	 * @param id_banco El banco correspondiente.
+	 * @param num_canal El canal del que obtener.
+	 * @return La ip correspondiente.
+	 */
+	public InetAddress getIpEnvio(String id_banco, int canal){
+	
+		//Obtenemos el codigo que identifica al cajero en la BD
+		int cod_cajero = this.getCodCajeroBD(id_banco, canal);
+		
+		//Obtenemos la ip para el codigo indicado
+		ResultSet resultSet = null;
+		String ip_cajero = null;
+		try {
+			resultSet = this.statement.executeQuery("SELECT cajIp FROM Cajero " +
+					"WHERE codCajero="+cod_cajero);
+			
+			if(resultSet.next())
+				ip_cajero = resultSet.getString(1);
+			else
+				throw new ConsorcioBDException("No existe el cajero: " +cod_cajero);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("STRING:"+ip_cajero);
+
+		//Devolvemos el string convertido a InetAddress
+		try {
+			System.out.println("IP:"+InetAddress.getByName(ip_cajero));
+			return InetAddress.getByName(ip_cajero);
 		} catch (UnknownHostException e) {
-			return null;
+			e.printStackTrace();
+			System.exit(-1);
 		}
 		return null;
 	}
@@ -2017,30 +2088,27 @@ public class Database_lib {
 	 */
 	public int getPortEnvio(String id_banco, int canal){
 		
-		//Obtiene el id real que identifica al banco en la BD.
-		int id_banco_bd = 0;
-		try{
-			id_banco_bd = this.getIdBancoBD(id_banco);
-		}catch(ConsorcioBDException c){
-			c.printStackTrace();
-			System.exit(-1);
-		}
+		//Obtenemos el codigo que identifica al cajero en la BD
+		int cod_cajero = this.getCodCajeroBD(id_banco, canal);
 		
-		ResultSet resultSet;
-		int res = 0;
+		//Obtenemos el puerto para el codigo indicado
+		ResultSet resultSet = null;
+		int puerto_cajero = 0;
 		try {
-			resultSet = this.statement.executeQuery("SELECT ue.uepuerto FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.ueNumUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
+			resultSet = this.statement.executeQuery("SELECT cajPuerto FROM Cajero " +
+					"WHERE codCajero="+cod_cajero);
 			
 			if(resultSet.next())
-				res = resultSet.getInt(1);
-				
+				puerto_cajero = resultSet.getInt(1);
+			else
+				throw new ConsorcioBDException("No existe el cajero: " +cod_cajero);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
 		}
-		return res;
+		return puerto_cajero;
 	}
 	
 	
@@ -2051,33 +2119,30 @@ public class Database_lib {
 	 * @param num_canal El canal en el que se encuentra el Envio con la id del cajero que lo realizó.
 	 * @return Un string que identifica al cajero que realizó el envio.
 	 */
-	public String getIdCajero(String id_banco, int canal){
+	public String getNombreCajero(String id_banco, int canal){
 		
-		//Obtiene el id real que identifica al banco en la BD.
-		int id_banco_bd = 0;
-		try{
-			id_banco_bd = this.getIdBancoBD(id_banco);
-		}catch(ConsorcioBDException c){
-			c.printStackTrace();
-			System.exit(-1);
-		}
+		//Obtenemos el codigo que identifica al cajero en la BD
+		int cod_cajero = this.getCodCajeroBD(id_banco, canal);
 		
-		ResultSet resultSet;
-		int res = 0;
+		//Obtenemos el nombre para el codigo indicado
+		ResultSet resultSet = null;
+		String nombre_cajero = null;
 		try {
-			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
-					"ON ue.ueNumUltimoEnvio = c.codUltimoEnvio " +
-					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
+			resultSet = this.statement.executeQuery("SELECT cajNombre FROM Cajero " +
+					"WHERE codCajero="+cod_cajero);
 			
 			if(resultSet.next())
-				res = resultSet.getInt(1);
-				
-			return Integer.toString(res);
+				nombre_cajero = resultSet.getString(1);
+			else
+				throw new ConsorcioBDException("No existe el cajero: " +cod_cajero);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
+		} catch (ConsorcioBDException e) {
+			e.printStackTrace();
+			return null;
 		}
-		return null;
+		return nombre_cajero;
 	}
 	
 	
@@ -2441,7 +2506,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codigoue,ueNumUltimoEnvio,uecontestado,uecodCajero,uepuerto,ueip,codBanco,codTarjeta,codCuenta,uestringMensaje" +
+			resultSet = this.statement.executeQuery("SELECT codigoue,ueNumUltimoEnvio,uecontestado,uecodCajero,codBanco,codTarjeta,codCuenta,uestringMensaje" +
 					" FROM UltimoEnvio ORDER BY codigoue");
 
 			while(resultSet.next()){
@@ -2452,20 +2517,16 @@ public class Database_lib {
 				int ueNumUltimoEnvio = resultSet.getInt(2);
 				int uecontestado = resultSet.getInt(3);
 				String uecodCajero = resultSet.getString(4);
-				int uepuerto = resultSet.getInt(5);
-				String ueip = resultSet.getString(6);
-				int codBanco = resultSet.getInt(7);
-				String codTarjeta = resultSet.getString(8);
-				a = resultSet.getString(9)==null;
-				int codCuenta = resultSet.getInt(9);
-				String uestringMensaje = resultSet.getString(10);
+				int codBanco = resultSet.getInt(5);
+				String codTarjeta = resultSet.getString(6);
+				a = resultSet.getString(7)==null;
+				int codCuenta = resultSet.getInt(7);
+				String uestringMensaje = resultSet.getString(8);
 
 				linea.add(String.valueOf(codigoue));
 				linea.add(String.valueOf(ueNumUltimoEnvio));
 				linea.add((uecontestado==0)?"NO":"SI");
 				linea.add((uecodCajero==null)?"NULL":uecodCajero);
-				linea.add((uepuerto==0)?"NULL":String.valueOf(uepuerto));
-				linea.add((ueip==null)?"NULL":ueip);
 				linea.add(String.valueOf(codBanco));
 				linea.add((codTarjeta==null)?"NULL":codTarjeta);
 				linea.add((a)?"NULL":String.valueOf(codCuenta));//NULL?

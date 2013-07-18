@@ -70,6 +70,7 @@ public class ServidorConsorcio_Bancos extends Thread{
 	public void eliminarSesion(String id_banco){
 		this.sesiones.remove(id_banco);
 	}
+	
 	//-------END GETTERS & SETTERS-------
 	
 	@Override
@@ -188,8 +189,8 @@ public class ServidorConsorcio_Bancos extends Thread{
      * CAJERO->CONSORCIO->BANCOS
      * @param message El mensaje a enviar.
      */
-    public void sendToBanco(MensajeDatos message,String id_cajero,InetAddress ip_cajero, int puerto_cajero){
-    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,id_cajero,ip_cajero,puerto_cajero,consorcio,this,socketServidor);
+    public void sendToBanco(MensajeDatos message,String id_cajero){
+    	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,id_cajero,consorcio,this,socketServidor);
     	c.start();
     }
     

@@ -27,7 +27,7 @@ public class AppBanco {
 			new Banco(args[0]);
 		}else{
 			System.out.println("Cargando Banco por defecto...");
-			new Banco("Santander","ma.ch.te", "pa.ca.va", "127.000.000.001/1234", "jdbc:mysql://localhost/acs?user=acsuser&password=password", 1234,"localhost",2424);			
+			new Banco("Pastor","pastor42", "pa.ca.va", "127.000.000.001/1234", "jdbc:mysql://localhost/acs?user=acsuser&password=password", 1234,"localhost",2424);			
 		}
 	}
 

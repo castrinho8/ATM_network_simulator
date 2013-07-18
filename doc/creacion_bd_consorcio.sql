@@ -73,6 +73,16 @@ CREATE TABLE Banco(
 );
 
 
+
+CREATE TABLE Cajero(
+	codCajero INTEGER NOT NULL AUTO_INCREMENT,
+	cajNombre VARCHAR(20) NOT NULL UNIQUE,
+	cajIp VARCHAR(20) NOT NULL,
+	cajPuerto INTEGER NOT NULL,
+
+	CONSTRAINT caj_pk PRIMARY KEY (codCajero)
+);
+
 -- codMovimiento El codigo que identifica al movimiento
 -- codTarjeta La tarjeta que realiza el movimiento
 -- codCuentaOrig La cuenta origen del movimiento 
@@ -153,9 +163,7 @@ CREATE TABLE UltimoEnvio(
 	codigoue INTEGER NOT NULL AUTO_INCREMENT,
 	ueNumUltimoEnvio INTEGER NOT NULL DEFAULT 0,
 	uecontestado BOOLEAN NOT NULL DEFAULT 1,
-	uecodCajero VARCHAR(20),
-	uepuerto INTEGER,
-	ueip VARCHAR(20),
+	uecodCajero INTEGER,
 	codBanco INTEGER NOT NULL,
 	codTarjeta VARCHAR(11),
 	codCuenta INTEGER,
@@ -163,6 +171,7 @@ CREATE TABLE UltimoEnvio(
 
 	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
 	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
+	CONSTRAINT ue_codCajero_fk FOREIGN KEY (uecodCajero) REFERENCES Cajero(codCajero) ON DELETE CASCADE,
 
 	CONSTRAINT ue_pk PRIMARY KEY (codigoue)
 );
@@ -210,6 +219,8 @@ VALUES (3,'Cajero');
 
 
 INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor42',2,80,'127.0.0.1',3);
+
+INSERT INTO Cajero(cajNombre,cajIp,cajPuerto) VALUES ('       1','127.0.0.1',8928);
 
 INSERT INTO Tarjeta VALUES ('pastor42 01',0);
 

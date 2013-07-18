@@ -125,11 +125,12 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip_cajero,port_cajero);
 		
+		System.out.println(ip_cajero+":"+port_cajero);
 		try{
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);
 		}catch (IOException e) {
-			e.getStackTrace();
+			e.printStackTrace();
 			System.out.println("Error al enviar CONSORCIO->CAJERO (Mensaje de datos)");
 			System.exit (-1);
 		}
@@ -144,14 +145,14 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 */
 	public void sendToBanco(MensajeDatos message,String numTarjeta){
 		
-		String cajero = message.getOrigen();
+		String id_cajero = message.getOrigen();
 		String destino = null;
 		
 		//Cambiamos origen y destino
 		try{
 			destino = numTarjeta.substring(0,numTarjeta.length()-3); //Id_banco
 		}catch(IndexOutOfBoundsException e){
-			e.getStackTrace();
+			e.printStackTrace();
 			System.out.println("Error obteniendo el banco destino a partir del número de tarjeta.");
 			System.exit (-1);
 		}
@@ -161,7 +162,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		message.setOrigen(origen);
 
 		//Delegar en el ServidorBancos para el reenvio y el almacenamiento del envio
-		this.consorcio.getBancos_server().sendToBanco(message,cajero,this.input_packet.getAddress(),this.input_packet.getPort());
+		this.consorcio.getBancos_server().sendToBanco(message,id_cajero);
 	}
 	
 	
@@ -246,7 +247,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
-		int nmsg = 0;
+		int nmsg = recibido.getNmsg();
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLSALDO,0,codonline);
@@ -286,7 +287,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
-		int nmsg = 0;
+		int nmsg = recibido.getNmsg();
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLMOVIMIENTOS,0,codonline);
@@ -324,7 +325,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			}*/
 			case ENVIO_CORRECTO:{
 				//Reenviamos el mensaje al banco
-				//reenviar_mensaje(recibido,recibido.getNum_tarjeta());
+				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				break;
 			}
 		}
@@ -341,7 +342,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
-		int nmsg = 0;
+		int nmsg = recibido.getNmsg();
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLREINTEGRO,recibido.getImporte(),codonline);
@@ -371,7 +372,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			}
 			case ENVIO_CORRECTO:{
 				//Reenviamos el mensaje al banco
-				//reenviar_mensaje(recibido,recibido.getNum_tarjeta());
+				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				break;
 			}
 		}
@@ -389,7 +390,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
-		int nmsg = 0;
+		int nmsg = recibido.getNmsg();
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),-1,recibido.getNum_cuenta(),CodigosMensajes.SOLABONO,recibido.getImporte(),codonline);
@@ -419,7 +420,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			}
 			case ENVIO_CORRECTO:{
 				//Reenviamos el mensaje al banco
-				//reenviar_mensaje(recibido,recibido.getNum_tarjeta());
+				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				break;
 			}
 		}
@@ -436,7 +437,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		String origen = this.consorcio.getId_consorcio();
 		String destino = recibido.getOrigen();
 		int numcanal = 0;
-		int nmsg = 0;
+		int nmsg = recibido.getNmsg();
 		boolean codonline = Database_lib.getInstance().consultar_protocolo(id_banco);
 		CodigosRespuesta cod_resp = 
 				Database_lib.getInstance().comprobar_condiciones(recibido.getNum_tarjeta(),recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),CodigosMensajes.SOLTRASPASO,recibido.getImporte(),codonline);
@@ -474,7 +475,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 			}
 			case ENVIO_CORRECTO:{
 				//Reenviamos el mensaje al banco
-				//reenviar_mensaje(recibido,recibido.getNum_tarjeta());
+				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				break;
 			}
 		}
