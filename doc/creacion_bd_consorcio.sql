@@ -133,7 +133,7 @@ CREATE TABLE TipoOrigDest(
 -- mestringMensaje El mensaje en formato toString
 CREATE TABLE Mensaje(
 	codMensaje INTEGER NOT NULL AUTO_INCREMENT,
-	meNumMensaje INTEGER DEFAULT 0,
+	meNumMensaje INTEGER DEFAULT NULL,
 	codTOrigen INTEGER,
 	meorigen VARCHAR(30) NOT NULL,
 	codTDestino INTEGER,
@@ -161,7 +161,7 @@ CREATE TABLE Mensaje(
 --	uestringMensaje El mensaje en formato toString
 CREATE TABLE UltimoEnvio(
 	codigoue INTEGER NOT NULL AUTO_INCREMENT,
-	ueNumUltimoEnvio INTEGER NOT NULL DEFAULT 0,
+	ueNumUltimoEnvio INTEGER DEFAULT NULL,
 	uecontestado BOOLEAN NOT NULL DEFAULT 1,
 	uecodCajero INTEGER,
 	codBanco INTEGER NOT NULL,

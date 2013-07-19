@@ -436,7 +436,37 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 			//Enviamos los mensajes offline de este banco
 			for(Mensaje m : Database_lib.getInstance().getMensajesOffline(id_banco)){
-				this.sendToBanco(m,ip_banco,puerto_banco);
+				
+				//Casteamos el mensaje y guardamos el id_cajero
+				MensajeDatos message = (MensajeDatos)m;
+				this.id_cajero= message.getOrigen();
+				String numTarjeta = null;
+				
+				//Obtenemos el numero de tarjeta
+				try {
+					numTarjeta = message.getNum_tarjeta();
+				} catch (CodigoNoValidoException e1) {
+					e1.printStackTrace();
+					System.exit (-1);
+				}
+				
+				String dest = null;
+				
+				//Cambiamos origen y destino
+				try{
+					dest = numTarjeta.substring(0,numTarjeta.length()-3); //Id_banco
+				}catch(IndexOutOfBoundsException e){
+					e.printStackTrace();
+					System.out.println("Error obteniendo el banco destino a partir del número de tarjeta.");
+					System.exit (-1);
+				}
+				
+				String orig = this.consorcio.getId_consorcio(); //Id_consorcio
+				message.setDestino(dest);
+				message.setOrigen(orig);
+				
+				//Reenviamos el mensaje al banco
+				this.resendToBanco(message);
 			}
 		}
 		else{ //Si hay errores respondemos con el error correspondiente
@@ -720,8 +750,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 				Database_lib.getInstance().bloquearCanal(id_banco,canal);
 		}
 		
-		//Reenviar al Cajero
-		this.sendToCajero(recibido);
+		//Hay que comprobar si se reenvia al cajero o no
+		if(recibido.getCodonline())
+			this.sendToCajero(recibido);
 	}
 	
 	

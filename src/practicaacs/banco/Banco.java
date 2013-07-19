@@ -602,35 +602,35 @@ public class Banco implements AnalizadorMensajes{
 
 		
 		if(c.ocupado){
-			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
+			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
-			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
+			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.FUERASEC);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if(this.bd.getTarxeta(numtarx) == null){
-			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
+			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosRespuesta.TARJETANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if((conta = this.bd.getConta(numtarx, numConta)) == null){
-			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CUENTANVALIDA, false, 0);
+			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosRespuesta.CUENTANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Conta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		this.bd.facerReintegro(this.idSesion, conta.getNumero(), importe);
-		r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
+		r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").\n");
 		this.iu.actualizar();
 	}
@@ -654,42 +654,42 @@ public class Banco implements AnalizadorMensajes{
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 		
 		if(c.ocupado){
-			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
+			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
-			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
+			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.FUERASEC);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if(this.bd.getTarxeta(numtarx) == null){
-			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.TARJETANVALIDA, false, 0);
+			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.TARJETANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta " + numtarx + " Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if((conta = this.bd.getConta(numtarx, numConta)) == null){
-			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0);
+			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CUENTANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Conta " + numConta + " Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if(conta.getSaldo() < importe && online){
-			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0);
+			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Saldo insuficiente).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		this.bd.facerAbono(this.idSesion, conta.getNumero(), importe);
-		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()-importe);
+		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()-importe);
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + (conta.getSaldo() - importe) + ").\n");
 		this.iu.actualizar();
 	}
@@ -714,48 +714,48 @@ public class Banco implements AnalizadorMensajes{
 
 		
 		if(c.ocupado){
-			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,true, CodigosError.CANALOCUP);
+			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,online, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2,"Mensaxe enviada: Error (Canal Opupado).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
-			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosError.FUERASEC);
+			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosError.FUERASEC);
 			this.enviarMensaje(r2,"Mensaxe enviada: Error (Canal Opupado).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if(this.bd.getTarxeta(numtarx) == null){
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.TARJETANVALIDA, false, 0, false, 0);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, online, CodigosRespuesta.TARJETANVALIDA, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Tarxeta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if((contaori = this.bd.getConta(numtarx, numContaOrigen)) == null){
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, false, 0);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal,nmsg, online, CodigosRespuesta.CUENTANVALIDA, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Conta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		if(contaori.getSaldo() < importe && online){
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0, false, 0);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Saldo insuficiente).\n");
 			this.iu.actualizar();
 			return;}
 		
 		if((contades = this.bd.getConta(numtarx, numContaDestino)) == null){
-			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CUENTANVALIDA, false, 0, false, 0);
+			r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CUENTANVALIDA, false, 0, false, 0);
 			this.enviarMensaje(r,"Mensaxe enviada: Error (Conta Invalida).\n");
 			this.iu.actualizar();
 			return;
 		}
 		
 		this.bd.facerTraspaso(this.idSesion, contaori.getNumero(),contades.getNumero(),importe);
-		r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA,
+		r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CONSACEPTADA,
 				(contaori.getSaldo() - importe) >= 0, contaori.getSaldo() - importe, 
 				(contades.getSaldo() + importe) >= 0, contades.getSaldo() + importe);
 		this.enviarMensaje(r,"Mensaxe enviada: Consulta Aceptada.");

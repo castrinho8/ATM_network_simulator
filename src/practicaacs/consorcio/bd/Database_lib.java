@@ -2217,7 +2217,7 @@ public class Database_lib {
 			//Obtenemos todos los mensajes OFFLINE
 			resultSet = this.statement.executeQuery("SELECT mestringMensaje" +
 					" FROM Mensaje " +
-					" WHERE codBanco = " + id_banco_bd + " AND meonline=0 AND codTDestino=1");
+					" WHERE codBanco = " + id_banco_bd + " AND meonline=0 AND codTOrigen=3 AND codTDestino=2");
 			
 			//Parseamos los mensajes
 			while(resultSet.next()){
@@ -2226,7 +2226,7 @@ public class Database_lib {
 			}
 			
 			//Ponemos OFFLINE a false para todos los mensajes del id_banco
-			this.statement.executeUpdate("UPDATE Mensaje SET meonline = 1 WHERE codBanco = " + id_banco_bd + " AND meonline=0");
+			this.statement.executeUpdate("UPDATE Mensaje SET meonline = NULL WHERE codBanco = " + id_banco_bd + " AND meonline=0 AND codTOrigen=3 AND codTDestino=2");
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2333,8 +2333,7 @@ public class Database_lib {
 		String id_banco = null;
 		int id_banco_bd = -1;
 		boolean online = true;
-		boolean es_mensaje_datos = message.es_datos();
-		
+				
 		//Añade el id_banco, origen, destino o se obtiene de la tarjeta
 		if(torigen.equals(TipoOrigDest.BANCO))
 			id_banco = origen;
@@ -2345,9 +2344,10 @@ public class Database_lib {
 		}
 		
 		//Si el mensaje es de datos obtenemos el numero de mensaje y si es offline
-		if(es_mensaje_datos){
+		if(message.es_datos()){
 			num_mensaje = ((MensajeDatos) message).getNmsg();
-			online = ((MensajeDatos) message).getCodonline();
+			if(!message.es_consulta() && !message.es_respuestaConsulta())
+				online = ((MensajeDatos) message).getCodonline();
 		}
 			
 		//Si hay banco, obtiene el identificar del banco en la BD
@@ -2359,9 +2359,11 @@ public class Database_lib {
 			}
 		}
 		
+		boolean es_null_codonline = !(message.es_datos() && !message.es_consulta() && !message.es_respuestaConsulta());
+		System.out.println("ES NULL CODIGO ONLINE: "+es_null_codonline);
 		try {
 			String q = "INSERT INTO Mensaje(codBanco,meNumMensaje,meonline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
-					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((es_mensaje_datos)?online:"NULL") + "," + torigen.getNum() +
+					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((es_null_codonline)?"NULL":online) + "," + torigen.getNum() +
 					",'" + origen + "'," + tdestino.getNum() + ",'" + destino + "','" + message.toString() +"')";
 			
 			this.statement.executeUpdate(q);

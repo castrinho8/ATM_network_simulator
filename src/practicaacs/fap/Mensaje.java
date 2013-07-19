@@ -77,6 +77,10 @@ public abstract class Mensaje implements java.io.Serializable {
 		return ((tipoMensaje == CodigosMensajes.SOLSALDO) | (tipoMensaje == CodigosMensajes.SOLMOVIMIENTOS));
 	}
 	
+	public boolean es_respuestaConsulta(){
+		return ((tipoMensaje == CodigosMensajes.RESSALDO) | (tipoMensaje == CodigosMensajes.RESMOVIMIENTOS));
+	}
+	
 	public boolean es_datos(){
 		return ((tipoMensaje == CodigosMensajes.RESABONO) ||
 				(tipoMensaje == CodigosMensajes.SOLABONO) ||
