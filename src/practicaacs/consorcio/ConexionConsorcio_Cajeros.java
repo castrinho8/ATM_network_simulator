@@ -379,6 +379,9 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				break;
 			}
 			case ENVIO_CORRECTO:{
+				//REALIZA EL REINTEGRO
+				Database_lib.getInstance().realizar_reintegro(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),recibido.getImporte(),codonline);
+
 				//Reenviamos el mensaje al banco
 				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				break;
@@ -427,6 +430,9 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				break;
 			}
 			case ENVIO_CORRECTO:{
+				//REALIZA EL ABONO
+				Database_lib.getInstance().realizar_abono(recibido.getNum_tarjeta(),recibido.getNum_cuenta(),codonline,recibido.getImporte());
+
 				//Reenviamos el mensaje al banco
 				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				break;
@@ -482,6 +488,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				break;
 			}
 			case ENVIO_CORRECTO:{
+				//REALIZA EL TRASPASO
+				Database_lib.getInstance().realizar_traspaso(recibido.getNum_tarjeta(),
+						recibido.getNum_cuenta_origen(),recibido.getNum_cuenta_destino(),codonline,recibido.getImporte());
+				
 				//Reenviamos el mensaje al banco
 				this.sendToBanco(recibido, recibido.getNum_tarjeta());
 				break;
