@@ -50,6 +50,10 @@ public abstract class MensajeDatos extends Mensaje {
 	public boolean getCodonline() {
 		return codonline;
 	}
+	
+	public void setCodonline(boolean codonline) {
+		this.codonline = codonline;
+	}
 
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {

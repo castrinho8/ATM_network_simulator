@@ -87,6 +87,14 @@ public class ConexionConsorcio_Cajeros extends Thread{
 					System.err.println(e.getLocalizedMessage());
 				}
 				
+				//Casteamos a Mensaje de datos y obtenemos el id
+				MensajeDatos recibido_datos = ((MensajeDatos)recibido);
+				String id_banco = null;
+				id_banco = recibido_datos.getIdBancoFromTarjeta();
+				
+				//Seteamos si el banco esta online o no
+				recibido_datos.setCodonline(Database_lib.getInstance().consultar_protocolo(id_banco));
+				
 				//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 				Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
 				//Actualizar la interfaz grafica

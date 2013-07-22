@@ -222,15 +222,10 @@ INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor4
 
 INSERT INTO Cajero(cajNombre,cajIp,cajPuerto) VALUES ('       1','127.0.0.1',8928);
 
-INSERT INTO Tarjeta VALUES ('pastor42 01',0);
+INSERT INTO Tarjeta VALUES ('pastor42001',0);
 
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42 01',0000,0);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42 01',0001,0);
-
-INSERT INTO Canal(codBanco,codCanal) VALUES (1,0);
-INSERT INTO Canal(codBanco,codCanal) VALUES (1,1);
-INSERT INTO Canal(codBanco,codCanal) VALUES (1,2);
-
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',0000,0);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',0001,0);
 
 
 

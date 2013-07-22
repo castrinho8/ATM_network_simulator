@@ -1807,7 +1807,7 @@ public class Database_lib {
 	 * @param message El mensaje a añadir.
 	 * @param canal El canal correspondiente.
 	 */
-	public void anhadir_ultimo_envio(Mensaje message,String codCajero,int canal){
+	public void anhadir_ultimo_envio(Mensaje message,String codCajero,int canal,boolean respondido){
 
 		String id_banco = message.getDestino();
 		//Obtiene el id real que identifica al banco en la BD.
@@ -1847,7 +1847,7 @@ public class Database_lib {
 		}
 		
 		//Inserta el nuevo envio para el banco y canal indicado
-		int nuevo_ultimo_envio = this.insertar_ultimo_envio(message,codCajero);
+		int nuevo_ultimo_envio = this.insertar_ultimo_envio(message,codCajero,respondido);
 		
 		//Setea el codigo del nuevo envio en la tabla de Canales para el canal concreto
 		this.settearCodigoUltimoEnvioEnCanal(id_banco_bd, canal, nuevo_ultimo_envio);
@@ -1917,11 +1917,11 @@ public class Database_lib {
 	 * @param puerto_cajero El puerto del cajero del que proviene
 	 * @return El codigo de ultimo envio
 	 */
-	private int insertar_ultimo_envio(Mensaje mensaje,String id_cajero){
+	private int insertar_ultimo_envio(Mensaje mensaje,String id_cajero,boolean respondido){
 		
 		String tarjeta = null;
 		int cuenta = -1;
-		int num_mensaje = 0;
+		int num_mensaje = -1;
 		String id_banco = mensaje.getDestino();
 		
 		//Comprueba que los datos son correctos
@@ -1961,8 +1961,8 @@ public class Database_lib {
 		//Ejecuta la insercion en la BD
 		try {
 			this.statement.executeUpdate("INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero," +
-					"codBanco,codTarjeta,codCuenta,uestringMensaje)" +
-					" VALUES (" + num_mensaje + "," + ((id_cajero_bd==0)?"NULL":id_cajero_bd) + "," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + ((cuenta<0)?"NULL":cuenta) + ",'" + mensaje.toString() +"')");
+					"codBanco,codTarjeta,codCuenta,uestringMensaje,uecontestado)" +
+				" VALUES (" + ((num_mensaje<0)?"NULL":num_mensaje) + "," + ((id_cajero_bd==0)?"NULL":id_cajero_bd) + "," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + ((cuenta<0)?"NULL":cuenta) + ",'" + mensaje.toString() +"',"+ (respondido?1:0) +")");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2514,8 +2514,10 @@ public class Database_lib {
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
 				boolean a = false;
+				boolean b = false;
 				
 				int codigoue = resultSet.getInt(1);
+				b = resultSet.getString(2)==null;
 				int ueNumUltimoEnvio = resultSet.getInt(2);
 				int uecontestado = resultSet.getInt(3);
 				String uecodCajero = resultSet.getString(4);
@@ -2526,7 +2528,7 @@ public class Database_lib {
 				String uestringMensaje = resultSet.getString(8);
 
 				linea.add(String.valueOf(codigoue));
-				linea.add(String.valueOf(ueNumUltimoEnvio));
+				linea.add((b)?"NULL":String.valueOf(ueNumUltimoEnvio));
 				linea.add((uecontestado==0)?"NO":"SI");
 				linea.add((uecodCajero==null)?"NULL":uecodCajero);
 				linea.add(String.valueOf(codBanco));
