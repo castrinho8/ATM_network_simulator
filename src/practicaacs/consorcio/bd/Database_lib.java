@@ -91,8 +91,17 @@ public class Database_lib {
 	static public Database_lib getInstance(){
 		if(instancia == null)
 			instancia = new Database_lib();
-		
+			
 		return instancia;
+	}
+	
+	/**
+	 * Método que obtiene el statement y se utiliza para sincronizar los threads y no 
+	 * accedan a el al mismo tiempo.
+	 * @return El statement para acceder a la BD.
+	 */
+	private synchronized Statement getStatement(){
+		return this.statement;
 	}
 	
 	
@@ -112,7 +121,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		//Obtiene la cuenta de la BD
 		try {
-			resultSet = this.statement.executeQuery("SELECT codCuenta FROM Cuenta" +  
+			resultSet = this.getStatement().executeQuery("SELECT codCuenta FROM Cuenta" +  
 				" WHERE codTarjeta = '" + tarjeta + "' AND codCuenta = " + cuenta);
 			
 			if(resultSet.next())
@@ -124,7 +133,7 @@ public class Database_lib {
 		
 		//En caso de que no haya, se introduce en la BD
 		try {
-			this.statement.executeUpdate("INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo)" +
+			this.getStatement().executeUpdate("INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo)" +
 					" VALUES('" + tarjeta + "'," + cuenta + ",0)");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -142,7 +151,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		//Obtiene la tarjeta de la BD
 		try {
-			resultSet = this.statement.executeQuery("SELECT codTarjeta FROM Tarjeta" +  
+			resultSet = this.getStatement().executeQuery("SELECT codTarjeta FROM Tarjeta" +  
 				" WHERE codTarjeta = '" + tarjeta + "'");
 			
 			if(resultSet.next())
@@ -154,7 +163,7 @@ public class Database_lib {
 		
 		//En caso de que no haya, se introduce en la BD
 		try {
-			this.statement.executeUpdate("INSERT INTO Tarjeta(codTarjeta,tagastoOffline)" +
+			this.getStatement().executeUpdate("INSERT INTO Tarjeta(codTarjeta,tagastoOffline)" +
 					" VALUES('" + tarjeta + "',0)");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -174,7 +183,7 @@ public class Database_lib {
 		//Comprueba si existe, si existe devuelve el codigo de la BD que lo identifica
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
+			resultSet = this.getStatement().executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
 
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -186,10 +195,10 @@ public class Database_lib {
 		
 		//Inserta el banco y devuelve el codigo de la BD que lo identifica
 		try {
-			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bamaxCanales)" +
+			this.getStatement().executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bamaxCanales)" +
 					" VALUES('"+id_banco+"',2,0)");
 			
-			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
+			resultSet = this.getStatement().executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
 
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -209,7 +218,7 @@ public class Database_lib {
 	public boolean existeTarjeta(String tarjeta){
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codTarjeta FROM Tarjeta WHERE codTarjeta ='" + tarjeta + "'");
+			resultSet = this.getStatement().executeQuery("SELECT codTarjeta FROM Tarjeta WHERE codTarjeta ='" + tarjeta + "'");
 
 			return resultSet.next();
 			
@@ -230,7 +239,7 @@ public class Database_lib {
 	public boolean existeCuenta(String tarjeta, int cuenta){
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codCuenta FROM Cuenta " +
+			resultSet = this.getStatement().executeQuery("SELECT codCuenta FROM Cuenta " +
 					"WHERE codTarjeta='"+tarjeta+"' AND codCuenta =" + cuenta);
 
 			return resultSet.next();
@@ -245,7 +254,7 @@ public class Database_lib {
 	public int getNumCuentas(String tarjeta){
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT count(codCuenta) FROM Cuenta " +
+			resultSet = this.getStatement().executeQuery("SELECT count(codCuenta) FROM Cuenta " +
 					"WHERE codTarjeta='"+tarjeta+"'");
 
 			if(resultSet.next())
@@ -260,7 +269,7 @@ public class Database_lib {
 	
 	public void insertarTarjeta(String tarjeta){
 		try {
-			this.statement.executeUpdate("INSERT INTO Tarjeta(codTarjeta) VALUES ('" + tarjeta + "')");
+			this.getStatement().executeUpdate("INSERT INTO Tarjeta(codTarjeta) VALUES ('" + tarjeta + "')");
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -269,7 +278,7 @@ public class Database_lib {
 	
 	public void insertarCuenta(String tarjeta, int cuenta){
 		try {
-			this.statement.executeUpdate("INSERT INTO Cuenta(codTarjeta,codCuenta) VALUES ('" + tarjeta + "'," + cuenta + ")");
+			this.getStatement().executeUpdate("INSERT INTO Cuenta(codTarjeta,codCuenta) VALUES ('" + tarjeta + "'," + cuenta + ")");
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
@@ -351,7 +360,7 @@ public class Database_lib {
 		
 		//Realizar la actualizacion
 		try {
-			this.statement.executeUpdate("UPDATE Tarjeta SET tagastoOffline=tagastoOffline+" + importe +  
+			this.getStatement().executeUpdate("UPDATE Tarjeta SET tagastoOffline=tagastoOffline+" + importe +  
 				" WHERE codTarjeta = '" + tarjeta + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -383,7 +392,7 @@ public class Database_lib {
 		
 		//Realizamos la actualizacion del saldo
 		try {
-			this.statement.executeUpdate("UPDATE Cuenta SET cusaldo = cusaldo"+ signo + importe +
+			this.getStatement().executeUpdate("UPDATE Cuenta SET cusaldo = cusaldo"+ signo + importe +
 				" WHERE codCuenta = " + cuenta + " AND codTarjeta = '" + tarjeta + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -417,7 +426,7 @@ public class Database_lib {
 		//Realizamos la consulta
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT cusaldo FROM Cuenta " +
+			resultSet = this.getStatement().executeQuery("SELECT cusaldo FROM Cuenta " +
 					"WHERE codCuenta=" + cuenta + " AND codTarjeta = '" + tarjeta + "'");
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -456,7 +465,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try{
 			//Obtenemos todos los movimientos de la cuenta
-			resultSet = this.statement.executeQuery("SELECT codMovimiento,moimporte,mofecha,codTMovimiento" +
+			resultSet = this.getStatement().executeQuery("SELECT codMovimiento,moimporte,mofecha,codTMovimiento" +
 					" FROM Movimiento " +
 					"WHERE ((codCuentaOrig = " + cuenta + " AND codTarjeta = '" + tarjeta +
 					"') || (codCuentaDest = " + cuenta + " AND codTarjeta = '" + tarjeta + "'))");
@@ -692,7 +701,7 @@ public class Database_lib {
 		//Calcula la suma de los movimientos para el tipo de movimiento indicado
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT SUM(moimporte) FROM Movimiento " +
+			resultSet = this.getStatement().executeQuery("SELECT SUM(moimporte) FROM Movimiento " +
 				"WHERE codTMovimiento = " + codigo_mov + " AND codBanco = "+ id_banco_bd);
 		
 			if(resultSet.next())
@@ -760,7 +769,7 @@ public class Database_lib {
 		//Consulta el gastoOffline de la tarjeta
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT tagastoOffline FROM Tarjeta WHERE codTarjeta = '" + tarjeta + "'");
+			resultSet = this.getStatement().executeQuery("SELECT tagastoOffline FROM Tarjeta WHERE codTarjeta = '" + tarjeta + "'");
 			
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -824,14 +833,9 @@ public class Database_lib {
 		String cuentas = ((cuenta_orig<0)? "NULL":cuenta_orig) + "," + ((cuenta_dest<0)? "NULL":cuenta_dest);
 		String fecha = sdf.format(time.getTime());
 		
-		System.out.println("INSERT INTO Movimiento" +
-				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,moonline,codBanco)" +
-				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + "," + fecha + "," +
-				importe + "," + (codonline) + "," + id_banco_bd + ")");
-
 		//Inserta el movimiento en la BD
 		try {
-			this.statement.executeUpdate("INSERT INTO Movimiento" +
+			this.getStatement().executeUpdate("INSERT INTO Movimiento" +
 				"(codTarjeta,codCuentaOrig,codCuentaDest,codTMovimiento,mofecha,moimporte,moonline,codBanco)" +
 				" VALUES ('" + tarjeta + "'," + cuentas + "," + cod_tmovimiento + ", STR_TO_DATE('" + fecha + "','%d/%m/%Y')," +
 				importe + "," + (codonline) + "," + id_banco_bd + ")");
@@ -852,7 +856,7 @@ public class Database_lib {
 		//Comprueba si existe, si existe devuelve el codigo de la BD que lo identifica
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codCajero FROM Cajero WHERE cajNombre ='" + id_cajero + "'");
+			resultSet = this.getStatement().executeQuery("SELECT codCajero FROM Cajero WHERE cajNombre ='" + id_cajero + "'");
 		
 			if(resultSet.next())
 				return resultSet.getInt(1);
@@ -861,8 +865,8 @@ public class Database_lib {
 			e1.printStackTrace();
 			System.exit(-1);
 		}
-		System.out.println("CAJERO:"+id_cajero+"-");
-		throw new ConsorcioBDException("No existe en la BD el cajero con el que se trata de realizar la operacion.");
+
+		throw new ConsorcioBDException("No existe en la BD el cajero " +id_cajero+ " con el que se trata de realizar la operacion.");
 	}
 	
 	
@@ -886,7 +890,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try{
 			//Obtiene el codigo que identifica al banco en la BD
-			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco " +
+			resultSet = this.getStatement().executeQuery("SELECT codigo FROM Banco " +
 					"WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
@@ -930,7 +934,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try{
 			//Obtiene el codigo que identifica al banco en la BD
-			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco " +
+			resultSet = this.getStatement().executeQuery("SELECT codigo FROM Banco " +
 					"WHERE codbanco = '" + id_banco +"'");
 			
 			if(resultSet.next()){
@@ -963,9 +967,8 @@ public class Database_lib {
 		//Obtiene el int que identifica al estado introducido
 		int estado = EstadoSesion.getInt_fromEstadoSesion(state);
 		
-		System.out.println("INSERTAR BANCO: "+id_banco+"-"+estado+"-"+puerto+"-"+ip+"-"+num_canales);
 		try {
-			this.statement.executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
+			this.getStatement().executeUpdate("INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales)" +
 			" VALUES('" + id_banco + "'," + estado + "," + puerto + ",'" + ip + "'," + num_canales+")");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -983,7 +986,7 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco" +
+			resultSet = this.getStatement().executeQuery("SELECT codigo FROM Banco" +
 					" WHERE codBanco = '" + id_banco + "' AND codEBanco = 1");
 			
 			return resultSet.next();
@@ -1004,7 +1007,7 @@ public class Database_lib {
 
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco" +
+			resultSet = this.getStatement().executeQuery("SELECT codigo FROM Banco" +
 					" WHERE codBanco = '" + id_banco + "' AND ((codEBanco = 1 ) || (codEBanco = 4))");
 			
 			return resultSet.next();
@@ -1030,8 +1033,8 @@ public class Database_lib {
 		//Comprueba si existe, si existe devuelve el codigo de la BD que lo identifica
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
-		
+			resultSet = this.getStatement().executeQuery("SELECT codigo FROM Banco WHERE codBanco ='" + id_banco + "'");
+
 			if(resultSet.next())
 				return resultSet.getInt(1);
 			
@@ -1039,8 +1042,7 @@ public class Database_lib {
 			e1.printStackTrace();
 			System.exit(-1);
 		}
-		System.out.println("BANCO:"+id_banco+"-");
-		throw new ConsorcioBDException("No existe el banco con el que se trata de realizar la operacion.");
+		throw new ConsorcioBDException("No existe el banco " + id_banco + " con el que se trata de realizar la operacion.");
 	}
 	
 	
@@ -1063,7 +1065,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		int codEBanco = 0;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codEBanco FROM Banco" +
+			resultSet = this.getStatement().executeQuery("SELECT codEBanco FROM Banco" +
 					" WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next())
@@ -1095,7 +1097,7 @@ public class Database_lib {
 		//Consultamos los canales del banco indicado
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT bamaxCanales FROM Banco" +
+			resultSet = this.getStatement().executeQuery("SELECT bamaxCanales FROM Banco" +
 					" WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next())
@@ -1128,7 +1130,7 @@ public class Database_lib {
 		//Consultamos el puerto del banco
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT bapuerto FROM Banco" +
+			resultSet = this.getStatement().executeQuery("SELECT bapuerto FROM Banco" +
 					" WHERE codBanco = '" + id_banco +"'");
 			
 			if(resultSet.next())
@@ -1163,7 +1165,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		String temp = "";
 		try {
-			resultSet = this.statement.executeQuery("SELECT baip FROM Banco" +
+			resultSet = this.getStatement().executeQuery("SELECT baip FROM Banco" +
 					" WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next())
@@ -1198,7 +1200,7 @@ public class Database_lib {
 		int canal = 0;
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT balastChannelUsed FROM Banco" +
+			resultSet = this.getStatement().executeQuery("SELECT balastChannelUsed FROM Banco" +
 					" WHERE codBanco = '" + id_banco + "'");
 			
 			if(resultSet.next()){
@@ -1224,7 +1226,7 @@ public class Database_lib {
 		//Realiza la búsqueda
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codBanco FROM Banco " +
+			resultSet = this.getStatement().executeQuery("SELECT codBanco FROM Banco " +
 					"WHERE codEBanco = "+codigo_estado);
 			
 			ArrayList<String> res = new ArrayList<String>();
@@ -1259,7 +1261,7 @@ public class Database_lib {
 		//Consultamos si el estado está introducido en la BD
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT codEBanco FROM EstadoBanco" +
+			resultSet = this.getStatement().executeQuery("SELECT codEBanco FROM EstadoBanco" +
 					" WHERE codEBanco = " + state);
 			
 			if(!resultSet.next()){
@@ -1272,7 +1274,7 @@ public class Database_lib {
 		}
 		
 		try {
-			this.statement.executeUpdate("UPDATE Banco SET codEbanco = " + state + 
+			this.getStatement().executeUpdate("UPDATE Banco SET codEbanco = " + state + 
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
@@ -1290,7 +1292,7 @@ public class Database_lib {
 	private void setPuertoBanco(String id_banco, int puerto){
 		
 		try {
-			this.statement.executeUpdate("UPDATE Banco SET bapuerto = " + puerto + 
+			this.getStatement().executeUpdate("UPDATE Banco SET bapuerto = " + puerto + 
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
@@ -1308,7 +1310,7 @@ public class Database_lib {
 	private void setIpBanco(String id_banco,String ip){
 		
 		try {
-			this.statement.executeUpdate("UPDATE Banco SET baip = '" + ip + 
+			this.getStatement().executeUpdate("UPDATE Banco SET baip = '" + ip + 
 					"' WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
@@ -1326,7 +1328,7 @@ public class Database_lib {
 	private void setNumCanalesBanco(String id_banco, int num_canales){
 		
 		try {
-			this.statement.executeUpdate("UPDATE Banco SET bamaxCanales = " + num_canales + 
+			this.getStatement().executeUpdate("UPDATE Banco SET bamaxCanales = " + num_canales + 
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
@@ -1343,7 +1345,7 @@ public class Database_lib {
 	 */
 	private void setLastChannelUsed(String id_banco, int last_channel){
 		try {
-			this.statement.executeUpdate("UPDATE Banco SET balastChannelUsed = " + last_channel + 
+			this.getStatement().executeUpdate("UPDATE Banco SET balastChannelUsed = " + last_channel + 
 					" WHERE codBanco = '" + id_banco + "'");
 			
 		} catch (SQLException e) {
@@ -1383,7 +1385,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			//Consultamos los canales libres en la BD
-			resultSet = this.statement.executeQuery("SELECT DISTINCT c.codCanal FROM Canal c JOIN UltimoEnvio ue " +
+			resultSet = this.getStatement().executeQuery("SELECT DISTINCT c.codCanal FROM Canal c JOIN UltimoEnvio ue " +
 					"ON c.codBanco = " + id_banco_bd + " WHERE c.cabloqueado = 0 AND ue.uecontestado = 1");
 			
 			//Obtenemos todos los canales que estan libres para ser usados
@@ -1436,7 +1438,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			//Obtiene el siguiente Numero de Mensaje del canal indicado
-			resultSet = this.statement.executeQuery("SELECT canext_numMensaje FROM Canal " +
+			resultSet = this.getStatement().executeQuery("SELECT canext_numMensaje FROM Canal " +
 					"WHERE codBanco = " + id_banco_bd + " AND codCanal = " + id_canal);
 			
 			//Si no hay un elemento se devuelve -1
@@ -1446,7 +1448,7 @@ public class Database_lib {
 				return -1;
 			
 			//Se actualiza el numero de mensaje sumandole 1
-			this.statement.executeUpdate("UPDATE Canal SET canext_numMensaje = canext_numMensaje+1" +
+			this.getStatement().executeUpdate("UPDATE Canal SET canext_numMensaje = canext_numMensaje+1" +
 					" WHERE codBanco = " + id_banco_bd + " AND codCanal = " + id_canal);
 
 		} catch (SQLException e) {
@@ -1476,7 +1478,7 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT c.cabloqueado || (ue.uecontestado=0)" +
+			resultSet = this.getStatement().executeQuery("SELECT c.cabloqueado || (ue.uecontestado=0)" +
 					" FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.ueNumUltimoEnvio" +
 					" WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 
@@ -1510,7 +1512,7 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT COUNT(ueNumUltimoEnvio) FROM UltimoEnvio " +
+			resultSet = this.getStatement().executeQuery("SELECT COUNT(ueNumUltimoEnvio) FROM UltimoEnvio " +
 					"WHERE codBanco = " + id_banco_bd + " AND uecontestado = 0");
 
 			if(resultSet.next())
@@ -1544,7 +1546,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT uestringMensaje FROM UltimoEnvio " +
+			resultSet = this.getStatement().executeQuery("SELECT uestringMensaje FROM UltimoEnvio " +
 					"WHERE codBanco = " + id_banco_bd);
 			
 			while(resultSet.next()){
@@ -1578,7 +1580,7 @@ public class Database_lib {
 		}
 		
 		try {
-			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 1 " +
+			this.getStatement().executeUpdate("UPDATE Canal SET cabloqueado = 1 " +
 					"WHERE codBanco = " + id_banco_bd + " AND codCanal = " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1612,7 +1614,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		try {
 			//Consultamos el si ha sido contestado y el mensaje
-			resultSet = this.statement.executeQuery("SELECT uecontestado,uestringMensaje FROM Canal c JOIN UltimoEnvio u " +
+			resultSet = this.getStatement().executeQuery("SELECT uecontestado,uestringMensaje FROM Canal c JOIN UltimoEnvio u " +
 					"ON c.codUltimoEnvio=u.codigoue WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = "+ canal);
 			
 			if(resultSet.next()){
@@ -1663,7 +1665,7 @@ public class Database_lib {
 		}
 		
 		try {
-			this.statement.executeUpdate("UPDATE Canal SET cabloqueado = 0 " +
+			this.getStatement().executeUpdate("UPDATE Canal SET cabloqueado = 0 " +
 					"WHERE codBanco = " + id_banco_bd);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1691,7 +1693,7 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT uecontestado " +
+			resultSet = this.getStatement().executeQuery("SELECT uecontestado " +
 					"FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.ueNumUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco_bd +" AND c.codCanal = " + canal);
 
@@ -1722,7 +1724,7 @@ public class Database_lib {
 		}
 		
 		try {
-			this.statement.executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES (" + id_banco_bd + "," + canal + ")");
+			this.getStatement().executeUpdate("INSERT INTO Canal(codBanco,codCanal) VALUES (" + id_banco_bd + "," + canal + ")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -1747,7 +1749,7 @@ public class Database_lib {
 		}
 		
 		try {
-			this.statement.executeUpdate("DELETE FROM Canal WHERE codBanco = " + id_banco_bd + " AND codCanal = " + canal);
+			this.getStatement().executeUpdate("DELETE FROM Canal WHERE codBanco = " + id_banco_bd + " AND codCanal = " + canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -1774,7 +1776,7 @@ public class Database_lib {
 		ResultSet resultSet = null;
 		try {
 			//Realiza la consulta
-			resultSet = this.statement.executeQuery("SELECT codCanal " +
+			resultSet = this.getStatement().executeQuery("SELECT codCanal " +
 					"FROM Canal " +
 					"WHERE codBanco = " + id_banco_bd);
 
@@ -1831,7 +1833,7 @@ public class Database_lib {
 		
 		//Selecciona el codigo del ultimo envio para el banco y canal indicados
 		try {
-			resultSet = this.statement.executeQuery("SELECT codUltimoEnvio" +
+			resultSet = this.getStatement().executeQuery("SELECT codUltimoEnvio" +
 					" FROM Canal" +
 					" WHERE codCanal=" + canal + " AND codBanco=" + id_banco_bd + " AND codUltimoEnvio IS NOT NULL");
 			
@@ -1857,7 +1859,7 @@ public class Database_lib {
 	
 	private void settearCodigoUltimoEnvioEnCanal(int id_banco_bd, int canal, int cod_ultimo_envio){
 		try {
-			this.statement.executeUpdate("UPDATE Canal SET codUltimoEnvio="+cod_ultimo_envio+
+			this.getStatement().executeUpdate("UPDATE Canal SET codUltimoEnvio="+cod_ultimo_envio+
 					" WHERE codBanco="+id_banco_bd+" AND codCanal="+canal);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1888,7 +1890,7 @@ public class Database_lib {
 		Mensaje res = null;
 		try {
 			//Obtiene el mensaje del Ultimo envio
-			resultSet = this.statement.executeQuery("SELECT ue.uestringMensaje " +
+			resultSet = this.getStatement().executeQuery("SELECT ue.uestringMensaje " +
 					"FROM UltimoEnvio ue JOIN Canal c ON ue.ueNumUltimoEnvio = c.codUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 			
@@ -1955,12 +1957,9 @@ public class Database_lib {
 			id_cajero_bd = 0;
 		}
 		
-		System.out.println("ULTIMO ENVIO:"+num_mensaje+"-CAJERO:"+id_cajero_bd+"-BANCO:"
-		+id_banco_bd+"-TARJETA:"+tarjeta+"-CUENTA:"+cuenta);
-		
 		//Ejecuta la insercion en la BD
 		try {
-			this.statement.executeUpdate("INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero," +
+			this.getStatement().executeUpdate("INSERT INTO UltimoEnvio(ueNumUltimoEnvio,uecodCajero," +
 					"codBanco,codTarjeta,codCuenta,uestringMensaje,uecontestado)" +
 				" VALUES (" + ((num_mensaje<0)?"NULL":num_mensaje) + "," + ((id_cajero_bd==0)?"NULL":id_cajero_bd) + "," + id_banco_bd + "," + ((tarjeta==null)?"NULL":"'"+tarjeta+"'") + "," + ((cuenta<0)?"NULL":cuenta) + ",'" + mensaje.toString() +"',"+ (respondido?1:0) +")");
 
@@ -1972,7 +1971,7 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try{
-			resultSet = this.statement.executeQuery("SELECT MAX(codigoue) FROM UltimoEnvio");
+			resultSet = this.getStatement().executeQuery("SELECT MAX(codigoue) FROM UltimoEnvio");
 			
 			if(resultSet.next())
 				cod_ultimo_envio = resultSet.getInt(1);
@@ -1992,7 +1991,7 @@ public class Database_lib {
 	 */
 	private void eliminar_ultimo_envio(int codigo_ultimo_envio){
 		try {
-			this.statement.executeUpdate("DELETE FROM UltimoEnvio WHERE ueNumUltimoEnvio=" + codigo_ultimo_envio);
+			this.getStatement().executeUpdate("DELETE FROM UltimoEnvio WHERE ueNumUltimoEnvio=" + codigo_ultimo_envio);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -2019,7 +2018,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		int cod_cajero = 0;
 		try {
-			resultSet = this.statement.executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
+			resultSet = this.getStatement().executeQuery("SELECT ue.uecodCajero FROM UltimoEnvio ue JOIN Canal c " +
 					"ON ue.codigoue = c.codUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 			
@@ -2051,7 +2050,7 @@ public class Database_lib {
 		ResultSet resultSet = null;
 		String ip_cajero = null;
 		try {
-			resultSet = this.statement.executeQuery("SELECT cajIp FROM Cajero " +
+			resultSet = this.getStatement().executeQuery("SELECT cajIp FROM Cajero " +
 					"WHERE codCajero="+cod_cajero);
 			
 			if(resultSet.next())
@@ -2065,11 +2064,8 @@ public class Database_lib {
 			e.printStackTrace();
 		}
 		
-		System.out.println("STRING:"+ip_cajero);
-
 		//Devolvemos el string convertido a InetAddress
 		try {
-			System.out.println("IP:"+InetAddress.getByName(ip_cajero));
 			return InetAddress.getByName(ip_cajero);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -2095,7 +2091,7 @@ public class Database_lib {
 		ResultSet resultSet = null;
 		int puerto_cajero = 0;
 		try {
-			resultSet = this.statement.executeQuery("SELECT cajPuerto FROM Cajero " +
+			resultSet = this.getStatement().executeQuery("SELECT cajPuerto FROM Cajero " +
 					"WHERE codCajero="+cod_cajero);
 			
 			if(resultSet.next())
@@ -2128,7 +2124,7 @@ public class Database_lib {
 		ResultSet resultSet = null;
 		String nombre_cajero = null;
 		try {
-			resultSet = this.statement.executeQuery("SELECT cajNombre FROM Cajero " +
+			resultSet = this.getStatement().executeQuery("SELECT cajNombre FROM Cajero " +
 					"WHERE codCajero="+cod_cajero);
 			
 			if(resultSet.next())
@@ -2169,14 +2165,14 @@ public class Database_lib {
 		try {
 			int codigo=0;
 			//Obtiene el codigo que identifica al ultimo envio para el banco/canal indicados
-			resultSet = this.statement.executeQuery("SELECT ue.codigoue " +
+			resultSet = this.getStatement().executeQuery("SELECT ue.codigoue " +
 					"FROM UltimoEnvio ue JOIN Canal c ON ue.codigoue = c.codUltimoEnvio " +
 					"WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
 		
 			//Si existe ultimo envio se actualiza a contestado = TRUE
 			if(resultSet.next()){
 				codigo = resultSet.getInt(1);
-				this.statement.executeUpdate("UPDATE UltimoEnvio SET uecontestado = 1 WHERE codigoue=" + codigo);
+				this.getStatement().executeUpdate("UPDATE UltimoEnvio SET uecontestado = 1 WHERE codigoue=" + codigo);
 			}
 			
 		} catch (SQLException e) {
@@ -2215,7 +2211,7 @@ public class Database_lib {
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
 			//Obtenemos todos los mensajes OFFLINE
-			resultSet = this.statement.executeQuery("SELECT mestringMensaje" +
+			resultSet = this.getStatement().executeQuery("SELECT mestringMensaje" +
 					" FROM Mensaje " +
 					" WHERE codBanco = " + id_banco_bd + " AND meonline=0 AND codTOrigen=3 AND codTDestino=2");
 			
@@ -2226,7 +2222,7 @@ public class Database_lib {
 			}
 			
 			//Ponemos OFFLINE a false para todos los mensajes del id_banco
-			this.statement.executeUpdate("UPDATE Mensaje SET meonline = NULL WHERE codBanco = " + id_banco_bd + " AND meonline=0 AND codTOrigen=3 AND codTDestino=2");
+			this.getStatement().executeUpdate("UPDATE Mensaje SET meonline = NULL WHERE codBanco = " + id_banco_bd + " AND meonline=0 AND codTOrigen=3 AND codTDestino=2");
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2249,7 +2245,7 @@ public class Database_lib {
 		ResultSet resultSet = null;
 		ArrayList<String> res = new ArrayList<String>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
+			resultSet = this.getStatement().executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
 					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
 					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
 					" WHERE ta.todnombre='Cajero' || tb.todnombre='Cajero' ORDER BY codMensaje");
@@ -2291,7 +2287,7 @@ public class Database_lib {
 		ResultSet resultSet = null;
 		ArrayList<String> res = new ArrayList<String>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
+			resultSet = this.getStatement().executeQuery("SELECT ta.todnombre as ORIGEN,tb.todnombre as DESTINO,m.mestringMensaje" +
 					" FROM Mensaje m JOIN TipoOrigDest ta ON ta.codTOrigDest = m.codTOrigen" +
 					" JOIN TipoOrigDest tb ON tb.codTOrigDest = m.codTDestino" +
 					" WHERE ta.todnombre='Banco' || tb.todnombre='Banco' ORDER BY codMensaje");
@@ -2366,7 +2362,7 @@ public class Database_lib {
 					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((es_null_codonline)?"NULL":online) + "," + torigen.getNum() +
 					",'" + origen + "'," + tdestino.getNum() + ",'" + destino + "','" + message.toString() +"')";
 			
-			this.statement.executeUpdate(q);
+			this.getStatement().executeUpdate(q);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -2384,7 +2380,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT b.codigo,b.codBanco,e.ebnombre,b.bapuerto,b.baip,b.bamaxCanales,b.balastChannelUsed" +
+			resultSet = this.getStatement().executeQuery("SELECT b.codigo,b.codBanco,e.ebnombre,b.bapuerto,b.baip,b.bamaxCanales,b.balastChannelUsed" +
 					" FROM Banco b JOIN EstadoBanco e ON b.codEBanco=e.codEBanco ORDER BY b.codigo");
 
 			while(resultSet.next()){
@@ -2419,7 +2415,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje" +
+			resultSet = this.getStatement().executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje" +
 					" FROM Canal ORDER BY codBanco");
 
 			while(resultSet.next()){
@@ -2452,7 +2448,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codTarjeta,tagastoOffline" +
+			resultSet = this.getStatement().executeQuery("SELECT codTarjeta,tagastoOffline" +
 					" FROM Tarjeta ORDER BY codTarjeta");
 
 			while(resultSet.next()){
@@ -2479,7 +2475,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codTarjeta,codCuenta,cusaldo" +
+			resultSet = this.getStatement().executeQuery("SELECT codTarjeta,codCuenta,cusaldo" +
 					" FROM Cuenta ORDER BY codTarjeta");
 
 			while(resultSet.next()){
@@ -2508,7 +2504,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codigoue,ueNumUltimoEnvio,uecontestado,uecodCajero,codBanco,codTarjeta,codCuenta,uestringMensaje" +
+			resultSet = this.getStatement().executeQuery("SELECT codigoue,ueNumUltimoEnvio,uecontestado,uecodCajero,codBanco,codTarjeta,codCuenta,uestringMensaje" +
 					" FROM UltimoEnvio ORDER BY codigoue");
 
 			while(resultSet.next()){
@@ -2549,7 +2545,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT m.codMovimiento,m.codTarjeta,m.codCuentaOrig,m.codCuentaDest,t.tmnombre,m.mofecha,m.moimporte,m.moonline,m.codBanco" +
+			resultSet = this.getStatement().executeQuery("SELECT m.codMovimiento,m.codTarjeta,m.codCuentaOrig,m.codCuentaDest,t.tmnombre,m.mofecha,m.moimporte,m.moonline,m.codBanco" +
 					" FROM Movimiento m JOIN TipoMovimiento t ON m.codTMovimiento=t.codTMovimiento ORDER BY m.codMovimiento");
 
 			while(resultSet.next()){
@@ -2593,7 +2589,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.statement.executeQuery("SELECT codMensaje,meNumMensaje,codTOrigen,meorigen,codTDestino,medestino,codBanco,meonline,mestringMensaje " +
+			resultSet = this.getStatement().executeQuery("SELECT codMensaje,meNumMensaje,codTOrigen,meorigen,codTDestino,medestino,codBanco,meonline,mestringMensaje " +
 					"FROM Mensaje ORDER BY codMensaje");
 
 			while(resultSet.next()){

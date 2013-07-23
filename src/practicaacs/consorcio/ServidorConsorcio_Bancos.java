@@ -17,6 +17,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import practicaacs.banco.estados.EstadoSesion;
 import practicaacs.banco.estados.SesAberta;
@@ -34,6 +36,7 @@ public class ServidorConsorcio_Bancos extends Thread{
 	private boolean abierto_serv_bancos;
 	private DatagramSocket socketServidor;
 	
+	private boolean control;
 	private HashMap<String,Sesion> sesiones; //Banco,sesion
 	
 	/**
@@ -47,7 +50,6 @@ public class ServidorConsorcio_Bancos extends Thread{
 
 		this.abierto_serv_bancos = false;
 		this.sesiones = new HashMap<String,Sesion>();
-		
 	}
 	
 	//-------GETTERS & SETTERS-------
@@ -91,24 +93,27 @@ public class ServidorConsorcio_Bancos extends Thread{
     public void recibir_servidorBancos(){
     		
     		byte [] recibirDatos = new byte[1024];
-
+    		
     		//Crea el Datagrama en donde recibir los datos
 			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
 			try{
 				//Recibe datos
 				socketServidor.receive(inputPacket);
-
+				
 				if(isOnline()){
 					//Crea una conexión para analizar el datagrama
 					ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(TipoAccion.CONEXION,inputPacket,this.consorcio,this,this.socketServidor);
 					t.start();
 				}
-
+				
+				sleep(1000);
 			}catch (SocketTimeoutException e){
 				System.out.println("Socket timeout");
 				cerrar_servidorBancos();
 			}catch (IOException e) {
 				System.out.println("IO EXCEPTION");
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
         }
     

@@ -142,9 +142,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 					}catch (MensajeNoValidoException e) {
 					    System.err.println(e.getLocalizedMessage());
 					}
-				
+					
+					if(recibido.es_datos())
+						System.out.println("ENTRA:"+((MensajeDatos)recibido).getNmsg()+":"+recibido.getOrigen()+"->"+recibido.getDestino()+":"+recibido.getTipoMensaje()+
+							"\nCANAL:"+((MensajeDatos)recibido).getNumcanal()+"COD_ONLINE:"+((MensajeDatos)recibido).getCodonline());
+					else
+						System.out.println("ENTRA:"+recibido.getOrigen()+"->"+recibido.getDestino()+":"+recibido.getTipoMensaje());
+						
+					
 					//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 					Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.BANCO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
+					
 					//Actualizar la interfaz grafica
 					this.consorcio.actualizarIU();
 					
@@ -224,10 +232,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
 
 		if(envio.es_datos())
-			System.out.println(((MensajeDatos)envio).getNmsg()+":"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje()+
+			System.out.println("SALE_BANCO:"+((MensajeDatos)envio).getNmsg()+":"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje()+
 					"\nCANAL:"+((MensajeDatos)envio).getNumcanal()+"COD_ONLINE:"+((MensajeDatos)envio).getCodonline());
 		else
-			System.out.println(envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje());
+			System.out.println("SALE_BANCO"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje());
 		
 		try{
 			//Enviamos el mensaje
@@ -272,6 +280,13 @@ public class ConexionConsorcio_Bancos extends Thread {
 			Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
 			//Actualizar la interfaz grafica
 			this.consorcio.actualizarIU();
+			
+			if(envio.es_datos())
+				System.out.println("SALE_BANCO:"+((MensajeDatos)envio).getNmsg()+":"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje()+
+						"\nCANAL:"+((MensajeDatos)envio).getNumcanal()+"COD_ONLINE:"+((MensajeDatos)envio).getCodonline());
+			else
+				System.out.println("SALE_BANCO"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje());
+			
 			
 			//Creamos el datagrama
 			DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
@@ -755,16 +770,17 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * @param recibido El mensaje recibido.
 	 */
 	private void maneja_mensajes_datos(MensajeRespDatos recibido){
-
+		
 		String id_banco = recibido.getOrigen();
 		int canal = recibido.getNumcanal();
 		CodigosMensajes tipo_mensaje = recibido.getTipoMensaje();
 		
+		System.out.println("MANEJA");
 		//En caso de que fuese todo correctamente
 		if(recibido.getCod_resp().equals(CodigosRespuesta.CONSACEPTADA)){
 
 			//Comprueba que el orden es correcto y marca el envio anterior en ese canal como contestado.
-			if(Database_lib.getInstance().esCorrectaContestacion(tipo_mensaje,id_banco,canal))
+			if((Database_lib.getInstance().esCorrectaContestacion(tipo_mensaje,id_banco,canal))| tipo_mensaje.equals(CodigosMensajes.RESMOVIMIENTOS))
 				Database_lib.getInstance().setEnvioContestado(id_banco,canal);
 			else{
 				System.out.println("Error: No se esperaba el mensaje " + tipo_mensaje.toString() + " recibido por el canal "+ canal);
@@ -774,10 +790,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 			if(Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance()))
 				Database_lib.getInstance().bloquearCanal(id_banco,canal);
 		}
-		
+		System.out.println("LLEGA.");
 		//Hay que comprobar si se reenvia al cajero o no
-		if(recibido.getCodonline())
+		if(recibido.getCodonline()){
+			System.out.println("ENVIAADO");
 			this.sendToCajero(recibido);
+		}
 	}
 	
 	
