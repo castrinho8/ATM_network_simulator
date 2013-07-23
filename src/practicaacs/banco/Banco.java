@@ -630,7 +630,7 @@ public class Banco implements AnalizadorMensajes{
 		}
 		
 		this.bd.facerReintegro(this.idSesion, conta.getNumero(), importe);
-		r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
+		r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()-importe);
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").\n");
 		this.iu.actualizar();
 	}
@@ -689,8 +689,8 @@ public class Banco implements AnalizadorMensajes{
 		}
 		
 		this.bd.facerAbono(this.idSesion, conta.getNumero(), importe);
-		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()-importe);
-		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + (conta.getSaldo() - importe) + ").\n");
+		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
+		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + (conta.getSaldo() + importe) + ").\n");
 		this.iu.actualizar();
 	}
 

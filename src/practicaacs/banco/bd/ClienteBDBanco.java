@@ -303,7 +303,7 @@ public class ClienteBDBanco {
 	
 	public void facerReintegro(int sesion, int num_conta, int importe) {
 		try {
-			this.updateConta(num_conta, importe);
+			this.updateConta(num_conta, -importe);
 			this.addMovemento(num_conta, 10, importe);
 			this.statement.executeUpdate("UPDATE Sesion SET treintegros = treintegros + " + importe +
 					" WHERE scod = " + sesion);
@@ -315,7 +315,7 @@ public class ClienteBDBanco {
 	
 	public void facerAbono(int sesion, int num_conta, int importe) {
 		try {
-			this.updateConta(num_conta, -importe);
+			this.updateConta(num_conta, importe);
 			this.addMovemento(num_conta, 50, importe);
 			this.statement.executeUpdate("UPDATE Sesion SET tabono = tabono + " + importe +
 					" WHERE scod = " + sesion);
