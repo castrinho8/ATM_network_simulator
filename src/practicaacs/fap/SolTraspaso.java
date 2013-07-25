@@ -74,4 +74,8 @@ public class SolTraspaso extends MensajeDatos {
 		}
 	}
 	
+	protected String formatearMensaje(){
+		return super.formatearMensaje()+"---- Traspaso: "+this.num_tarjeta+"("+this.num_cuenta_origen+"->"+this.num_cuenta_destino+") IMPORTE: "+this.importe+"€";
+	}
+	
 }

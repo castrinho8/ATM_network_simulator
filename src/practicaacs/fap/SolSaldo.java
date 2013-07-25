@@ -59,4 +59,8 @@ public class SolSaldo extends MensajeDatos {
 			throw new MensajeNoValidoException("Error de formato dos numeros.");
 		}	
 	}
+	
+	protected String formatearMensaje(){
+		return super.formatearMensaje()+"---- Tarjeta: "+this.num_tarjeta+"("+this.num_cuenta+")";
+	}
 }

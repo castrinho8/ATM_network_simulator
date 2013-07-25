@@ -115,5 +115,8 @@ public abstract class MensajeDatos extends Mensaje {
 	}
 	
 	
+	protected String formatearMensaje(){
+		return super.formatearMensaje();
+	}
 	
 }

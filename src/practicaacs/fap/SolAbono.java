@@ -59,6 +59,8 @@ public class SolAbono extends MensajeDatos {
 		}
 	}
 	
-	
+	protected String formatearMensaje(){
+		return super.formatearMensaje()+"---- Abono: "+this.num_tarjeta+"("+this.num_cuenta+") IMPORTE: "+this.importe+"€";
+	}
 	
 }

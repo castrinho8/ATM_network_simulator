@@ -223,6 +223,15 @@ public abstract class Mensaje implements java.io.Serializable {
 		}
 		return false;
 	}
+	
+	
+	public String obtenerImprimible(String orig,String dest){
+		return this.getTipoMensaje()+":"+orig+"("+this.getOrigen()+")->"+dest+"("+this.getDestino()+")"+this.formatearMensaje();
+	}
+
+	protected String formatearMensaje(){ 
+		return "";
+	}
 }
 
 

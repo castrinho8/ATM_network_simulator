@@ -115,5 +115,8 @@ public class RespMovimientos extends MensajeRespDatos {
 		return fecha;
 	}
 	
+	protected String formatearMensaje(){
+		return super.formatearMensaje()+"---- Movimiento: "+this.tipo_mov+" "+(this.signo?"+":"-")+this.importe+"€ / "+this.fecha;
+	}
 	
 }

@@ -37,4 +37,10 @@ public abstract class MensajeRespDatos extends MensajeDatos {
 	public CodigosRespuesta getCod_resp() {
 		return cod_resp;
 	}
+	
+	
+	protected String formatearMensaje(){
+		return super.formatearMensaje()+"---- {"+cod_resp+"}";
+	}
+	
 }

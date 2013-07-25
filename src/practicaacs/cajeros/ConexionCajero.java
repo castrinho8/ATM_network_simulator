@@ -46,7 +46,7 @@ public class ConexionCajero extends Thread{
 				lista.add(resp);
 				System.out.println(resp.getNmovimientos());
 				System.out.println("MOVIMIENTOS RESTANTES: "+resp.getNmovimientos());
-			}while(resp.getNmovimientos()>1);
+			}while(resp.getNmovimientos()>0);
 			
 			try {
 				this.interfaz.actualizarIUmovimientos(lista);

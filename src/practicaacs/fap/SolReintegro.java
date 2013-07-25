@@ -58,6 +58,8 @@ public class SolReintegro extends MensajeDatos {
 	}
 	
 	
-	
+	protected String formatearMensaje(){
+		return super.formatearMensaje()+"---- Reintegro: "+this.num_tarjeta+"("+this.num_cuenta+") IMPORTE: "+this.importe+"€";
+	}
 	
 }

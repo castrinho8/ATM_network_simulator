@@ -2235,6 +2235,24 @@ public class Database_lib {
 	}
 	
 	
+	/*private String obtenerImprimible(Mensaje m){
+		
+		String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
+		if(m.es_datos()){
+			if(m.es_consulta()){
+				
+			}
+			if(m.es_respuestaConsulta()){
+				
+			}
+		}else{
+			
+		}
+				
+		return elemento;
+	}*/
+	
+	
 	/**
 	 * Método que obtiene todos los mensajes hacia/desde el CAJERO.
 	 * Devuelve un arraylist con los Strings a mostrar en la interfaz grafica.
@@ -2266,7 +2284,7 @@ public class Database_lib {
 				}
 				
 				//Creamos el string a imprimir
-				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
+				String elemento = m.obtenerImprimible(str1,str2);
 				res.add(elemento);
 			}
 		} catch (SQLException e) {
@@ -2308,7 +2326,7 @@ public class Database_lib {
 				}
 				
 				//Creamos el string a imprimir
-				String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
+				String elemento = m.obtenerImprimible(str1,str2);
 				res.add(elemento);
 			}
 		} catch (SQLException e) {
