@@ -240,6 +240,34 @@ public class Banco implements AnalizadorMensajes{
 
 	
 	/**
+	 * Metdo que consulta se a ultima mensaxe do canle foi respondida
+	 * @param canle O canle a comprobar
+	 * @return True se foi respondida e False se non
+	 */
+	public boolean ultimaMensaxeRespondida(int canle){
+		 return bd.mensaxeRespondida(idSesion, canle);
+	}
+	
+	/**
+	 * Metodo que obten a ultima mensaxe na canle indicada.
+	 * @param canle A canle da que obter a ultima mensaxe
+	 * @return A mensaxe
+	 */
+	private Mensaje getUltimaMensaxe(int canle){
+		return bd.getUltimaMensaxe(idSesion, canle);
+	}
+	
+	
+	/**
+	 * Método que obten a ultima mensaxe en envia a resposta de recuperacion
+	 * @param canle A canle da que obter a mensaxe
+	 */
+	public void manexaRespostaUltimaMensaxe(int canle){
+		Mensaje m = this.getUltimaMensaxe(canle);
+		this.enviarMensaje(m, "Mensaxe enviada: Recuperación "+m.getTipoMensaje());
+	}
+	
+	/**
 	 * 
 	 * @param canal
 	 */
@@ -494,7 +522,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
+		if (c.lastMsg != null && c.lastMsg + 1 != nmsg && !estado.recuperacion()){
 			r2 = new RespSaldoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de Secuencia).\n");
 			return;
@@ -543,7 +571,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
+		if (c.lastMsg != null && c.lastMsg + 1 != nmsg && !estado.recuperacion()){
 			r2 = new RespMovimientosError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
 			return;
@@ -608,7 +636,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
+		if (c.lastMsg != null && c.lastMsg + 1 != nmsg && !estado.recuperacion()){
 			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.FUERASEC);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).\n");
 			this.iu.actualizar();
@@ -651,6 +679,8 @@ public class Banco implements AnalizadorMensajes{
 		RespAbonoError r2;
 		Conta conta;
 		
+		System.out.println("FACER ABONO");
+
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 		
 		if(c.ocupado){
@@ -660,7 +690,7 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
+		if (c.lastMsg != null && c.lastMsg + 1 != nmsg && !estado.recuperacion()){
 			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.FUERASEC);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).");
 			this.iu.actualizar();
@@ -720,9 +750,9 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		if (c.lastMsg != null && c.lastMsg + 1 != nmsg){
+		if (c.lastMsg != null && c.lastMsg + 1 != nmsg && !estado.recuperacion()){
 			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosError.FUERASEC);
-			this.enviarMensaje(r2,"Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2,"Mensaxe enviada: Error (Fora de secuencia).\n");
 			this.iu.actualizar();
 			return;
 		}

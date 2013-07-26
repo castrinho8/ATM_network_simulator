@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import practicaacs.fap.Mensaje;
+import practicaacs.fap.MensajeNoValidoException;
+
 
 public class ClienteBDBanco {
 	private Connection con;
@@ -434,5 +437,48 @@ public class ClienteBDBanco {
 			return new ArrayList<Canal>();
 		}	
 	}
+	
+	public boolean mensaxeRespondida(int id_sesion,int canle ){
 
+		try {
+			ResultSet resultSet = statement.executeQuery("SELECT enviado,mscod FROM Mensaxe WHERE scod = " + id_sesion + " AND cncod = " + canle + " ORDER BY mscod DESC");
+			
+			//Avanzamos un valor
+			resultSet.next();
+			
+			if(resultSet.next()){
+				System.out.println(resultSet.getBoolean(1)+"-"+resultSet.getInt(2));
+				return resultSet.getBoolean(1);
+			}
+			return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public Mensaje getUltimaMensaxe(int id_sesion,int canle){
+
+		Mensaje m = null;
+		ResultSet resultSet;
+		try {
+			resultSet = statement.executeQuery("SELECT texto FROM Mensaxe WHERE scod = " + id_sesion + " AND cncod = " + canle + " ORDER BY mscod DESC");
+			
+			//Avanzamos un valor
+			resultSet.next();
+			
+			if(resultSet.next()){
+				String texto = resultSet.getString(1);
+				m = Mensaje.parse(texto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (MensajeNoValidoException e) {
+			e.printStackTrace();
+		}
+		return m;
+	}
+	
+	
 }

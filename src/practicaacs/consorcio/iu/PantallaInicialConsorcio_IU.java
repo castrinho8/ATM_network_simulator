@@ -23,7 +23,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     	actualizarListaCajeros();
     	actualizarListaBancos();
     	this.setLocationRelativeTo(null);
-        this.setExtendedState(MAXIMIZED_BOTH);    
+        this.setExtendedState(MAXIMIZED_BOTH);  
+        this.setExtendedState(ICONIFIED);
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -109,7 +110,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         LabelCuenta.setText("Error insertando Cuenta");
-
+        LabelCuenta.setVisible(false);
+        
         ButtonEstado.setText("Cambiar Estado");
         ButtonEstado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -118,7 +120,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         LabelTarjeta.setText("Error insertando Tarjeta");
-
+        LabelTarjeta.setVisible(false);
+        
         jMenu1.setText("File");
 
         jMenuItem1.setText("Salir");

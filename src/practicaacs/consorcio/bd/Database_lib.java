@@ -1546,8 +1546,9 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<Mensaje> res = new ArrayList<Mensaje>();
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT uestringMensaje FROM UltimoEnvio " +
-					"WHERE codBanco = " + id_banco_bd);
+			resultSet = this.getStatement().executeQuery("SELECT u.uestringMensaje " +
+					"FROM Canal c JOIN UltimoEnvio u ON c.codUltimoEnvio=u.codigoue " +
+					"WHERE c.codBanco=" + id_banco_bd + " AND codCanal>0");
 			
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
@@ -1562,6 +1563,41 @@ public class Database_lib {
 		return null;
 	}
 
+	/**
+	 * Metodo que obtiene los id_cajeros de los ultimos mensajes enviamos por los canales
+	 * @param id_banco El banco en el que buscar los id's
+	 * @return Un arraylist con los id's de los cajeros
+	 */
+	public ArrayList<String> recupera_idCajeros_ultimos_mensajes(String id_banco){
+		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.getIdBancoBD(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
+		ResultSet resultSet;
+		ArrayList<String> cajeros = new ArrayList<String>();
+		try {
+			resultSet = this.getStatement().executeQuery("SELECT u.uecodCajero " +
+					"FROM Canal c JOIN UltimoEnvio u ON c.codUltimoEnvio=u.codigoue " +
+					"WHERE c.codBanco=" + id_banco_bd + " AND codCanal>0");
+			
+			while(resultSet.next()){
+				String caj = resultSet.getString(1);
+				cajeros.add(caj);
+			}
+			
+			return cajeros;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return null;
+	}
 	
 	/**
 	 * Settea a True la variable bloqueado de CANAL para el banco y canal correspondiente. 
@@ -2233,24 +2269,6 @@ public class Database_lib {
 		}
 		return res;
 	}
-	
-	
-	/*private String obtenerImprimible(Mensaje m){
-		
-		String elemento = str1+"("+m.getOrigen()+")"+ "->" + str2+"("+m.getDestino()+")" + ": " + m.getTipoMensaje();
-		if(m.es_datos()){
-			if(m.es_consulta()){
-				
-			}
-			if(m.es_respuestaConsulta()){
-				
-			}
-		}else{
-			
-		}
-				
-		return elemento;
-	}*/
 	
 	
 	/**

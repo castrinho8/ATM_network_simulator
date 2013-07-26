@@ -169,7 +169,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 					break;
 				}
 				case ENVIO:{
-					resendToBanco(this.envio);
+					resendToBanco(this.envio,true);
 					break;
 				}
 			}	
@@ -253,7 +253,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * ENVIA MENSAJES DE DATOS - CONSORCIO->BANCO
 	 * @param envio
 	 */
-	private void resendToBanco(MensajeDatos envio){
+	private void resendToBanco(MensajeDatos envio,boolean seleccionarCanalyNum){
 
 		try{
 	    	String id_banco = envio.getDestino();
@@ -265,14 +265,20 @@ public class ConexionConsorcio_Bancos extends Thread {
 			if((puerto==0)|(ip==null))
 				throw new UnknownHostException();
 			
-			//Seleccionamos el canal y se lo añadimos el mensaje
-			int canal = Database_lib.getInstance().seleccionarCanal(envio.getDestino());
+			int canal = envio.getNumcanal();
+			int n_mensaje = envio.getNmsg();
+			
+			/*Se seleccionan los datos en los casos normales, en caso de recuperacion por ejemplo
+			  se envia a través del canal y con el número de mensaje que tenía originalmente*/
+			if(seleccionarCanalyNum){
+				//Seleccionamos el canal y se lo añadimos el mensaje
+				canal = Database_lib.getInstance().seleccionarCanal(envio.getDestino());
+				//Seleccionamos el numero de mensaje siguiente en el canal
+				n_mensaje = Database_lib.getInstance().selecciona_num_mensaje(envio.getDestino(),canal);
+			}
 			envio.setNumcanal(canal);
-			
-			//Seleccionamos el numero de mensaje siguiente en el canal
-			int n_mensaje = Database_lib.getInstance().selecciona_num_mensaje(envio.getDestino(),canal);
 			envio.setNmsg(n_mensaje);
-			
+
 			//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
 			Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,canal,false);
 	
@@ -496,7 +502,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 				MensajeDatos message = cambiaOrigenDestino(m);
 				
 				//Reenviamos el mensaje al banco
-				this.resendToBanco(message);
+				this.resendToBanco(message,true);
 			}
 		}
 		else{ //Si hay errores respondemos con el error correspondiente
@@ -634,7 +640,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 				MensajeDatos message = cambiaOrigenDestino(m);
 				
 				//Reenviamos el mensaje
-				this.resendToBanco(message);
+				this.resendToBanco(message,true);
 			}
 			
 		}else{
@@ -650,30 +656,32 @@ public class ConexionConsorcio_Bancos extends Thread {
 	public void manejar_iniciar_recuperacion(RespIniTraficoRec recibido){
 	
 		String id_banco = recibido.getOrigen();
-    	InetAddress ip_banco = this.input_packet.getAddress();
-    	int puerto_banco = this.input_packet.getPort();
-    	
     	boolean cod_resp = recibido.getCodResp();
 		CodigosError cod_error = recibido.getCodError();
 		
 		if(cod_resp){
-			
 			try{
 				//Setear el estado de la conexion a RECUPERACION
 				Database_lib.getInstance().setEstado_conexion_banco(id_banco,SesRecuperacion.instance());
 			}catch(ConsorcioBDException c){
 				c.printStackTrace();
 				System.exit(-1);
-			}		
+			}
+
+			//Consultar ultimos envios correspondientes en la BD
+			ArrayList<Mensaje> mensajes = Database_lib.getInstance().recupera_ultimos_mensajes(id_banco);
+			Iterator it_m = mensajes.iterator();
 			
-			//Consultar ultimos envios en la BD y reenviarlos
-			for(Mensaje m : Database_lib.getInstance().recupera_ultimos_mensajes(id_banco)){
-				
+			//Obtenemos los envios y los reenviamos al banco
+			while(it_m.hasNext()){
+				//Obtenemos el envio
+				Mensaje m = (Mensaje) it_m.next();
+
 				//Cambiamos el origen y el destino
 				MensajeDatos message = cambiaOrigenDestino(m);
 				
 				//Reenviamos el mensaje
-				this.resendToBanco(message);
+				this.resendToBanco(message,false);
 			}
 		}else{
 			System.out.println("Error iniciando la recuperación: " + cod_error.getMensaje());
@@ -776,6 +784,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		CodigosMensajes tipo_mensaje = recibido.getTipoMensaje();
 		
 		System.out.println("MANEJA");
+		
 		//En caso de que fuese todo correctamente
 		if(recibido.getCod_resp().equals(CodigosRespuesta.CONSACEPTADA)){
 
@@ -791,8 +800,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 				Database_lib.getInstance().bloquearCanal(id_banco,canal);
 		}
 		System.out.println("LLEGA.");
+		
 		//Hay que comprobar si se reenvia al cajero o no
-		if(recibido.getCodonline()){
+		if(recibido.getCodonline() && !Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance())){
 			System.out.println("ENVIAADO");
 			this.sendToCajero(recibido);
 		}

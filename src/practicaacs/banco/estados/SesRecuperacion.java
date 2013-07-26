@@ -3,6 +3,12 @@ package practicaacs.banco.estados;
 import practicaacs.banco.Banco;
 import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
+import practicaacs.fap.MensajeDatos;
+import practicaacs.fap.SolAbono;
+import practicaacs.fap.SolMovimientos;
+import practicaacs.fap.SolReintegro;
+import practicaacs.fap.SolSaldo;
+import practicaacs.fap.SolTraspaso;
 
 public class SesRecuperacion extends EstadoSesion {
 	private static SesRecuperacion instance;
@@ -17,8 +23,79 @@ public class SesRecuperacion extends EstadoSesion {
 	
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
-		if(m != null && m.getTipoMensaje().equals(CodigosMensajes.SOLFINREC)){
-			b.establecerFinTraficoRecuperacion();
+		
+		if(m != null){
+			
+			//Se é fin de recuperacion
+			if(m.getTipoMensaje().equals(CodigosMensajes.SOLFINREC)){
+				b.establecerFinTraficoRecuperacion();
+				return;
+			}
+			
+			//Se non é solicitude de datos sae
+			if(!m.es_solicitudDatos())
+				return;
+			
+			//Obten a canle pola que chegou
+			int canle = ((MensajeDatos)m).getNumcanal();
+
+			//Comproba si xa hay resposta para dita canle e se a hay responde
+			if(b.ultimaMensaxeRespondida(canle)){
+				System.out.println("Entra");
+				b.manexaRespostaUltimaMensaxe(canle);
+				return;
+			}
+			//Se non hay resposta, crea a mesma e responde
+			else{
+				switch(m.getTipoMensaje()){
+					case SOLSALDO:
+						b.facerConsultaSaldo(	((SolSaldo) m).getNumcanal(),
+												((SolSaldo) m).getNmsg(),
+												((SolSaldo) m).getCodonline(),
+												((SolSaldo) m).getNum_tarjeta(),
+												((SolSaldo) m).getNum_cuenta()
+											);
+						return;
+					case SOLMOVIMIENTOS:
+						b.facerConsultaMovementos(	((SolMovimientos) m).getNumcanal(),
+													((SolMovimientos) m).getNmsg(),
+													((SolMovimientos) m).getCodonline(),
+													((SolMovimientos) m).getNum_tarjeta(),
+													((SolMovimientos) m).getNum_cuenta()
+												);
+						return;
+					case SOLREINTEGRO:
+						b.facerReintegro(	((SolReintegro) m).getNumcanal(),
+											((SolReintegro) m).getNmsg(), 
+											((SolReintegro) m).getCodonline(), 
+											((SolReintegro) m).getNum_tarjeta(), 
+											((SolReintegro) m).getNum_cuenta(), 
+											((SolReintegro) m).getImporte()
+										);
+						return;
+					case SOLABONO:
+						b.facerAbono(	((SolAbono) m).getNumcanal(),
+										((SolAbono) m).getNmsg(),
+										((SolAbono) m).getCodonline(),
+										((SolAbono) m).getNum_tarjeta(),
+										((SolAbono) m).getNum_cuenta(),
+										((SolAbono) m).getImporte()
+									);
+						return;
+					case SOLTRASPASO:
+						b.facerTranspaso(	((SolTraspaso) m).getNumcanal(),
+											((SolTraspaso) m).getNmsg(), 
+											((SolTraspaso) m).getCodonline(), 
+											((SolTraspaso) m).getNum_tarjeta(), 
+											((SolTraspaso) m).getNum_cuenta_origen(), 
+											((SolTraspaso) m).getNum_cuenta_destino(), 
+											((SolTraspaso) m).getImporte()
+										);
+						return;
+					default:
+						break;
+				}
+			}
 		}
 	}
 
