@@ -10,6 +10,7 @@ import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
+import practicaacs.fap.MensajeRespDatos;
 import practicaacs.fap.RespAbono;
 import practicaacs.fap.RespReintegro;
 import practicaacs.fap.RespTraspaso;
@@ -250,12 +251,12 @@ public class RealizarReintegro_IU extends ConsultaAbstracta {
     }
     
 	@Override
-    public void actualizarIU(MensajeDatos respuesta){
+    public void actualizarIU(MensajeRespDatos respuesta){
 		
 		String texto = "";
-		CodigosRespuesta codigo = ((RespReintegro)respuesta).getCod_resp();
+		CodigosRespuesta codigo = respuesta.getCod_resp();
 		
-		if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
+		if(codigo.equals(CodigosRespuesta.CONSACEPTADA) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESREINTEGRO))
 			texto = String.valueOf(((RespReintegro)respuesta).getSaldo());
 		else
 			texto = String.valueOf(codigo.getMensaje());

@@ -12,6 +12,7 @@ import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.MensajeNoValidoException;
+import practicaacs.fap.MensajeRespDatos;
 import practicaacs.fap.RespMovimientos;
 import practicaacs.fap.SolMovimientos;
 
@@ -20,6 +21,7 @@ public class ConexionCajero extends Thread{
 	private Mensaje envio;
 	private Cajero cajero;
 	private ConsultaAbstracta interfaz;
+	
 	/**
 	 * Constructor de la clase
 	 * @param env EL envio a realizar.
@@ -34,7 +36,7 @@ public class ConexionCajero extends Thread{
 	@Override
 	public void run() {
 		
-		MensajeDatos m = null;
+		MensajeRespDatos m = null;
 		RespMovimientos resp = null;
 		ArrayList<RespMovimientos> lista = new ArrayList<RespMovimientos>();
 		this.enviar_mensaje();
@@ -55,8 +57,11 @@ public class ConexionCajero extends Thread{
 			}
 		//Si no es MOVIMIENTOS solo se recibe uno
 		}else{
-			m = this.recibir_mensaje();
-			
+			//Recibimos mensajes hasta que la contestacion sea la adecuada
+			do{
+				m = this.recibir_mensaje();
+			}while(!envio.esContestacionCorrecta(m.getTipoMensaje()));
+				
 			try {
 				this.interfaz.actualizarIU(m);
 			} catch (CodigoNoValidoException e) {
@@ -91,7 +96,7 @@ public class ConexionCajero extends Thread{
     }
     
     
-    public MensajeDatos recibir_mensaje(){
+    public MensajeRespDatos recibir_mensaje(){
     
     	Calendar time = Calendar.getInstance();
     	byte [] recibirDatos = new byte[1024];
@@ -122,7 +127,7 @@ public class ConexionCajero extends Thread{
 		
 		time = Calendar.getInstance();
     	System.out.println("RECEPCION: Cajero: " + this.cajero.getId_cajero() +" a las " + time.getTime());
-    	return (MensajeDatos) recepcion;
+    	return (MensajeRespDatos) recepcion;
     }
     
     

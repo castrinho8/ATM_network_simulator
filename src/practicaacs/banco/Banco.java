@@ -518,7 +518,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		if(c.ocupado){
 			r2 = new RespSaldoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
 			return;
 		}
 		
@@ -567,13 +567,13 @@ public class Banco implements AnalizadorMensajes{
 		
 		if(c.ocupado){
 			r2 = new RespMovimientosError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
 			return;
 		}
 		
 		if (c.lastMsg != null && c.lastMsg + 1 != nmsg && !estado.recuperacion()){
 			r2 = new RespMovimientosError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.FUERASEC);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de Secuencia).\n");
 			return;
 		}
 		
@@ -631,7 +631,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		if(c.ocupado){
 			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
 			this.iu.actualizar();
 			return;
 		}
@@ -685,7 +685,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		if(c.ocupado){
 			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
 			this.iu.actualizar();
 			return;
 		}
@@ -745,7 +745,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		if(c.ocupado){
 			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,online, CodigosError.CANALOCUP);
-			this.enviarMensaje(r2,"Mensaxe enviada: Error (Canal Opupado).\n");
+			this.enviarMensaje(r2,"Mensaxe enviada: Error (Canal Ocupado).\n");
 			this.iu.actualizar();
 			return;
 		}

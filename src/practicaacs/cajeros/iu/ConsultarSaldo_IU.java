@@ -10,6 +10,7 @@ import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
+import practicaacs.fap.MensajeRespDatos;
 import practicaacs.fap.RespAbono;
 import practicaacs.fap.RespSaldo;
 
@@ -158,15 +159,14 @@ public class ConsultarSaldo_IU extends ConsultaAbstracta {
     }
     
 	@Override
-    public void actualizarIU(MensajeDatos respuesta){
+    public void actualizarIU(MensajeRespDatos respuesta){
 		this.ConsultandoLabel.setVisible(false);
 
-		RespSaldo m = (RespSaldo)respuesta;
 		String texto = "";
-		
-		if(m.getCodonline()){
-			CodigosRespuesta codigo = m.getCod_resp();
-			if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
+		if(respuesta.getCodonline()){
+			CodigosRespuesta codigo = respuesta.getCod_resp();
+			
+			if((codigo.equals(CodigosRespuesta.CONSACEPTADA)) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESSALDO))
 				texto = String.valueOf(((RespSaldo)respuesta).getSaldo());
 			else
 				texto = String.valueOf(codigo.getMensaje());

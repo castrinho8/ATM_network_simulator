@@ -108,6 +108,8 @@ public class FinRecuperacion_IU extends javax.swing.JFrame {
         //Obtiene el banco seleccionado
         JList lista = (JList) this.jScrollPane1.getViewport().getView();
         String id_banco = (String) lista.getSelectedValue();
+        if(id_banco==null)
+        	return;
         this.finalizar_recuperacion(id_banco);
         this.setVisible(false);
         this.parent.setVisible(true);

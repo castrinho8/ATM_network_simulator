@@ -25,6 +25,7 @@ import practicaacs.banco.estados.SesAberta;
 import practicaacs.banco.estados.SesDetida;
 import practicaacs.banco.estados.SesNonAberta;
 import practicaacs.banco.estados.SesRecuperacion;
+import practicaacs.consorcio.aux.MensajeCajero;
 import practicaacs.consorcio.aux.Sesion;
 import practicaacs.consorcio.aux.TipoAccion;
 import practicaacs.consorcio.aux.TipoOrigDest;
@@ -364,6 +365,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 				&& (Database_lib.getInstance().hayMensajesSinResponder(id_banco)))
 			return CodigosError.OTRASCAUSAS;
 			
+		//Llega mensaje de CONTROL y está en RECUPERACION
+		if((!m.es_datos()) && (Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance())))
+			return CodigosError.OTRASCAUSAS;
+		
 		return CodigosError.CORRECTO;
 	}
 	
@@ -658,7 +663,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String id_banco = recibido.getOrigen();
     	boolean cod_resp = recibido.getCodResp();
 		CodigosError cod_error = recibido.getCodError();
-		
+
 		if(cod_resp){
 			try{
 				//Setear el estado de la conexion a RECUPERACION
@@ -669,19 +674,32 @@ public class ConexionConsorcio_Bancos extends Thread {
 			}
 
 			//Consultar ultimos envios correspondientes en la BD
-			ArrayList<Mensaje> mensajes = Database_lib.getInstance().recupera_ultimos_mensajes(id_banco);
-			Iterator it_m = mensajes.iterator();
+			ArrayList<MensajeCajero> mensajes = Database_lib.getInstance().recupera_ultimos_mensajes(id_banco);
 			
 			//Obtenemos los envios y los reenviamos al banco
-			while(it_m.hasNext()){
-				//Obtenemos el envio
-				Mensaje m = (Mensaje) it_m.next();
+			for(MensajeCajero message : mensajes){
 
+				//Obtenemos el envio
+				Mensaje m = message.getMensaje();
+				int caj = Integer.parseInt(message.getId_cajero());
+				
+				String cajero = null;
+				try {
+					cajero = Database_lib.getInstance().getNameCajeroBD(caj);
+				} catch (ConsorcioBDException e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+				
 				//Cambiamos el origen y el destino
-				MensajeDatos message = cambiaOrigenDestino(m);
+				MensajeDatos m_datos = cambiaOrigenDestino(m);
+				//Cambiamos el id del cajero
+				this.id_cajero = cajero;
+				
+				System.out.println("ID CAJERO:"+this.id_cajero+"-"+cajero);
 				
 				//Reenviamos el mensaje
-				this.resendToBanco(message,false);
+				this.resendToBanco(m_datos,false);
 			}
 		}else{
 			System.out.println("Error iniciando la recuperación: " + cod_error.getMensaje());
@@ -764,6 +782,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		String origen = this.consorcio.getId_consorcio();
 		String destino = id_banco;
 		
+		//Enviamos la solicitud de fin de recuperacion
 		SolFinTraficoRec envio = new SolFinTraficoRec(origen,destino);
 		this.sendToBanco(envio,ip_banco,puerto_banco,false);
 	}
@@ -783,7 +802,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		int canal = recibido.getNumcanal();
 		CodigosMensajes tipo_mensaje = recibido.getTipoMensaje();
 		
-		System.out.println("MANEJA");
+		System.out.println("ENTRA MANEJA MENSAJES DATOS");
 		
 		//En caso de que fuese todo correctamente
 		if(recibido.getCod_resp().equals(CodigosRespuesta.CONSACEPTADA)){
@@ -799,11 +818,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 			if(Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance()))
 				Database_lib.getInstance().bloquearCanal(id_banco,canal);
 		}
-		System.out.println("LLEGA.");
+		
+		System.out.println("SALE MANEJA MENSAJES DATOS");
 		
 		//Hay que comprobar si se reenvia al cajero o no
-		if(recibido.getCodonline() && !Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance())){
-			System.out.println("ENVIAADO");
+		if(recibido.getCodonline()){
 			this.sendToCajero(recibido);
 		}
 	}

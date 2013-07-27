@@ -10,6 +10,7 @@ import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
+import practicaacs.fap.MensajeRespDatos;
 import practicaacs.fap.RespAbono;
 import practicaacs.fap.RespTraspaso;
 
@@ -286,11 +287,12 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
     }
     
 	@Override
-    public void actualizarIU(MensajeDatos respuesta){
-		String texto = "";
-		CodigosRespuesta codigo = ((RespTraspaso)respuesta).getCod_resp();
+    public void actualizarIU(MensajeRespDatos respuesta){
 		
-		if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
+		String texto = "";
+		CodigosRespuesta codigo = respuesta.getCod_resp();
+		
+		if(codigo.equals(CodigosRespuesta.CONSACEPTADA) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESTRASPASO))
 			texto = String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
 				"\nDESTINO: " + String.valueOf(((RespTraspaso)respuesta).getSaldoDestino()));
 		else

@@ -313,24 +313,6 @@ public class ConexionConsorcio_Cajeros extends Thread{
 				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;
 			}
-			//PARA HACER PRUEBAS DE ENVIO DE MOVIMIENTOS AL CAJERO SIN TENER QUE USAR EL BANCO
-			/*case RECHAZAR_PETICION:{
-				//La respuesta en caso de error.
-				ArrayList<Movimiento> list = Database_lib.getInstance().consultar_movimientos(recibido.getNum_tarjeta(),recibido.getNum_cuenta());
-				Iterator<Movimiento> it = list.iterator();
-				int num = list.size()-1;
-				
-				while(it.hasNext()){
-					Movimiento m = it.next();
-					respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,true,cod_resp,
-						num,m.getTipo(),m.getSigno(),m.getImporte(),c.getTime());
-					num--;
-					System.out.println(num);
-					//Enviamos el mensaje
-					sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
-				}
-				break;
-			}*/
 			case ENVIO_CORRECTO:{
 				//Reenviamos el mensaje al banco
 				this.sendToBanco(recibido, recibido.getNum_tarjeta());
