@@ -333,10 +333,10 @@ public class Database_lib {
 		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (!this.existeCuenta(tarjeta,cuenta_destino)))
 			return CodigosRespuesta.TRANSCUENTADESNVALIDA;
 		
-		/**if (((tipo.equals(CodigosMensajes.SOLSALDO)) || (tipo.equals(CodigosMensajes.SOLMOVIMIENTOS)))
+		if (((tipo.equals(CodigosMensajes.SOLSALDO)) || (tipo.equals(CodigosMensajes.SOLMOVIMIENTOS)))
 				&& (!codonline))
 			return CodigosRespuesta.CONSDEN;
-		*/
+		
 		if ((this.consultarGastoOffline(tarjeta)+importe) > 1000)
 			return CodigosRespuesta.IMPORTEEXCLIMITE;
 

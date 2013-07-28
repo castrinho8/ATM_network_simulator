@@ -8,6 +8,7 @@ import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.MensajeRespDatos;
 import practicaacs.fap.RespMovimientos;
+import practicaacs.fap.RespMovimientosError;
 
 abstract public class ConsultaAbstracta extends javax.swing.JFrame {
 
@@ -18,6 +19,10 @@ abstract public class ConsultaAbstracta extends javax.swing.JFrame {
     }
     
     public void actualizarIUmovimientos(ArrayList<RespMovimientos> lista) throws CodigoNoValidoException{
+    	throw new CodigoNoValidoException("Error: El método actualizarIUmovimientos solo puede ser llamado para las consultas de movimientos.");
+    }
+ 
+    public void actualizarIUmovimientos(RespMovimientosError elemento) throws CodigoNoValidoException{
     	throw new CodigoNoValidoException("Error: El método actualizarIUmovimientos solo puede ser llamado para las consultas de movimientos.");
     }
     

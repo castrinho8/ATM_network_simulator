@@ -14,6 +14,7 @@ import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.MensajeNoValidoException;
 import practicaacs.fap.MensajeRespDatos;
 import practicaacs.fap.RespMovimientos;
+import practicaacs.fap.RespMovimientosError;
 import practicaacs.fap.SolMovimientos;
 
 public class ConexionCajero extends Thread{
@@ -38,20 +39,34 @@ public class ConexionCajero extends Thread{
 		
 		MensajeRespDatos m = null;
 		RespMovimientos resp = null;
+		RespMovimientosError resp_error = null;
 		ArrayList<RespMovimientos> lista = new ArrayList<RespMovimientos>();
 		this.enviar_mensaje();
 
 		//Si es MOVIMIENTOS hay que recibir varios mensajes
 		if(this.envio.getTipoMensaje().equals(CodigosMensajes.SOLMOVIMIENTOS)){
 			do{
-				resp = (RespMovimientos) this.recibir_mensaje();
-				lista.add(resp);
-				System.out.println(resp.getNmovimientos());
-				System.out.println("MOVIMIENTOS RESTANTES: "+resp.getNmovimientos());
+				//Recibe el mensaje
+				MensajeDatos m_datos = this.recibir_mensaje();
+				
+				//Si es respuesta de movimientos normal la añadimos a la lista
+				try{
+					resp = (RespMovimientos) m_datos;
+					lista.add(resp);
+				//Si es respuesta de movimientos error salimos del bucle
+				}catch(ClassCastException e){
+					resp_error = (RespMovimientosError) m_datos;
+					break;
+				}
 			}while(resp.getNmovimientos()>0);
 			
 			try {
-				this.interfaz.actualizarIUmovimientos(lista);
+				//Si no hay errores actualizamos los movimientos
+				if(resp_error==null)
+					this.interfaz.actualizarIUmovimientos(lista);
+				//Si hay errores actualizamos el error
+				else
+					this.interfaz.actualizarIUmovimientos(resp_error);
 			} catch (CodigoNoValidoException e) {
 				e.printStackTrace();
 			}
@@ -80,12 +95,10 @@ public class ConexionCajero extends Thread{
     private void enviar_mensaje(){
     	
     	Calendar time = Calendar.getInstance();
-    	System.out.println("ENVIO: Cajero: " + this.cajero + " a las " + time.getTime() + " \n" + this.envio.toString());
+    	System.out.println("ENVIO: " + this.envio.getTipoMensaje() + " Cajero: " + this.cajero + " a las " + time.getTime() + " \n" + this.envio.toString());
     	//Crea el Datagrama a enviar
 		DatagramPacket enviarPaquete = new DatagramPacket(this.envio.getBytes(),this.envio.size(),this.cajero.getConsorcio_address(),this.cajero.getConsorcio_port());
 		
-		System.out.println("ENVIA: " + this.envio.getTipoMensaje().toString());
-
 		try{
 			//Enviamos el mensaje
 			this.cajero.getSocketCajero().send(enviarPaquete);
@@ -126,7 +139,7 @@ public class ConexionCajero extends Thread{
 		}
 		
 		time = Calendar.getInstance();
-    	System.out.println("RECEPCION: Cajero: " + this.cajero.getId_cajero() +" a las " + time.getTime());
+    	System.out.println("RECEPCION: " + recepcion.getTipoMensaje() + " Cajero: " + this.cajero.getId_cajero() +" a las " + time.getTime());
     	return (MensajeRespDatos) recepcion;
     }
     

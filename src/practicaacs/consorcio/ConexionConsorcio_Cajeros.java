@@ -133,7 +133,6 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip_cajero,port_cajero);
 		
-		System.out.println(ip_cajero+":"+port_cajero);
 		try{
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);

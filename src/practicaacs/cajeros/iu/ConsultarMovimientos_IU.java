@@ -17,6 +17,7 @@ import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
 import practicaacs.fap.MensajeDatos;
 import practicaacs.fap.RespMovimientos;
+import practicaacs.fap.RespMovimientosError;
 import practicaacs.fap.RespSaldo;
 
 public class ConsultarMovimientos_IU extends ConsultaAbstracta {
@@ -173,6 +174,7 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 		
 		while(it.hasNext()){
 			RespMovimientos m = (RespMovimientos) it.next();
+
 			if(m.getCodonline()){
 				CodigosRespuesta codigo = m.getCod_resp();
 				if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
@@ -189,6 +191,23 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 		}
         this.listMovimientos.setListData(strlist.toArray());
 	}
+	
+	@Override
+    public void actualizarIUmovimientos(RespMovimientosError elemento) throws CodigoNoValidoException{
+		this.ConsultandoLabel.setVisible(false);
+		
+		ArrayList<String> strlist = new ArrayList<String>();
+		String texto = null;
+
+		if(elemento.getCodonline())
+			texto = "Error: "+elemento.getCod_resp().getMensaje();
+		else 
+			texto = "Error: No hay conexion";
+
+		strlist.add(texto);
+        this.listMovimientos.setListData(strlist.toArray());
+    }
+	
 }
 
 
