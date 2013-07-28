@@ -26,6 +26,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         this.setExtendedState(MAXIMIZED_BOTH);  
         this.setExtendedState(ICONIFIED);
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -51,6 +52,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         LabelCuenta = new javax.swing.JLabel();
         ButtonEstado = new javax.swing.JButton();
         LabelTarjeta = new javax.swing.JLabel();
+        RefreshButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -76,14 +78,14 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         cajerosList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = {};
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
         jScrollPane3.setViewportView(cajerosList);
 
         BancosLIst.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = {};
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
@@ -122,6 +124,13 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         LabelTarjeta.setText("Error insertando Tarjeta");
         LabelTarjeta.setVisible(false);
         
+        RefreshButton.setText("Actualizar");
+        RefreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RefreshButtonActionPerformed(evt);
+            }
+        });
+
         jMenu1.setText("File");
 
         jMenuItem1.setText("Salir");
@@ -164,6 +173,14 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
                         .addGap(159, 159, 159)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(LabelCuenta, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(TextFieldCuenta, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(ButtonCuenta)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(LabelTarjeta, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addGroup(layout.createSequentialGroup()
@@ -171,28 +188,25 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(ButtonTarjeta)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 374, Short.MAX_VALUE)
-                                .addComponent(ButtonEstado))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(LabelCuenta, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(TextFieldCuenta, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(ButtonCuenta)))
-                                .addGap(0, 0, Short.MAX_VALUE))))
+                                .addComponent(RefreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane4))
+                    .addComponent(jScrollPane4)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(ButtonEstado)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(50, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(ButtonEstado)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(SolButton)
                     .addComponent(TextFieldTarjeta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ButtonTarjeta)
-                    .addComponent(ButtonEstado))
+                    .addComponent(RefreshButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(LabelTarjeta)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -220,6 +234,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         pack();
     }// </editor-fold>                        
 
+                                            
     /**
      * Solicitar Recuperacion
      */
@@ -340,8 +355,16 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
      */
     private void ButtonEstadoActionPerformed(java.awt.event.ActionEvent evt) {                                             
         this.consorcio.getBancos_server().cambiar_estado();
-    }                                            
-                                            
+    }
+    
+    /**
+     * Boton Refresh
+     * @param evt
+     */
+    private void RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    	this.actualizarListaBancos();
+    	this.actualizarListaCajeros();
+    }                                             
 
     /**
      * @param args the command line arguments
@@ -385,6 +408,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     private javax.swing.JButton FinButton;
     private javax.swing.JLabel LabelCuenta;
     private javax.swing.JLabel LabelTarjeta;
+    private javax.swing.JButton RefreshButton;
     private javax.swing.JButton SolButton;
     private javax.swing.JTextField TextFieldCuenta;
     private javax.swing.JTextField TextFieldTarjeta;
@@ -413,9 +437,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     	this.interfaz_bd.actualizar();
     }
     
+    
 }
-
-
 
 
 
