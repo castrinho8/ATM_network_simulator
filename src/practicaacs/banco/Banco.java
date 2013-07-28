@@ -264,7 +264,7 @@ public class Banco implements AnalizadorMensajes{
 	 */
 	public void manexaRespostaUltimaMensaxe(int canle){
 		Mensaje m = this.getUltimaMensaxe(canle);
-		this.enviarMensaje(m, "Mensaxe enviada: Recuperación "+m.getTipoMensaje());
+		this.enviarMensaje(m, "Mensaxe enviada: Recuperación "+m.getTipoMensaje()+".\n");
 	}
 	
 	/**

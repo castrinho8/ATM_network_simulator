@@ -43,4 +43,44 @@ public abstract class MensajeRespDatos extends MensajeDatos {
 		return super.formatearMensaje()+"---- {"+cod_resp+"}";
 	}
 	
+	
+	public static RespDatosError obtenerRespuestaError(MensajeDatos m, CodigosError codigoError){
+		
+		switch(m.getTipoMensaje()){
+			case RESSALDO:
+				return new RespSaldoError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			case SOLSALDO:
+				return new RespSaldoError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			case RESMOVIMIENTOS:
+				return new RespMovimientosError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError) ;
+			case SOLMOVIMIENTOS:
+				return new RespMovimientosError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError) ;
+			case RESREINTEGRO:
+				return new RespReintegroError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			case SOLREINTEGRO:
+				return new RespReintegroError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			case RESABONO:
+				return new RespAbonoError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			case SOLABONO:
+				return new RespAbonoError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			case RESTRASPASO:
+				return new RespTraspasoError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			case SOLTRASPASO:
+				return new RespTraspasoError(m.getOrigen(),m.getDestino(),m.getNumcanal(),m.getNmsg(),
+						m.getCodonline(),codigoError);
+			default:
+				return null;
+		}
+	}
+	
+	
 }
