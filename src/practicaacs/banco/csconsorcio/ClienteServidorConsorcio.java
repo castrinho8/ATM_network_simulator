@@ -80,7 +80,6 @@ public class ClienteServidorConsorcio extends Thread {
 			 
 			while ((msgEnviar = mensajesAEnviar.poll()) != null){
 				DatagramPacket enviarPaquete = new DatagramPacket(msgEnviar.getBytes(), msgEnviar.size(), ipconsorcio, this.puertoConsorcio);
-	
 				try{
 					socketServidor.send(enviarPaquete);
 				}catch (IOException e) {

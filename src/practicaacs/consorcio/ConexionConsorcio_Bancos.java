@@ -144,13 +144,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 					    System.err.println(e.getLocalizedMessage());
 					}
 					
-					if(recibido.es_datos())
-						System.out.println("ENTRA:"+((MensajeDatos)recibido).getNmsg()+":"+recibido.getOrigen()+"->"+recibido.getDestino()+":"+recibido.getTipoMensaje()+
-							"\nCANAL:"+((MensajeDatos)recibido).getNumcanal()+"COD_ONLINE:"+((MensajeDatos)recibido).getCodonline());
-					else
-						System.out.println("ENTRA:"+recibido.getOrigen()+"->"+recibido.getDestino()+":"+recibido.getTipoMensaje());
-						
-					
+					System.out.println("ENTRA: "+recibido.obtenerImprimible("BANCO", "CONSORCIO"));
+					System.out.println("MENSAJE: -"+recibido.toString()+"-");
+
 					//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 					Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.BANCO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
 					
@@ -201,8 +197,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 		respuesta.setDestino(destino);
 		respuesta.setOrigen(origen);
 		
-		System.out.println("IP DEST:"+ip_dest+"PUERTO DEST"+puerto_dest);
-		
 		//Delegar en el ServidorCajeros para el reenvio y el almacenamiento del envio
 		this.consorcio.getCajeros_server().sendToCajero(respuesta,ip_dest,puerto_dest);
 	}
@@ -230,11 +224,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
 
-		if(envio.es_datos())
-			System.out.println("SALE_BANCO:"+((MensajeDatos)envio).getNmsg()+":"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje()+
-					"\nCANAL:"+((MensajeDatos)envio).getNumcanal()+"COD_ONLINE:"+((MensajeDatos)envio).getCodonline());
-		else
-			System.out.println("SALE_BANCO"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje());
+		System.out.println("SALE: "+envio.obtenerImprimible("CONSORCIO", "BANCO"));
 		
 		try{
 			//Enviamos el mensaje
@@ -289,12 +279,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			//Actualizar la interfaz grafica
 			this.consorcio.actualizarIU();
 			
-			if(envio.es_datos())
-				System.out.println("SALE_BANCO:"+((MensajeDatos)envio).getNmsg()+":"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje()+
-						"\nCANAL:"+((MensajeDatos)envio).getNumcanal()+"COD_ONLINE:"+((MensajeDatos)envio).getCodonline());
-			else
-				System.out.println("SALE_BANCO"+envio.getOrigen()+"->"+envio.getDestino()+":"+envio.getTipoMensaje());
-			
+			System.out.println("SALE: "+envio.obtenerImprimible("CONSORCIO", "BANCO"));
 			
 			//Creamos el datagrama
 			DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
@@ -707,8 +692,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 				//Cambiamos el id del cajero
 				this.id_cajero = cajero;
 				
-				System.out.println("ID CAJERO:"+this.id_cajero+"-"+cajero);
-				
 				//Reenviamos el mensaje
 				try {
 					this.resendToBanco(m_datos,false);
@@ -821,7 +804,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Comprobamos si hay algun error
 		CodigosError cod_error = this.comprobar_errores(recibido, canal);
-		System.out.println("COD_ERROR:"+cod_error);
 		
 		//Si hay algun error a nivel de comunicacion
 		if(!cod_error.equals(CodigosError.CORRECTO)){

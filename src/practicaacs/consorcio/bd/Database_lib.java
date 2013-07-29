@@ -1562,7 +1562,6 @@ public class Database_lib {
 			resultSet = this.getStatement().executeQuery("SELECT DISTINCT c.codCanal FROM Canal c JOIN UltimoEnvio ue " +
 					"ON c.codBanco = " + id_banco_bd + " WHERE c.cabloqueado = 0 AND ue.uecontestado = 1 AND c.codCanal>0");
 			
-			System.out.println("HAY CANAL:"+resultSet.next());
 			//Devolvemos si hay algun canal libre
 			return resultSet.next();
 			
@@ -1767,7 +1766,6 @@ public class Database_lib {
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
 				String id_cajero = resultSet.getString(2);
-				System.out.println(id_cajero+"->"+m);
 				res.add(new MensajeCajero(m,id_cajero));
 			}
 			
@@ -2521,7 +2519,7 @@ public class Database_lib {
 		}
 		
 		boolean es_null_codonline = !(message.es_datos() && !message.es_consulta() && !message.es_respuestaConsulta());
-		System.out.println("ES NULL CODIGO ONLINE: "+es_null_codonline);
+
 		try {
 			String q = "INSERT INTO Mensaje(codBanco,meNumMensaje,meonline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
 					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((es_null_codonline)?"NULL":online) + "," + torigen.getNum() +

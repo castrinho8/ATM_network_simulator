@@ -129,7 +129,8 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		//Actualizar la interfaz grafica
 		this.consorcio.actualizarIU();
 		
-		System.out.println("SALE: " + respuesta.getTipoMensaje().toString());
+		System.out.println("SALE: "+respuesta.obtenerImprimible("CONSORCIO", "CAJERO"));
+		
 		//Creamos el datagrama
 		DatagramPacket enviarPaquete = new DatagramPacket(respuesta.getBytes(),respuesta.size(),ip_cajero,port_cajero);
 		
@@ -261,15 +262,11 @@ public class ConexionConsorcio_Cajeros extends Thread{
 
 		RespSaldo respuesta = null;
 		
-		System.out.println("ONLINE:"+codonline+"-"+cod_resp+"-"+"TIPO:"+obtiene_tipo_envio(recibido,codonline,cod_resp));
-
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
 				//La respuesta en caso de error.
 				respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 
-				System.out.println(nmsg+":"+origen+"->"+destino+"CANAL:"+numcanal+"CODONLINE:"+codonline+"codresp:"+cod_resp);
-				
 				//Enviamos el mensaje
 				sendToCajero(respuesta,this.input_packet.getAddress(),this.input_packet.getPort());
 				break;

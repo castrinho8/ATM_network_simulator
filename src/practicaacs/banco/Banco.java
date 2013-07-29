@@ -594,7 +594,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		
 		movs = this.getMovementosConta(conta.getNumero());
-		ind = movs.size() >= 20 ? 20 : movs.size();
+		ind = (movs.size() >= 20) ? 20 : movs.size();
 		for (Movemento m : movs){
 			CodigosMovimiento c1;
 			try {
@@ -607,6 +607,8 @@ public class Banco implements AnalizadorMensajes{
 					c1, m.importe >= 0, m.importe > 0 ? m.importe : - m.importe, m.data);
 				this.enviarMensaje(r, "Mensaxe enviada: Movemento("+ c1 + ").\n");
 			
+			if(ind<0)
+				break;
 		}
 		this.iu.actualizar();
 	}
@@ -928,6 +930,8 @@ public class Banco implements AnalizadorMensajes{
 	
 	private void enviarMensaje(Mensaje m, String string) {
 		if (this.responderMensaxe(m)){
+			System.out.println("SALE: "+m.obtenerImprimible("BANCO", "CONSORCIO"));
+			System.out.println("-"+m.toString()+"-");
 			try {
 				this.cs.enviarMensaje(m);
 				rexistrarMensaxe(m, m.toString());

@@ -48,7 +48,9 @@ public class ConexionCajero extends Thread{
 			do{
 				//Recibe el mensaje
 				MensajeDatos m_datos = this.recibir_mensaje();
-				
+
+				System.out.println("RECIBIDO: "+m_datos.obtenerImprimible("CONSORCIO", "CAJERO"));
+
 				//Si es respuesta de movimientos normal la añadimos a la lista
 				try{
 					resp = (RespMovimientos) m_datos;
@@ -75,6 +77,7 @@ public class ConexionCajero extends Thread{
 			//Recibimos mensajes hasta que la contestacion sea la adecuada
 			do{
 				m = this.recibir_mensaje();
+				System.out.println("RECIBIDO: "+m.obtenerImprimible("CONSORCIO", "CAJERO"));
 			}while(!envio.esContestacionCorrecta(m.getTipoMensaje()));
 				
 			try {
@@ -118,9 +121,7 @@ public class ConexionCajero extends Thread{
 		
 		try{
 			//Recibe datos
-			System.out.println("RECIBIENDO DEL CONSORCIO");
 			this.cajero.getSocketCajero().receive(inputPacket);
-			System.out.println("RECIBIDO DEL CONSORCIO");
 
 		}catch (SocketTimeoutException e){
 			System.out.println("Timeout");

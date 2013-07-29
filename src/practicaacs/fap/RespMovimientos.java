@@ -57,8 +57,8 @@ public class RespMovimientos extends MensajeRespDatos {
 	@Override
 	protected void parseComp(String bs) throws MensajeNoValidoException {
 		super.parseComp(bs);
-		
-		if(bs.length() != 57)
+
+		if((bs.length() != 58) && (bs.length() != 57))
 			throw new MensajeNoValidoException("Lonxitude (" + bs.length() + ") non válida (RespMovimiento)");
 		
 		try{
