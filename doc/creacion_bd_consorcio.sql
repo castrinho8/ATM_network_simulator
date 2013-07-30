@@ -222,10 +222,26 @@ INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor4
 
 INSERT INTO Cajero(cajNombre,cajIp,cajPuerto) VALUES ('       1','127.0.0.1',8928);
 
-INSERT INTO Tarjeta VALUES ('pastor42001',0);
 
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',0000,0);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',0001,0);
+INSERT INTO Tarjeta VALUES ('pastor42001',0);
+INSERT INTO Tarjeta VALUES ('pastor42002',0);
+INSERT INTO Tarjeta VALUES ('pastor42003',0);
+INSERT INTO Tarjeta VALUES ('pastor42004',0);
+INSERT INTO Tarjeta VALUES ('pastor42005',0);
+
+
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42005',0,0000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',1,1000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42002',1,1000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',2,2000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',3,3000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42002',3,3000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42003',4,4000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42003',5,5000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42003',6,6000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42004',7,7000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42004',8,8000);
+INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42005',9,9000);
 
 
 

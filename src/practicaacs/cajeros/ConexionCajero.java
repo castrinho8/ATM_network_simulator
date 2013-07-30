@@ -45,22 +45,27 @@ public class ConexionCajero extends Thread{
 
 		//Si es MOVIMIENTOS hay que recibir varios mensajes
 		if(this.envio.getTipoMensaje().equals(CodigosMensajes.SOLMOVIMIENTOS)){
+			MensajeDatos m_datos = null;
 			do{
 				//Recibe el mensaje
-				MensajeDatos m_datos = this.recibir_mensaje();
+				m_datos = this.recibir_mensaje();
 
 				System.out.println("RECIBIDO: "+m_datos.obtenerImprimible("CONSORCIO", "CAJERO"));
 
-				//Si es respuesta de movimientos normal la añadimos a la lista
-				try{
-					resp = (RespMovimientos) m_datos;
-					lista.add(resp);
-				//Si es respuesta de movimientos error salimos del bucle
-				}catch(ClassCastException e){
-					resp_error = (RespMovimientosError) m_datos;
-					break;
+				//Comprobamos que sea del tipo RESMOVIMIENTOS
+				if(m_datos.getTipoMensaje().equals(CodigosMensajes.RESMOVIMIENTOS)){
+					//Si es respuesta de movimientos normal la añadimos a la lista
+					try{
+						resp = (RespMovimientos) m_datos;
+						lista.add(resp);
+					//Si es respuesta de movimientos error salimos del bucle
+					}catch(ClassCastException e){
+						resp_error = (RespMovimientosError) m_datos;
+						break;
+					}
 				}
-			}while(resp.getNmovimientos()>0);
+				
+			}while((!envio.esContestacionCorrecta(m_datos.getTipoMensaje())) || (resp.getNmovimientos()>0));
 			
 			try {
 				//Si no hay errores actualizamos los movimientos

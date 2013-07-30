@@ -25,7 +25,7 @@ import practicaacs.fap.*;
 public class Cajero{
 
 	static private int next_id_cajero = 1;
-	static private int next_number_message = 0;
+	static private int next_number_message = 1;
 	static private PantallaInicialCajero_IU iu;
 	
 	private String id_cajero;

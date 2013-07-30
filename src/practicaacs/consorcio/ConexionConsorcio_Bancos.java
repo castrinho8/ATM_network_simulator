@@ -759,7 +759,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 		//Enviamos la solicitud de recuperacion
 		SolIniTraficoRec envio = new SolIniTraficoRec(origen,destino); 
-		this.sendToBanco(envio,ip_banco,puerto_banco,false);
+		this.sendToBanco(envio,ip_banco,puerto_banco,true);
 	}
 	
 	/**
@@ -783,7 +783,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Enviamos la solicitud de fin de recuperacion
 		SolFinTraficoRec envio = new SolFinTraficoRec(origen,destino);
-		this.sendToBanco(envio,ip_banco,puerto_banco,false);
+		this.sendToBanco(envio,ip_banco,puerto_banco,true);
 	}
 	
 	
