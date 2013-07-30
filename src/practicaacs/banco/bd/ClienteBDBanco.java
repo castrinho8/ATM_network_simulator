@@ -263,7 +263,7 @@ public class ClienteBDBanco {
 		try {
 			this.statement.executeUpdate("UPDATE Canle SET lastmsg = " + nmsg + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
 			this.statement.executeUpdate("UPDATE Canle SET ocupado = " + (ocupado ? "1" : "0") + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
-			this.statement.executeUpdate("UPDATE Canle SET recuperado = " + (ocupado ? "1" : "0") + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
+			this.statement.executeUpdate("UPDATE Canle SET recuperado = " + (recuperado ? "1" : "0") + " WHERE scod = " + sesionid + " AND cncod = " + ncanal);
 			
 		} catch (SQLException e) {
 			e.printStackTrace();

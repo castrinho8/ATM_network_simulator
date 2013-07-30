@@ -41,6 +41,7 @@ CREATE TABLE Execucion(
 	CONSTRAINT e_pk PRIMARY KEY (ecod)
 );
 
+
 CREATE TABLE Sesion(
 	scod INTEGER AUTO_INCREMENT,
 	treintegros INTEGER DEFAULT 0,
@@ -54,7 +55,7 @@ CREATE TABLE Canle(
 	cncod INTEGER,
 	lastmsg INTEGER DEFAULT NULL,
 	ocupado BOOLEAN DEFAULT 0,
-	recuperado BOOLEAN DEFAULT 0,
+	recuperado BOOLEAN DEFAULT 1,
 	CONSTRAINT cn_scod_fk FOREIGN KEY (scod) REFERENCES Sesion(scod) ON DELETE CASCADE,
 	CONSTRAINT s_pk PRIMARY KEY (scod,cncod)	
 );
@@ -96,18 +97,18 @@ INSERT INTO Conta(ccod,saldo) VALUES (7,7000);
 INSERT INTO Conta(ccod,saldo) VALUES (8,8000);
 INSERT INTO Conta(ccod,saldo) VALUES (9,9000);
 
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',1,1);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',2,2);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 01',3,3);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',1,1);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 02',2,3);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',1,4);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',2,5);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 03',3,6);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',1,7);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 04',2,8);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',1,0);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42 05',3,9);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',1,1);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',2,2);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',3,3);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',1,1);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',2,3);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',1,4);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',2,5);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',3,6);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',1,7);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',2,8);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',1,0);
+INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',3,9);
 
 
 -- Tipos de movimento.

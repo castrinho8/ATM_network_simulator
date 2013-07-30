@@ -476,7 +476,8 @@ public class Banco implements AnalizadorMensajes{
 		this.iu.engadirLinhaLog("Entrando en modo recuperación.\n");
 		
 		for(Canal c : this.bd.getCanales(idSesion)){
-			this.bd.setCanal(idSesion, c.numero, c.lastMsg, c.ocupado, false);
+			if(c.lastMsg!=0)
+				this.bd.setCanal(idSesion, c.numero, c.lastMsg, c.ocupado, false);
 		}
 		
 		this.iu.actualizar();
@@ -495,7 +496,7 @@ public class Banco implements AnalizadorMensajes{
 		this.iu.engadirLinhaLog("Saindo de modo recuperación.\n");
 		
 		for(Canal c : this.bd.getCanales(idSesion)){
-			this.bd.setCanal(idSesion, c.numero, c.lastMsg, c.ocupado, true);
+			this.bd.setCanal(idSesion, c.numero, c.lastMsg, false, true);
 		}
 		
 		this.iu.actualizar();
@@ -516,6 +517,8 @@ public class Banco implements AnalizadorMensajes{
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 		
+		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
+
 		if(c.ocupado){
 			r2 = new RespSaldoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -564,7 +567,9 @@ public class Banco implements AnalizadorMensajes{
 		Conta conta;
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
-		
+	
+		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
+
 		if(c.ocupado){
 			r2 = new RespMovimientosError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -629,7 +634,8 @@ public class Banco implements AnalizadorMensajes{
 		Conta conta;
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
-
+	
+		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
 		
 		if(c.ocupado){
 			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
@@ -681,10 +687,10 @@ public class Banco implements AnalizadorMensajes{
 		RespAbonoError r2;
 		Conta conta;
 		
-		System.out.println("FACER ABONO");
-
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 		
+		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
+
 		if(c.ocupado){
 			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -744,6 +750,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 
+		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
 		
 		if(c.ocupado){
 			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,online, CodigosError.CANALOCUP);
@@ -890,6 +897,7 @@ public class Banco implements AnalizadorMensajes{
 	private void rexistrarMensaxe(Mensaje m, String s){
 		if(m != null){
 			if(eMensaxeDatos(m)){
+					
 				this.bd.registrarMensaje(	m.getTipoMensaje().toString(),
 											this.idSesion,
 											((MensajeDatos) m).getNumcanal(),
@@ -901,7 +909,7 @@ public class Banco implements AnalizadorMensajes{
 					this.bd.setCanal(	this.idSesion,
 										((MensajeDatos) m).getNumcanal(),
 										((MensajeDatos) m).getNmsg(),
-										false,true);
+										this.estado.recuperacion(),true);
 				}
 				
 			}else{
