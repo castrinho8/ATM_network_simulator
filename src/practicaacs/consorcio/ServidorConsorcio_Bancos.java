@@ -63,7 +63,7 @@ public class ServidorConsorcio_Bancos extends Thread{
 	public Sesion getSesion(String id_banco){
 		return this.sesiones.get(id_banco);
 	}
-
+	
 	public void insertaSesion(Sesion ses){
     	this.sesiones.put(ses.getId(),ses);
     }
@@ -142,16 +142,20 @@ public class ServidorConsorcio_Bancos extends Thread{
     	if(!this.socketServidor.isClosed())
     		this.socketServidor.close();
     	
-		Calendar time = Calendar.getInstance();
-    	System.out.println("CIERRE: Sesion Servidor de Bancos termidada a las " + time.getTime());
-    	
-    	/*ArrayList<String> i = Database_lib.getInstance().getSesiones();
+    	/*//Obtenemos todos los bancos que tienen sesion en el consorcio y los cerramos en la BD del consorcio.
+    	ArrayList<String> i = Database_lib.getInstance().getSesiones(1);
+    	i.addAll(Database_lib.getInstance().getSesiones(3));
+    	i.addAll(Database_lib.getInstance().getSesiones(4));
     	String id_banco;
+    	Iterator it = i.iterator();
     	//Cerrar todas las conexiones con los bancos
-    	while(i.iterator().hasNext()){
-    		id_banco = i.iterator().next(); 
+    	while(it.hasNext()){
+    		id_banco = (String) it.next(); 
     		Database_lib.getInstance().cerrar_sesion(id_banco);
     	}*/
+
+		Calendar time = Calendar.getInstance();
+    	System.out.println("CIERRE: Sesion Servidor de Bancos termidada a las " + time.getTime());
     }
 
     

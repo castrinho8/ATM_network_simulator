@@ -1716,7 +1716,6 @@ public class Database_lib {
 			System.exit(-1);
 		}
 		
-		System.out.println("Comprobar secuencia mensajes en canal:"+num_mensaje+"-"+getNumUltimoEnvioFromCanal(id_banco_bd,canal));
 		//Comprueba si es igual el ultimo numero enviado por el canal y el que le pasamos.
 		return (getNumUltimoEnvioFromCanal(id_banco_bd, canal)==num_mensaje);
 	}
@@ -1852,7 +1851,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<MensajeCajero> res = new ArrayList<MensajeCajero>();
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT u.uestringMensaje,u.uecodCajero,u.uecontestado " +
+			resultSet = this.getStatement().executeQuery("SELECT u.uestringMensaje,u.uecodCajero,u.uecontestado,c.codCanal " +
 					"FROM Canal c JOIN UltimoEnvio u ON c.codUltimoEnvio=u.codigoue " +
 					"WHERE c.codBanco=" + id_banco_bd + " AND codCanal>0");
 			
@@ -1860,7 +1859,8 @@ public class Database_lib {
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
 				String id_cajero = resultSet.getString(2);
 				boolean contestado = resultSet.getBoolean(3);
-				res.add(new MensajeCajero(m,id_cajero,contestado));
+				int canal = resultSet.getInt(4);
+				res.add(new MensajeCajero(m,id_cajero,contestado,canal));
 			}
 			
 			return res;

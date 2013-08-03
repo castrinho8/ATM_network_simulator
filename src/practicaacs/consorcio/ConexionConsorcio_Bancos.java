@@ -284,12 +284,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 			//Creamos el datagrama
 			DatagramPacket enviarPaquete = new DatagramPacket(envio.getBytes(),envio.size(),ip,puerto);
 
-			/*			
-			if(envio.es_sol_datos(){
+				
+			if((!en_recuperacion) && (envio.es_datos())){
 				//Obtenemos la sesion y creamos un timer
 				Sesion s = servidor.getSesion(envio.getDestino());
 				s.setTimer(canal);
-			}*/
+			}
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);
 		}catch (IOException e) {
@@ -682,6 +682,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 				Mensaje m = message.getMensaje();
 				int caj = Integer.parseInt(message.getId_cajero());
 				boolean contestado = message.isContestado();
+				int canal = message.getCanal();
 				
 				String cajero = null;
 				try {
@@ -806,9 +807,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 		int canal = recibido.getNumcanal();
 		CodigosMensajes tipo_mensaje = recibido.getTipoMensaje();
 		
+		//Eliminamos el timer para el canal indicado
+		Sesion s = servidor.getSesion(id_banco);
+		s.cancelarTimer(canal);
+		
 		//Comprobamos si hay algun error
 		CodigosError cod_error = this.comprobar_errores(recibido, canal);
-		System.out.println(cod_error);
 		
 		//Si hay algun error a nivel de comunicacion RESPONDER HACIA EL BANCO
 		if(!cod_error.equals(CodigosError.CORRECTO)){
@@ -822,7 +826,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			
 			//Respondemos un error hacia el BANCO
 			try {
-				this.resendToBanco(res_error, false,true,true);
+				this.resendToBanco(res_error,false,true,true);
 			} catch (ConsorcioBDException e) {
 				e.printStackTrace();
 				System.out.println("No hay canal disponible para enviar: "+res_error);
@@ -835,8 +839,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 			Database_lib.getInstance().bloquearCanal(id_banco,canal);
 	
 		//Si NO hay ningun error a nivel de operacion RESPONDER HACIA EL CAJERO
-		System.out.println("ONLINE:"+recibido.getCodonline()+"-NO CONTESTADO:"+(!Database_lib.getInstance().isContestado(id_banco, canal)));
-
 		if((recibido.getCodonline()) && (!Database_lib.getInstance().isContestado(id_banco, canal))){
 
 			//Comprueba que el orden es correcto y marca el envio anterior en ese canal como contestado.
