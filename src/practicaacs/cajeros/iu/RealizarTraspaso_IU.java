@@ -290,13 +290,17 @@ public class RealizarTraspaso_IU extends ConsultaAbstracta {
     public void actualizarIU(MensajeRespDatos respuesta){
 		
 		String texto = "";
-		CodigosRespuesta codigo = respuesta.getCod_resp();
-		
-		if(codigo.equals(CodigosRespuesta.CONSACEPTADA) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESTRASPASO))
-			texto = String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
-				"\nDESTINO: " + String.valueOf(((RespTraspaso)respuesta).getSaldoDestino()));
-		else
-			texto = String.valueOf(codigo.getMensaje());
+		if(respuesta!=null){
+			CodigosRespuesta codigo = respuesta.getCod_resp();
+			
+			if(codigo.equals(CodigosRespuesta.CONSACEPTADA) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESTRASPASO))
+				texto = String.valueOf("ORIGEN: " + String.valueOf(((RespTraspaso)respuesta).getSaldoOrigen()) +
+					"\nDESTINO: " + String.valueOf(((RespTraspaso)respuesta).getSaldoDestino()));
+			else
+				texto = String.valueOf(codigo.getMensaje());
+		}else{
+			texto = String.valueOf("No se puede realizar la operacion, inténtelo de nuevo más tarde.");
+		}
 		
 		this.SaldoText.setText(texto);
 		this.EsperandoRespuestaLabel.setVisible(false);

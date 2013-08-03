@@ -168,7 +168,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 				case ENVIO:{
 					try {
 						//Renviar al banco si se puede
-						resendToBanco(this.envio,true);
+						resendToBanco(this.envio,true,false,false);
 					} catch (ConsorcioBDException e) {
 						e.printStackTrace();
 						System.exit(-1);
@@ -207,13 +207,13 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * ENVIA MENSAJES DE CONTROL -  CONSORCIO->BANCO
 	 * @param envio El mensaje a enviar.
 	 */
-	private void sendToBanco(Mensaje envio,InetAddress ip, int puerto,boolean respondido){
+	private void sendToBanco(Mensaje envio,InetAddress ip, int puerto,boolean esta_respondido){
 		
 		//Como solo envia mensajes de control
 		int canal = 0;
 		
     	//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-		Database_lib.getInstance().anhadir_ultimo_envio(envio,"NO CAJERO",canal,respondido);
+		Database_lib.getInstance().anhadir_ultimo_envio(envio,"NO CAJERO",canal,esta_respondido,false);
 
 		//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 		Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -243,7 +243,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * @param envio
 	 * @throws ConsorcioBDException 
 	 */
-	private void resendToBanco(MensajeDatos envio,boolean seleccionarCanalyNum) throws ConsorcioBDException{
+	private void resendToBanco(MensajeDatos envio,boolean seleccionarCanalyNum,boolean en_recuperacion,boolean esta_respondido) throws ConsorcioBDException{
 
 		try{
 	    	String id_banco = envio.getDestino();
@@ -270,9 +270,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 			}
 			envio.setNumcanal(canal);
 			envio.setNmsg(n_mensaje);
-
+			
 			//Almacenamos el envio en la BD (Tabla de ULTIMO ENVIO) 
-			Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,canal,false);
+			Database_lib.getInstance().anhadir_ultimo_envio(envio,this.id_cajero,canal,esta_respondido,en_recuperacion);
 	
 			//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 			Database_lib.getInstance().almacenar_mensaje(envio,TipoOrigDest.CONSORCIO,envio.getOrigen(),TipoOrigDest.BANCO,envio.getDestino());
@@ -320,9 +320,10 @@ public class ConexionConsorcio_Bancos extends Thread {
 			return CodigosError.YAABIERTA;
 		
 		//El numero de mensaje entrante es != del que deberia ser (deberia recibirse el mismo numero de mensaje que se envia)
-		if((Database_lib.getInstance().aceptaMensajes(id_banco)) && 
-				(!(Database_lib.getInstance().isContestado(id_banco,canal))))
+		if((Database_lib.getInstance().aceptaMensajes(id_banco)) &&
+						((m.es_datos()) && (!Database_lib.getInstance().comprobarSecuenciaMensajesEnCanal(id_banco, canal,((MensajeDatos)m).getNmsg())))){
 			return CodigosError.FUERASEC;
+		}
 		
 		//Solicitar utilizar un canal que aun no ha obtenido respuesta (que esta ocupado)
 		if((Database_lib.getInstance().aceptaMensajes(id_banco)) && 
@@ -491,10 +492,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 				
 				//Cambiamos el origen y el destino
 				MensajeDatos message = cambiaOrigenDestino(m);
+				boolean respondido = true;
 				
 				//Reenviamos el mensaje al banco
 				try {
-					this.resendToBanco(message,true);
+					this.resendToBanco(message,true,false,respondido);
 				} catch (ConsorcioBDException e) {
 					e.printStackTrace();
 					System.out.println("No hay canal disponible para enviar: "+message);
@@ -634,10 +636,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 				//Cambiamos el origen y el destino
 				MensajeDatos message = cambiaOrigenDestino(m);
+				boolean respondido = true;
 				
 				//Reenviamos el mensaje
 				try {
-					this.resendToBanco(message,true);
+					this.resendToBanco(message,true,false,respondido);
 				} catch (ConsorcioBDException e) {
 					e.printStackTrace();
 					System.out.println("No hay canal disponible para enviar: "+message);
@@ -678,6 +681,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 				//Obtenemos el envio
 				Mensaje m = message.getMensaje();
 				int caj = Integer.parseInt(message.getId_cajero());
+				boolean contestado = message.isContestado();
 				
 				String cajero = null;
 				try {
@@ -694,7 +698,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 				
 				//Reenviamos el mensaje
 				try {
-					this.resendToBanco(m_datos,false);
+					this.resendToBanco(m_datos,false,true,contestado);
 				} catch (ConsorcioBDException e) {
 					e.printStackTrace();
 					System.out.println("No hay canal disponible para enviar: "+message);
@@ -804,8 +808,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 		
 		//Comprobamos si hay algun error
 		CodigosError cod_error = this.comprobar_errores(recibido, canal);
+		System.out.println(cod_error);
 		
-		//Si hay algun error a nivel de comunicacion
+		//Si hay algun error a nivel de comunicacion RESPONDER HACIA EL BANCO
 		if(!cod_error.equals(CodigosError.CORRECTO)){
 			
 			//Creamos el mensaje de error de respuesta 
@@ -817,7 +822,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 			
 			//Respondemos un error hacia el BANCO
 			try {
-				this.resendToBanco(res_error, false);
+				this.resendToBanco(res_error, false,true,true);
 			} catch (ConsorcioBDException e) {
 				e.printStackTrace();
 				System.out.println("No hay canal disponible para enviar: "+res_error);
@@ -825,28 +830,28 @@ public class ConexionConsorcio_Bancos extends Thread {
 			return;
 		}
 		
-		//Si NO hay ningun error a nivel de operacion 
-		if(recibido.getCod_resp().equals(CodigosRespuesta.CONSACEPTADA)){
+		//Si esta en recuperacion bloquea el canal
+		if(Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance()))
+			Database_lib.getInstance().bloquearCanal(id_banco,canal);
+	
+		//Si NO hay ningun error a nivel de operacion RESPONDER HACIA EL CAJERO
+		System.out.println("ONLINE:"+recibido.getCodonline()+"-NO CONTESTADO:"+(!Database_lib.getInstance().isContestado(id_banco, canal)));
+
+		if((recibido.getCodonline()) && (!Database_lib.getInstance().isContestado(id_banco, canal))){
 
 			//Comprueba que el orden es correcto y marca el envio anterior en ese canal como contestado.
 			if((Database_lib.getInstance().esCorrectaContestacion(tipo_mensaje,id_banco,canal))| tipo_mensaje.equals(CodigosMensajes.RESMOVIMIENTOS))
-				Database_lib.getInstance().setEnvioContestado(id_banco,canal);
+				if(!(tipo_mensaje.equals(CodigosMensajes.RESMOVIMIENTOS)) || ((tipo_mensaje.equals(CodigosMensajes.RESMOVIMIENTOS)) && (((RespMovimientos)recibido).getNmovimientos()<=0)))
+					Database_lib.getInstance().setEnvioContestado(id_banco,canal);
 			else{
 				System.out.println("Error: No se esperaba el mensaje " + tipo_mensaje.toString() + " recibido por el canal "+ canal);
 			}
 			
-			//Si esta en recuperacion bloquea el canal
-			if(Database_lib.getInstance().getEstado_conexion_banco(id_banco).equals(SesRecuperacion.instance()))
-				Database_lib.getInstance().bloquearCanal(id_banco,canal);
-		}
-		
-		//Hay que comprobar si se reenvia al cajero o no
-		if(recibido.getCodonline()){
 			//Obtenemos datos
 			String destino = Database_lib.getInstance().getNombreCajero(recibido.getOrigen(),recibido.getNumcanal());//Id_cajero
 			String origen = this.consorcio.getId_consorcio(); //Id_consorcio
-	    	String banco = recibido.getOrigen();
-			
+			String banco = recibido.getOrigen();
+		
 			//Obtenemos la direccion y el puerto a donde enviar
 			InetAddress ip_dest = Database_lib.getInstance().getIpEnvio(banco,recibido.getNumcanal());
 			int puerto_dest = Database_lib.getInstance().getPortEnvio(banco,recibido.getNumcanal());

@@ -180,12 +180,14 @@ CREATE TABLE UltimoEnvio(
 -- codBanco El codigo del banco que lo identifica
 -- codCanal El codigo del canal
 -- cabloqueado Un flag booleano que indica si el canal se encuentra bloqueado (TRUE=BLOQUEADO, FALSE=DESBLOQUEADO)
+-- caenRecuperacion True si el canal esta en recuperación o no.
 -- codUltimoEnvio El codigo que identifica al ultimo envio de este canal
 -- canext_numMensaje El siguiente numero de mensaje que se deberia asignar para este canal
 CREATE TABLE Canal(
 	codBanco INTEGER NOT NULL,
 	codCanal INTEGER NOT NULL,
 	cabloqueado BOOLEAN NOT NULL DEFAULT 0,
+	caenRecuperacion BOOLEAN NOT NULL DEFAULT 0,
 	codUltimoEnvio INTEGER DEFAULT NULL,
 	canext_numMensaje INTEGER NOT NULL DEFAULT 1,
 

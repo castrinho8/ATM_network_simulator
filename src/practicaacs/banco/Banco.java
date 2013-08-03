@@ -498,7 +498,7 @@ public class Banco implements AnalizadorMensajes{
 		for(Canal c : this.bd.getCanales(idSesion)){
 			this.bd.setCanal(idSesion, c.numero, c.lastMsg, false, true);
 		}
-		
+		canalBloqueado = -1;
 		this.iu.actualizar();
 	}
 
@@ -517,8 +517,6 @@ public class Banco implements AnalizadorMensajes{
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 		
-		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
-
 		if(c.ocupado){
 			r2 = new RespSaldoError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -531,8 +529,8 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
-				
+		System.out.println("MEDIO");
+		
 		if(this.bd.getTarxeta(numtarx) == null){
 			r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta Invalida).\n");
@@ -544,7 +542,7 @@ public class Banco implements AnalizadorMensajes{
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Conta Invalida).\n");
 			return;
 		}
-		
+		System.out.println("VA A SALIR");
 		r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo());
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").\n");
 		this.iu.actualizar();
@@ -568,8 +566,6 @@ public class Banco implements AnalizadorMensajes{
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 	
-		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
-
 		if(c.ocupado){
 			r2 = new RespMovimientosError(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -581,9 +577,6 @@ public class Banco implements AnalizadorMensajes{
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de Secuencia).\n");
 			return;
 		}
-		
-		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
-
 		
 		if(this.bd.getTarxeta(numtarx) == null){
 			r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, 0, null, false, 0, null);
@@ -635,8 +628,6 @@ public class Banco implements AnalizadorMensajes{
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 	
-		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
-		
 		if(c.ocupado){
 			r2 = new RespReintegroError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -689,8 +680,6 @@ public class Banco implements AnalizadorMensajes{
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 		
-		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
-
 		if(c.ocupado){
 			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2, "Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -726,9 +715,13 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
+		System.out.println("FACER ABONO");
 		this.bd.facerAbono(this.idSesion, conta.getNumero(), importe);
+		System.out.println("ABONO FEITO");
 		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
+		System.out.println("ENVIAR ABONO");
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + (conta.getSaldo() + importe) + ").\n");
+		System.out.println("ACTUALIZAR ABONO IU");
 		this.iu.actualizar();
 	}
 
@@ -750,8 +743,6 @@ public class Banco implements AnalizadorMensajes{
 		
 		Canal c = this.bd.getCanal(this.idSesion, ncanal);
 
-		this.bd.setCanal(this.idSesion, ncanal, nmsg, true, true);
-		
 		if(c.ocupado){
 			r2 = new RespTraspasoError(this.idbanco, this.idconsorcio, ncanal,nmsg+1,online, CodigosError.CANALOCUP);
 			this.enviarMensaje(r2,"Mensaxe enviada: Error (Canal Ocupado).\n");
@@ -891,7 +882,7 @@ public class Banco implements AnalizadorMensajes{
 		if(!this.eMensaxeDatos(m)){
 			return true;
 		}
-		return ((MensajeDatos) m).getNumcanal() != this.canalBloqueado;
+		return ((((MensajeDatos) m).getNumcanal() != this.canalBloqueado) || (this.estado.recuperacion()));
 	}
 	
 	private void rexistrarMensaxe(Mensaje m, String s){

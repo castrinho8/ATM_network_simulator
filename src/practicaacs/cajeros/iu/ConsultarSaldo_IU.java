@@ -160,18 +160,27 @@ public class ConsultarSaldo_IU extends ConsultaAbstracta {
     
 	@Override
     public void actualizarIU(MensajeRespDatos respuesta){
+		System.out.println("ENTRA");
+		
 		this.ConsultandoLabel.setVisible(false);
-
+	
 		String texto = "";
-		if(respuesta.getCodonline()){
-			CodigosRespuesta codigo = respuesta.getCod_resp();
+		
+		if(respuesta!=null){
+			System.out.println(respuesta.getCodonline()+"-"+respuesta.getCod_resp()+"-"+respuesta.getTipoMensaje());
+			if(respuesta.getCodonline()){
+				CodigosRespuesta codigo = respuesta.getCod_resp();
+				
+				if((codigo.equals(CodigosRespuesta.CONSACEPTADA)) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESSALDO))
+					texto = String.valueOf(((RespSaldo)respuesta).getSaldo());
+				else
+					texto = String.valueOf(codigo.getMensaje());
+			}else
+				texto = String.valueOf("Error: No hay conexion.");
+		}else{
+			texto = String.valueOf("No se puede realizar la operacion, inténtelo de nuevo más tarde.");
+		}
 			
-			if((codigo.equals(CodigosRespuesta.CONSACEPTADA)) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESSALDO))
-				texto = String.valueOf(((RespSaldo)respuesta).getSaldo());
-			else
-				texto = String.valueOf(codigo.getMensaje());
-		}else
-			texto = String.valueOf("Error: No hay conexion");
 		this.jTextField1.setText(texto);
 
     }

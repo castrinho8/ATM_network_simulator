@@ -2,6 +2,7 @@ package practicaacs.cajeros;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,7 +51,10 @@ public class ConexionCajero extends Thread{
 				//Recibe el mensaje
 				m_datos = this.recibir_mensaje();
 
-				System.out.println("RECIBIDO: "+m_datos.obtenerImprimible("CONSORCIO", "CAJERO"));
+				if(m_datos==null)
+					continue;
+				
+				System.out.println("RECIBIDO MOVIMIENTOS: "+m_datos.obtenerImprimible("CONSORCIO", "CAJERO"));
 
 				//Comprobamos que sea del tipo RESMOVIMIENTOS
 				if(m_datos.getTipoMensaje().equals(CodigosMensajes.RESMOVIMIENTOS)){
@@ -64,7 +68,6 @@ public class ConexionCajero extends Thread{
 						break;
 					}
 				}
-				
 			}while((!envio.esContestacionCorrecta(m_datos.getTipoMensaje())) || (resp.getNmovimientos()>0));
 			
 			try {
@@ -77,14 +80,19 @@ public class ConexionCajero extends Thread{
 			} catch (CodigoNoValidoException e) {
 				e.printStackTrace();
 			}
+			
 		//Si no es MOVIMIENTOS solo se recibe uno
 		}else{
 			//Recibimos mensajes hasta que la contestacion sea la adecuada
-			do{
-				m = this.recibir_mensaje();
+			m = this.recibir_mensaje();
+			
+			if(m!=null)
 				System.out.println("RECIBIDO: "+m.obtenerImprimible("CONSORCIO", "CAJERO"));
-			}while(!envio.esContestacionCorrecta(m.getTipoMensaje()));
-				
+			
+			//Comprobamos si la contestacion es correcta
+			if((m!=null) && (!envio.esContestacionCorrecta(m.getTipoMensaje())))
+				m = null;
+			
 			try {
 				this.interfaz.actualizarIU(m);
 			} catch (CodigoNoValidoException e) {
@@ -93,6 +101,7 @@ public class ConexionCajero extends Thread{
 		}
 	}
 
+	
 	/**
      * Envia el mensaje y se queda esperando una respuesta.
      * @param envio El mensaje a enviar.
@@ -124,12 +133,20 @@ public class ConexionCajero extends Thread{
 		//Crea el Datagrama en donde recibir los datos
 		DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
 		
+		//Establece un timeout
+		try {
+			this.cajero.getSocketCajero().setSoTimeout(100000);
+		} catch (SocketException e1) {
+			e1.printStackTrace();
+			System.exit ( 0 );
+		}
+		
 		try{
 			//Recibe datos
 			this.cajero.getSocketCajero().receive(inputPacket);
-
-		}catch (SocketTimeoutException e){
-			System.out.println("Timeout");
+			
+		}catch(SocketTimeoutException a){
+			return null;
 		}catch (IOException e) {
 			System.out.println("Error al recibir.");
 			System.exit ( 0 );

@@ -23,7 +23,8 @@ public class SesRecuperacion extends EstadoSesion {
 	
 	@Override
 	public void analizarMensaje(Mensaje m, Banco b) {
-		
+		System.out.println(m.obtenerImprimible("CONSORCIO", "BANCO"));
+
 		if(m != null){
 			
 			//Se é fin de recuperacion

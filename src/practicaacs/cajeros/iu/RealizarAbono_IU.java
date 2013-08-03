@@ -244,14 +244,18 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
     public void actualizarIU(MensajeRespDatos respuesta){
 		
 		String texto = "";
-		CodigosRespuesta codigo = respuesta.getCod_resp();
+		if(respuesta!=null){
+			CodigosRespuesta codigo = respuesta.getCod_resp();
+			
+			if(codigo.equals(CodigosRespuesta.CONSACEPTADA) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESABONO))
+				texto = String.valueOf(((RespAbono)respuesta).getSaldo());
+			else
+				texto = String.valueOf(codigo.getMensaje());
+		}else{
+			texto = String.valueOf("No se puede realizar la operacion, inténtelo de nuevo más tarde.");
+		}
 		
-		if(codigo.equals(CodigosRespuesta.CONSACEPTADA) && respuesta.getTipoMensaje().equals(CodigosMensajes.RESABONO))
-			texto = String.valueOf(((RespAbono)respuesta).getSaldo());
-		else
-			texto = String.valueOf(codigo.getMensaje());
-		
-    	this.SaldoText.setText(texto);
+		this.SaldoText.setText(texto);
         this.EsperandoRespuestaLabel.setVisible(false);
         this.ErrorLabel.setVisible(false);
         this.SaldoLabel.setVisible(true);

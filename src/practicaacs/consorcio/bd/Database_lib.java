@@ -287,6 +287,37 @@ public class Database_lib {
 	}
 	
 	
+	private synchronized ArrayList<String> getTarjetasFromBanco(String id_banco){
+		ArrayList<String> tarjetas = new ArrayList<String>();
+		ResultSet resultSet = null;
+		
+		try {
+			resultSet = this.getStatement().executeQuery("SELECT codTarjeta FROM Tarjeta");
+			
+			while(resultSet.next()){
+				String tarjeta = resultSet.getString(1);
+				String banco = null;
+
+				//Obtiene el id_banco
+				try{
+					banco = tarjeta.substring(0,tarjeta.length()-3);
+				}catch(IndexOutOfBoundsException e){
+					e.getStackTrace();
+					System.exit (-1);
+				}
+				
+				//Si la tarjeta pertenece al banco
+				if(banco.equalsIgnoreCase(id_banco))
+					tarjetas.add(tarjeta);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+		return tarjetas;
+	}
+	
 	/*---------------------------------------------------
 	 --------------------- CONSULTAS --------------------
 	 ----------------------------------------------------*/	
@@ -382,6 +413,28 @@ public class Database_lib {
 		}
 	}
 
+	private synchronized void setGastoOffline(String tarjeta, int importe){
+		
+		//Comprobamos si existen tarjeta
+		try{
+			//Comprueba si existe la tarjeta
+			if(!this.existeTarjeta(tarjeta))
+				throw new ConsorcioBDException("actualiza_GastoOffline: La tarjeta indicada no existe.");
+		}catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		//Realizar la actualizacion
+		try {
+			this.getStatement().executeUpdate("UPDATE Tarjeta SET tagastoOffline = " + importe +  
+				" WHERE codTarjeta = '" + tarjeta + "'");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+	}
 	
 	/**
 	 * Recalcula el saldo actual de la cuenta indicada.
@@ -1078,17 +1131,22 @@ public class Database_lib {
 			if(resultSet.next()){
 				//Si ya está el banco, settear la sesion a abierta y los datos
 				try{
-					this.setEstado_conexion_banco(id_banco,SesAberta.instance());
+					setEstado_conexion_banco(id_banco,SesAberta.instance());
 				}catch(ConsorcioBDException c){
 					c.printStackTrace();
 					System.exit(-1);
 				}
-				this.setPuertoBanco(id_banco, puerto);
-				this.setIpBanco(id_banco, ip);
-				this.setNumCanalesBanco(id_banco, num_canales);
+				setPuertoBanco(id_banco, puerto);
+				setIpBanco(id_banco, ip);
+				setNumCanalesBanco(id_banco, num_canales);
 			}else{
 				//Añadir BANCO a la BD
 				insertar_banco(id_banco,SesAberta.instance(),puerto,ip,num_canales);
+			}
+			
+			//Obtenemos todas las tarjetas de ese banco y ponemos su gastoOffline a cero
+			for(String tarjeta : this.getTarjetasFromBanco(id_banco)){
+				this.setGastoOffline(tarjeta, 0);
 			}
 			
 			//Borrar todos los canales del banco
@@ -1628,6 +1686,41 @@ public class Database_lib {
 	}
 	
 	
+	
+	private int getNumUltimoEnvioFromCanal(int id_banco_bd, int canal){
+		
+		int num_envio = -1;
+		ResultSet resultSet;
+		try {
+			resultSet = this.getStatement().executeQuery("SELECT ue.ueNumUltimoEnvio FROM Canal c JOIN UltimoEnvio ue" +
+					" ON c.codUltimoEnvio=ue.codigoue WHERE c.codBanco = " + id_banco_bd + " AND c.codCanal = " + canal);
+			if(resultSet.next())
+				num_envio = resultSet.getInt(1);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return num_envio;
+	}
+	
+	
+	public boolean comprobarSecuenciaMensajesEnCanal(String id_banco, int canal, int num_mensaje){
+		
+		//Obtenemos el ID del banco en la BD
+		int id_banco_bd = 0;
+		try {
+			id_banco_bd = this.getIdBancoBD(id_banco);
+		} catch (ConsorcioBDException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		
+		System.out.println("Comprobar secuencia mensajes en canal:"+num_mensaje+"-"+getNumUltimoEnvioFromCanal(id_banco_bd,canal));
+		//Comprueba si es igual el ultimo numero enviado por el canal y el que le pasamos.
+		return (getNumUltimoEnvioFromCanal(id_banco_bd, canal)==num_mensaje);
+	}
+	
 	/**
 	 * Obtiene en CANAL el siguiente numero de mensaje para el banco y canal indicado 
 	 * y le suma 1.
@@ -1725,8 +1818,8 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT COUNT(ueNumUltimoEnvio) FROM UltimoEnvio " +
-					"WHERE codBanco = " + id_banco_bd + " AND uecontestado = 0");
+			resultSet = this.getStatement().executeQuery("SELECT COUNT(ue.ueNumUltimoEnvio) FROM UltimoEnvio ue JOIN Canal c " +
+					"ON ue.codigoue=c.codUltimoEnvio WHERE ue.codBanco = " + id_banco_bd + " AND ue.uecontestado = 0");
 
 			if(resultSet.next())
 				return (resultSet.getInt(1) != 0);
@@ -1759,14 +1852,15 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<MensajeCajero> res = new ArrayList<MensajeCajero>();
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT u.uestringMensaje,u.uecodCajero " +
+			resultSet = this.getStatement().executeQuery("SELECT u.uestringMensaje,u.uecodCajero,u.uecontestado " +
 					"FROM Canal c JOIN UltimoEnvio u ON c.codUltimoEnvio=u.codigoue " +
 					"WHERE c.codBanco=" + id_banco_bd + " AND codCanal>0");
 			
 			while(resultSet.next()){
 				Mensaje m = Mensaje.parse(resultSet.getString(1));
 				String id_cajero = resultSet.getString(2);
-				res.add(new MensajeCajero(m,id_cajero));
+				boolean contestado = resultSet.getBoolean(3);
+				res.add(new MensajeCajero(m,id_cajero,contestado));
 			}
 			
 			return res;
@@ -1921,6 +2015,15 @@ public class Database_lib {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+		
+		try {
+			this.getStatement().executeUpdate("UPDATE Canal SET caenRecuperacion = 0 " +
+					"WHERE codBanco = " + id_banco_bd);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}		
+		
 	}
 	
 	
@@ -1943,8 +2046,8 @@ public class Database_lib {
 		
 		ResultSet resultSet;
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT uecontestado " +
-					"FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.ueNumUltimoEnvio " +
+			resultSet = this.getStatement().executeQuery("SELECT ue.uecontestado " +
+					"FROM Canal c JOIN UltimoEnvio ue ON c.codUltimoEnvio = ue.codigoue " +
 					"WHERE c.codBanco = " + id_banco_bd +" AND c.codCanal = " + canal);
 
 			if(resultSet.next())
@@ -2048,7 +2151,41 @@ public class Database_lib {
 	}
 	
 	
+	public boolean isCanalEnRecuperacion(String id_banco, int canal){
+		
+		//Obtiene el id real que identifica al banco en la BD.
+		int id_banco_bd = 0;
+		try{
+			id_banco_bd = this.getIdBancoBD(id_banco);
+		}catch(ConsorcioBDException c){
+			c.printStackTrace();
+			System.exit(-1);
+		}
+		
+		ResultSet resultSet = null;
+		try{
+			 resultSet = this.getStatement().executeQuery("SELECT caenRecuperacion FROM Canal " +
+						" WHERE codBanco = " + id_banco_bd + " AND codCanal = " + canal);
+			 
+			 if(resultSet.next())
+				return resultSet.getBoolean(1);
+			 
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return false;
+	}
 	
+	private void setCanalEnRecuperacion(int id_banco_bd, int canal,boolean en_recuperacion){
+		try {
+			 this.getStatement().executeUpdate("UPDATE Canal SET caenRecuperacion = " + ((en_recuperacion)?1:0) 
+					+ " WHERE codBanco = " + id_banco_bd + " AND codCanal = " + canal);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
 	/*---------------------------------------------------
 	 --------------------- ULTIMOENVIO -----------------------
 	 ----------------------------------------------------*/
@@ -2059,7 +2196,7 @@ public class Database_lib {
 	 * @param message El mensaje a añadir.
 	 * @param canal El canal correspondiente.
 	 */
-	public synchronized void anhadir_ultimo_envio(Mensaje message,String codCajero,int canal,boolean respondido){
+	public synchronized void anhadir_ultimo_envio(Mensaje message,String codCajero,int canal,boolean respondido,boolean en_recuperacion){
 
 		String id_banco = message.getDestino();
 		//Obtiene el id real que identifica al banco en la BD.
@@ -2103,7 +2240,7 @@ public class Database_lib {
 		
 		//Setea el codigo del nuevo envio en la tabla de Canales para el canal concreto
 		this.settearCodigoUltimoEnvioEnCanal(id_banco_bd, canal, nuevo_ultimo_envio);
-		
+		this.setCanalEnRecuperacion(id_banco_bd, canal,en_recuperacion);
 	}
 	
 	/**
@@ -2578,7 +2715,7 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje" +
+			resultSet = this.getStatement().executeQuery("SELECT codBanco,codCanal,cabloqueado,codUltimoEnvio,canext_numMensaje,caenRecuperacion" +
 					" FROM Canal ORDER BY codBanco");
 
 			while(resultSet.next()){
@@ -2590,12 +2727,14 @@ public class Database_lib {
 				a = resultSet.getString(4)==null;
 				int ultimo_envio = resultSet.getInt(4);
 				int siguiente_mensaje = resultSet.getInt(5);
+				int enRecuperacion = resultSet.getInt(6);
 				
 				linea.add(String.valueOf(cod));
 				linea.add(String.valueOf(canal));
 				linea.add((bloqueado==0)?"NO":"SI");
 				linea.add((a)?"NULL":String.valueOf(ultimo_envio));//NULL?
 				linea.add(String.valueOf(siguiente_mensaje));
+				linea.add((enRecuperacion==1)?"SI":"NO");
 				elementos.add(linea);
 			}
 			
