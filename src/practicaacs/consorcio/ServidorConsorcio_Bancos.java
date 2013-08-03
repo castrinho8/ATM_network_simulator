@@ -36,7 +36,6 @@ public class ServidorConsorcio_Bancos extends Thread{
 	private boolean abierto_serv_bancos;
 	private DatagramSocket socketServidor;
 	
-	private boolean control;
 	private HashMap<String,Sesion> sesiones; //Banco,sesion
 	
 	/**
@@ -78,10 +77,7 @@ public class ServidorConsorcio_Bancos extends Thread{
 	@Override
 	public void run() {
 		abrir_servidorBancos();
-		while(true){
-			if(isOnline())
-				recibir_servidorBancos();
-		}
+		recibir_servidorBancos();
 	}
 
 	/**
@@ -93,32 +89,36 @@ public class ServidorConsorcio_Bancos extends Thread{
     public void recibir_servidorBancos(){
     		
     		byte [] recibirDatos = new byte[1024];
-    		
+
     		//Crea el Datagrama en donde recibir los datos
 			DatagramPacket inputPacket = new DatagramPacket(recibirDatos, recibirDatos.length);
 			try{
-				//Recibe datos
-				socketServidor.receive(inputPacket);
-				
-				if(isOnline()){
-					//Crea una conexión para analizar el datagrama
-					ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(TipoAccion.CONEXION,inputPacket,this.consorcio,this,this.socketServidor);
-					t.start();
+				while(abierto_serv_bancos){
+					//Recibe datos
+					socketServidor.receive(inputPacket);
+					
+					if(isOnline()){
+						//Crea una conexión para analizar el datagrama
+						ConexionConsorcio_Bancos t = new ConexionConsorcio_Bancos(TipoAccion.CONEXION,inputPacket,this.consorcio,this,this.socketServidor);
+						t.start();
+					}
+					
+					sleep(1000);
 				}
-				
-				sleep(1000);
-			}catch (SocketTimeoutException e){
-				System.out.println("Socket timeout");
+			}catch (SocketException s){
 				cerrar_servidorBancos();
-			}catch (IOException e) {
-				System.out.println("IO EXCEPTION");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}catch (IOException e) {
+				System.out.println("IO EXCEPTION");
 			}
         }
     
-    
-    public void abrir_servidorBancos(){
+    /**
+     * Método que levanta el servidor de Bancos
+     */
+    private void abrir_servidorBancos(){
+    	this.abierto_serv_bancos = true;
 
     	try {
 			 socketServidor = new DatagramSocket(this.port);
@@ -126,14 +126,6 @@ public class ServidorConsorcio_Bancos extends Thread{
 			 System.out.println("Error al crear el objeto socket servidor Consorcio_Bancos");
 			 System.exit(-1);
 		 }
-		
-    	/*try { //Establece un timeout
-			this.socketServidor.setSoTimeout(100000);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}*/
-
-    	this.abierto_serv_bancos = true;
 
     	Calendar time = Calendar.getInstance();
     	System.out.println("APERTURA: Sesion Servidor de Bancos comenzada a las " + time.getTime());
@@ -146,7 +138,9 @@ public class ServidorConsorcio_Bancos extends Thread{
      */
     public void cerrar_servidorBancos(){
     	this.abierto_serv_bancos = false;
-    	this.socketServidor.close();
+    	
+    	if(!this.socketServidor.isClosed())
+    		this.socketServidor.close();
     	
 		Calendar time = Calendar.getInstance();
     	System.out.println("CIERRE: Sesion Servidor de Bancos termidada a las " + time.getTime());
@@ -160,16 +154,6 @@ public class ServidorConsorcio_Bancos extends Thread{
     	}*/
     }
 
-    /**
-     * Método que cambia el estado del servidor
-     * @throws IOException 
-     */
-    public void cambiar_estado(){
-    	if(isOnline())
-			cerrar_servidorBancos();
-		else
-			abrir_servidorBancos();
-    }
     
     /**
      * Método que envia un mensaje de solicitar Recuperacion

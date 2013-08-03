@@ -114,7 +114,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         LabelCuenta.setText("Error insertando Cuenta");
         LabelCuenta.setVisible(false);
         
-        ButtonEstado.setText("Cambiar Estado");
+        ButtonEstado.setText("Cerrar Servidor");
         ButtonEstado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ButtonEstadoActionPerformed(evt);
@@ -354,7 +354,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
      * @param evt
      */
     private void ButtonEstadoActionPerformed(java.awt.event.ActionEvent evt) {                                             
-        this.consorcio.getBancos_server().cambiar_estado();
+        String texto = this.consorcio.cambiarEstadoBancosServer();
+        this.ButtonEstado.setText(texto);
     }
     
     /**
