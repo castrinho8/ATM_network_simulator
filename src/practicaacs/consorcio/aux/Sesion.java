@@ -53,7 +53,7 @@ public class Sesion {
 				this.cancel();
 			}
 		};
-		timer.schedule(manejador,0,this.delay);
+		timer.schedule(manejador,this.delay,this.delay);
 		this.cronos.put(canal,timer);
 	}
 	
