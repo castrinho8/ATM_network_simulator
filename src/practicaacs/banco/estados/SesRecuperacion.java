@@ -105,6 +105,8 @@ public class SesRecuperacion extends EstadoSesion {
 		return true;
 	}
 	
-	
+	public boolean sesionAberta(){
+		return false;
+	}
 
 }

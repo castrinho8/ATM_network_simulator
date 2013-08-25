@@ -480,6 +480,7 @@ public class Banco implements AnalizadorMensajes{
 				this.bd.setCanal(idSesion, c.numero, c.lastMsg, c.ocupado, false);
 		}
 		
+		this.iu.liberarCanles();
 		this.iu.actualizar();
 	}
 

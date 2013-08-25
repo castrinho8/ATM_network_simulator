@@ -36,7 +36,7 @@ public class Sesion {
 		this.servidor = serv;
 		this.n_canales = num_canales;
 		this.cronos = new HashMap<Integer,Timer>(this.n_canales);
-		this.delay = 10000; //Asignar un minuto
+		this.delay = 60000; //Asignar un minuto
 	}
 
 	/**

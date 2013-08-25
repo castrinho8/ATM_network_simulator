@@ -687,9 +687,16 @@ public class VentanaBanco extends javax.swing.JFrame{
 	}
 	
 	
+	public void liberarCanles(){
+		if(this.silenciaractivo){
+			this.setSilenciar(false);
+			this.banco.silenciarCanle(-1);
+			this.botonforzarrecuperacion.setText("Silenciar canle.");
+		}
+	}
+	
 	
 	private void silenciarCanle() {
-		
 		if(this.silenciaractivo){
 			this.setSilenciar(false);
 			this.banco.silenciarCanle(-1);
