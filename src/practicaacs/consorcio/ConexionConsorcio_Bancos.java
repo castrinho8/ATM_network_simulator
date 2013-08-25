@@ -145,7 +145,6 @@ public class ConexionConsorcio_Bancos extends Thread {
 					}
 					
 					System.out.println("ENTRA: "+recibido.obtenerImprimible("BANCO", "CONSORCIO"));
-					System.out.println("MENSAJE: -"+recibido.toString()+"-");
 
 					//Guardamos el mensaje en la BD (Tabla de MENSAJES)
 					Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.BANCO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());

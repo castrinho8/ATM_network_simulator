@@ -323,7 +323,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		Mensaje msx;
 		try {
-			System.out.println(bs);
+			//System.out.println(bs);
 			msx = Mensaje.parse(bs);
 			this.iu.engadirLinhaLog("Mensaxe recibida: " + msx.getTipoMensaje() + "\n");
 			this.rexistrarMensaxe(msx, bs);
@@ -530,8 +530,6 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		System.out.println("MEDIO");
-		
 		if(this.bd.getTarxeta(numtarx) == null){
 			r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.TARJETANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Tarxeta Invalida).\n");
@@ -543,7 +541,6 @@ public class Banco implements AnalizadorMensajes{
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Conta Invalida).\n");
 			return;
 		}
-		System.out.println("VA A SALIR");
 		r = new RespSaldo(this.idbanco, this.idconsorcio, ncanal,nmsg,true, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo());
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + conta.getSaldo() + ").\n");
 		this.iu.actualizar();
@@ -690,7 +687,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		if (c.lastMsg != null && c.lastMsg + 1 != nmsg && !estado.recuperacion()){
 			r2 = new RespAbonoError(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosError.FUERASEC);
-			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).");
+			this.enviarMensaje(r2, "Mensaxe enviada: Error (Fora de secuencia).\n");
 			this.iu.actualizar();
 			return;
 		}
@@ -716,13 +713,9 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		System.out.println("FACER ABONO");
 		this.bd.facerAbono(this.idSesion, conta.getNumero(), importe);
-		System.out.println("ABONO FEITO");
 		r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CONSACEPTADA, conta.getSaldo() >= 0, conta.getSaldo()+importe);
-		System.out.println("ENVIAR ABONO");
 		this.enviarMensaje(r, "Mensaxe enviada: Consulta Aceptada (Saldo = " + (conta.getSaldo() + importe) + ").\n");
-		System.out.println("ACTUALIZAR ABONO IU");
 		this.iu.actualizar();
 	}
 
@@ -789,7 +782,7 @@ public class Banco implements AnalizadorMensajes{
 		r = new RespTraspaso(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CONSACEPTADA,
 				(contaori.getSaldo() - importe) >= 0, contaori.getSaldo() - importe, 
 				(contades.getSaldo() + importe) >= 0, contades.getSaldo() + importe);
-		this.enviarMensaje(r,"Mensaxe enviada: Consulta Aceptada.");
+		this.enviarMensaje(r,"Mensaxe enviada: Consulta Aceptada.\n");
 		this.iu.actualizar();
 	}
 
