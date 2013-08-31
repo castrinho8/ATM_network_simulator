@@ -122,8 +122,8 @@ public class Database_lib {
 		ResultSet resultSet;
 		//Obtiene la cuenta de la BD
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT codCuenta FROM Cuenta" +  
-				" WHERE codTarjeta = '" + tarjeta + "' AND codCuenta = " + cuenta);
+			resultSet = this.getStatement().executeQuery("SELECT codCuenta FROM CuentaTarjeta" +  
+				" WHERE codTarjeta = '" + tarjeta + "' AND cnum = " + cuenta);
 			
 			if(resultSet.next())
 				return;
@@ -240,8 +240,8 @@ public class Database_lib {
 	public synchronized boolean existeCuenta(String tarjeta, int cuenta){
 		ResultSet resultSet;
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT codCuenta FROM Cuenta " +
-					"WHERE codTarjeta='"+tarjeta+"' AND codCuenta =" + cuenta);
+			resultSet = this.getStatement().executeQuery("SELECT codCuenta FROM CuentaTarjeta " +
+					"WHERE codTarjeta='"+tarjeta+"' AND cnum =" + cuenta);
 
 			return resultSet.next();
 			
@@ -255,7 +255,7 @@ public class Database_lib {
 	public synchronized int getNumCuentas(String tarjeta){
 		ResultSet resultSet;
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT count(codCuenta) FROM Cuenta " +
+			resultSet = this.getStatement().executeQuery("SELECT count(codCuenta) FROM CuentaTarjeta " +
 					"WHERE codTarjeta='"+tarjeta+"'");
 
 			if(resultSet.next())
@@ -493,8 +493,9 @@ public class Database_lib {
 		//Realizamos la consulta
 		ResultSet resultSet;
 		try{
-			resultSet = this.getStatement().executeQuery("SELECT cusaldo FROM Cuenta " +
-					"WHERE codCuenta=" + cuenta + " AND codTarjeta = '" + tarjeta + "'");
+			resultSet = this.getStatement().executeQuery("SELECT c.cusaldo FROM CuentaTarjeta ct JOIN Cuenta c " +
+					"ON ct.codCuenta=c.codCuenta " +
+					"WHERE ct.cnum=" + cuenta + " AND ct.codTarjeta = '" + tarjeta + "'");
 			if(resultSet.next())
 				return resultSet.getInt(1);
 		}
@@ -2777,8 +2778,8 @@ public class Database_lib {
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
 		try {
-			resultSet = this.getStatement().executeQuery("SELECT codTarjeta,codCuenta,cusaldo" +
-					" FROM Cuenta ORDER BY codTarjeta");
+			resultSet = this.getStatement().executeQuery("SELECT ct.codTarjeta,ct.cnum,c.cusaldo" +
+					" FROM Cuenta c JOIN CuentaTarjeta ct ON c.codCuenta=ct.codCuenta ORDER BY ct.codTarjeta,ct.cnum");
 
 			while(resultSet.next()){
 				ArrayList<String> linea = new ArrayList<String>();
