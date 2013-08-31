@@ -13,11 +13,20 @@ CREATE TABLE Tarjeta(
 -- codCuenta Codigo de la cuenta
 -- cusaldo Saldo actual de la cuenta
 CREATE TABLE Cuenta(
-	codTarjeta VARCHAR(11) NOT NULL,
 	codCuenta INTEGER NOT NULL,
 	cusaldo INTEGER NOT NULL DEFAULT 0,
-	CONSTRAINT ct_tcod_fk FOREIGN KEY (codTarjeta) REFERENCES Tarjeta(codTarjeta) ON DELETE CASCADE,
-	CONSTRAINT cu_pk PRIMARY KEY (codCuenta,codTarjeta)
+	CONSTRAINT cu_pk PRIMARY KEY (codCuenta)
+);
+
+
+CREATE TABLE CuentaTarjeta(
+	codTarjeta CHAR(11),
+	cnum INTEGER,
+	codCuenta INTEGER,
+	CONSTRAINT ct_codCuenta_fk FOREIGN KEY (codCuenta) REFERENCES Cuenta(codCuenta) ON DELETE CASCADE,
+	CONSTRAINT ct_codTarjeta_fk FOREIGN KEY (codTarjeta) REFERENCES Tarjeta(codTarjeta) ON DELETE CASCADE,
+	CONSTRAINT ct_cnum_check CHECK (cnum IN (1,3)),
+	CONSTRAINT ct_pk PRIMARY KEY (codTarjeta,cnum)
 );
 
 
@@ -102,8 +111,9 @@ CREATE TABLE Movimiento(
 	moimporte INTEGER NOT NULL DEFAULT 0,
 	moonline BOOLEAN NOT NULL DEFAULT 0,
 	codBanco INTEGER NOT NULL,
-	CONSTRAINT mo_codCuentaOrig_fk FOREIGN KEY (codCuentaOrig,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
-	CONSTRAINT mo_codCuentaDest_fk FOREIGN KEY (codCuentaDest,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
+	CONSTRAINT mo_codTarjeta_fk FOREIGN KEY (codTarjeta) REFERENCES Tarjeta(codTarjeta) ON DELETE CASCADE,
+	CONSTRAINT mo_codCuentaOrig_fk FOREIGN KEY (codCuentaOrig) REFERENCES Cuenta(codCuenta) ON DELETE CASCADE,
+	CONSTRAINT mo_codCuentaDest_fk FOREIGN KEY (codCuentaDest) REFERENCES Cuenta(codCuenta) ON DELETE CASCADE,
 
 	CONSTRAINT mo_codTMovimiento_fk FOREIGN KEY (codTMovimiento) REFERENCES TipoMovimiento(codTMovimiento) ON DELETE SET NULL,
 
@@ -170,7 +180,8 @@ CREATE TABLE UltimoEnvio(
 	uestringMensaje VARCHAR(500) NOT NULL,
 
 	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
-	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta,codTarjeta) REFERENCES Cuenta(codCuenta,codTarjeta) ON DELETE CASCADE,
+	CONSTRAINT ue_Tarjeta_fk FOREIGN KEY (codTarjeta) REFERENCES Tarjeta(codTarjeta) ON DELETE CASCADE,
+	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta) REFERENCES Cuenta(codCuenta) ON DELETE CASCADE,
 	CONSTRAINT ue_codCajero_fk FOREIGN KEY (uecodCajero) REFERENCES Cajero(codCajero) ON DELETE CASCADE,
 
 	CONSTRAINT ue_pk PRIMARY KEY (codigoue)
@@ -232,19 +243,29 @@ INSERT INTO Tarjeta VALUES ('pastor42004',0);
 INSERT INTO Tarjeta VALUES ('pastor42005',0);
 
 
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42005',0,0000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',1,1000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42002',1,1000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',2,2000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42001',3,3000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42002',3,3000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42003',4,4000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42003',5,5000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42003',6,6000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42004',7,7000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42004',8,8000);
-INSERT INTO Cuenta(codTarjeta,codCuenta,cusaldo) VALUES ('pastor42005',9,9000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (0,0000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (1,1000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (2,2000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (3,3000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (4,4000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (5,5000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (6,6000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (7,7000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (8,8000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (9,9000);
 
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42001',1,1);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42001',2,2);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42001',3,3);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42002',1,1);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42002',2,3);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42003',1,4);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42003',2,5);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42003',3,6);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42004',1,7);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42004',2,8);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42005',1,0);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42005',3,9);
 
 
 
