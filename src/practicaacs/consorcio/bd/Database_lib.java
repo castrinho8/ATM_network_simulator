@@ -229,7 +229,22 @@ public class Database_lib {
 		}
 		return false;
 	}
-	
+
+	private synchronized int getNumCuenta(String tarjeta, int cnum){
+		ResultSet resultSet;
+		try{
+			resultSet = this.getStatement().executeQuery("SELECT codCuenta FROM CuentaTarjeta" +  
+					" WHERE codTarjeta = '" + tarjeta + "' AND cnum = " + cnum);
+			
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		return -1;
+	}
 	
 	/**
 	 * Método que comprueba si existe la cuenta para la tarjeta indicadas y devuelve un booleano que lo indica.
@@ -442,7 +457,7 @@ public class Database_lib {
 	 * @param importe El importe a modificar.
 	 * @param signo El signo que indica si se debe sumar o restar.
 	 */
-	private synchronized void recalcular_saldoActual(int cuenta,String tarjeta, int importe, char signo){
+	private synchronized void recalcular_saldoActual(int cnum,String tarjeta, int importe, char signo){
 	
 		//Comprobamos si existen tarjeta/cuenta
 		try{
@@ -450,17 +465,19 @@ public class Database_lib {
 			if(!this.existeTarjeta(tarjeta))
 				throw new ConsorcioBDException("recalcular_saldoActual: La tarjeta indicada no existe.");
 			//Comprueba si existe la cuenta
-			if(!this.existeCuenta(tarjeta, cuenta))
+			if(!this.existeCuenta(tarjeta, cnum))
 				throw new ConsorcioBDException("recalcular_saldoActual: La cuenta indicada no existe.");
 		}catch (ConsorcioBDException e1) {
 			e1.printStackTrace();
 			System.exit(-1);
 		}
 		
+		int cuenta = this.getNumCuenta(tarjeta, cnum);
+		
 		//Realizamos la actualizacion del saldo
 		try {
 			this.getStatement().executeUpdate("UPDATE Cuenta SET cusaldo = cusaldo"+ signo + importe +
-				" WHERE codCuenta = " + cuenta + " AND codTarjeta = '" + tarjeta + "'");
+				" WHERE codCuenta = " + cuenta);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(-1);
