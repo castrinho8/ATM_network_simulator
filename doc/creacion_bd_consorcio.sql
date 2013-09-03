@@ -40,7 +40,7 @@ CREATE TABLE EstadoBanco(
 
 
 CREATE TABLE Banco(
-	codigo INTEGER NOT NULL AUTO_INCREMENT,	
+	codigo INTEGER NOT NULL AUTO_INCREMENT,
 	codBanco VARCHAR(20) NOT NULL UNIQUE,
 	codEBanco INTEGER DEFAULT 2,
 	bapuerto INTEGER,
@@ -75,11 +75,8 @@ CREATE TABLE Movimiento(
 	CONSTRAINT mo_codTarjeta_fk FOREIGN KEY (codTarjeta) REFERENCES Tarjeta(codTarjeta) ON DELETE CASCADE,
 	CONSTRAINT mo_codCuentaOrig_fk FOREIGN KEY (codCuentaOrig) REFERENCES Cuenta(codCuenta) ON DELETE CASCADE,
 	CONSTRAINT mo_codCuentaDest_fk FOREIGN KEY (codCuentaDest) REFERENCES Cuenta(codCuenta) ON DELETE CASCADE,
-
 	CONSTRAINT mo_codTMovimiento_fk FOREIGN KEY (codTMovimiento) REFERENCES TipoMovimiento(codTMovimiento) ON DELETE SET NULL,
-
 	CONSTRAINT mo_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
-
 	CONSTRAINT mo_pk PRIMARY KEY (codMovimiento)
 );
 
@@ -101,7 +98,6 @@ CREATE TABLE Mensaje(
 	codBanco INTEGER,
 	meonline BOOLEAN DEFAULT NULL,
 	mestringMensaje VARCHAR(500) NOT NULL,
-
 	CONSTRAINT me_codTOrigen_fk FOREIGN KEY (codTOrigen) REFERENCES TipoOrigDest(codTOrigDest) ON DELETE SET NULL,
 	CONSTRAINT me_codTDestino_fk FOREIGN KEY (codTDestino) REFERENCES TipoOrigDest(codTOrigDest) ON DELETE SET NULL,
 	CONSTRAINT me_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
@@ -118,12 +114,10 @@ CREATE TABLE UltimoEnvio(
 	codTarjeta VARCHAR(11),
 	codCuenta INTEGER,
 	uestringMensaje VARCHAR(500) NOT NULL,
-
 	CONSTRAINT ue_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
 	CONSTRAINT ue_Tarjeta_fk FOREIGN KEY (codTarjeta) REFERENCES Tarjeta(codTarjeta) ON DELETE CASCADE,
 	CONSTRAINT ue_Cuenta_fk FOREIGN KEY (codCuenta) REFERENCES Cuenta(codCuenta) ON DELETE CASCADE,
 	CONSTRAINT ue_codCajero_fk FOREIGN KEY (uecodCajero) REFERENCES Cajero(codCajero) ON DELETE CASCADE,
-
 	CONSTRAINT ue_pk PRIMARY KEY (codigoue)
 );
 
@@ -135,7 +129,6 @@ CREATE TABLE Canal(
 	caenRecuperacion BOOLEAN NOT NULL DEFAULT 0,
 	codUltimoEnvio INTEGER DEFAULT NULL,
 	canext_numMensaje INTEGER NOT NULL DEFAULT 1,
-
 	CONSTRAINT ca_codBanco_fk FOREIGN KEY (codBanco) REFERENCES Banco(codigo) ON DELETE CASCADE,
 	CONSTRAINT ca_codUltimoEnvio_fk FOREIGN KEY (codUltimoEnvio) REFERENCES UltimoEnvio(codigoue) ON DELETE SET NULL,
 	CONSTRAINT ca_pk PRIMARY KEY (codBanco,codCanal)
@@ -167,7 +160,7 @@ VALUES (3,'Cajero');
 
 INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor42',2,80,'127.0.0.1',3);
 
-INSERT INTO Cajero(cajNombre,cajIp,cajPuerto) VALUES ('       1','127.0.0.1',8928);
+INSERT INTO Cajero(cajNombre,cajIp,cajPuerto) VALUES ('cajero01','127.0.0.1',8928);
 
 
 INSERT INTO Tarjeta VALUES ('pastor42001',0);

@@ -601,11 +601,16 @@ public class Banco implements AnalizadorMensajes{
 			}
 			r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, ind--,
 					c1, m.importe >= 0, m.importe > 0 ? m.importe : - m.importe, m.data);
-				this.enviarMensaje(r, "Mensaxe enviada: Movemento("+ c1 + ").\n");
+			this.enviarMensaje(r, "Mensaxe enviada: Movemento("+ c1 + ").\n");
 			
 			if(ind<0)
 				break;
 		}
+		r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, 0,
+				CodigosMovimiento.OTRO, false, 0, new Date ());
+		this.enviarMensaje(r, "Mensaxe enviada: Movemento(MARCAFIN).\n");
+		
+		
 		this.iu.actualizar();
 	}
 

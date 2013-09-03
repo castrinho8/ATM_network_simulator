@@ -48,7 +48,7 @@ public class Database_lib {
 		InputStream is;
 		//LA SITUACION DEL FICHERO DE CONFIGURACION
 		//String file = "/home/ch01/UNI/ACS/RepositorioPractica/res/consorcioBD.properties";
-		String file = "/home/castrinho8/Escritorio/UNI/ACS/res/consorcioBD.properties";
+		String file = "/home/ch01/RepositorioPractica/res/consorcio.properties";
 
 		try {
 			is = new FileInputStream(file);
