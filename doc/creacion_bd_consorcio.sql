@@ -158,16 +158,25 @@ INSERT INTO TipoOrigDest(codTOrigDest,todnombre)
 VALUES (3,'Cajero');
 
 
-INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('pastor42',2,80,'127.0.0.1',3);
+INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('banco001',2,80,'127.0.0.1',3);
+INSERT INTO Banco(codBanco,codEBanco,bapuerto,baip,bamaxCanales) VALUES('banco002',2,81,'127.0.0.1',3);
+
+
 
 INSERT INTO Cajero(cajNombre,cajIp,cajPuerto) VALUES ('cajero01','127.0.0.1',8928);
+INSERT INTO Cajero(cajNombre,cajIp,cajPuerto) VALUES ('cajero02','127.0.0.1',8927);
 
 
-INSERT INTO Tarjeta VALUES ('pastor42001',0);
-INSERT INTO Tarjeta VALUES ('pastor42002',0);
-INSERT INTO Tarjeta VALUES ('pastor42003',0);
-INSERT INTO Tarjeta VALUES ('pastor42004',0);
-INSERT INTO Tarjeta VALUES ('pastor42005',0);
+INSERT INTO Tarjeta VALUES ('banco001001',0);
+INSERT INTO Tarjeta VALUES ('banco001002',0);
+INSERT INTO Tarjeta VALUES ('banco001003',0);
+INSERT INTO Tarjeta VALUES ('banco001004',0);
+INSERT INTO Tarjeta VALUES ('banco001005',0);
+INSERT INTO Tarjeta VALUES ('banco002001',0);
+INSERT INTO Tarjeta VALUES ('banco002002',0);
+INSERT INTO Tarjeta VALUES ('banco002003',0);
+INSERT INTO Tarjeta VALUES ('banco002004',0);
+INSERT INTO Tarjeta VALUES ('banco002005',0);
 
 
 INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (0,0000);
@@ -180,19 +189,42 @@ INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (6,6000);
 INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (7,7000);
 INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (8,8000);
 INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (9,9000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (10,0000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (11,1000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (12,2000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (13,3000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (14,4000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (15,5000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (16,6000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (17,7000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (18,8000);
+INSERT INTO Cuenta(codCuenta,cusaldo) VALUES (19,9000);
 
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42001',1,1);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42001',2,2);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42001',3,3);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42002',1,1);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42002',2,3);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42003',1,4);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42003',2,5);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42003',3,6);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42004',1,7);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42004',2,8);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42005',1,0);
-INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('pastor42005',3,9);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001001',1,1);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001001',2,2);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001001',3,3);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001002',1,1);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001002',2,3);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001003',1,4);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001003',2,5);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001003',3,6);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001004',1,7);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001004',2,8);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001005',1,0);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco001005',3,9);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002001',1,11);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002001',2,12);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002001',3,13);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002002',1,11);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002002',2,13);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002003',1,14);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002003',2,15);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002003',3,16);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002004',1,17);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002004',2,18);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002005',1,10);
+INSERT INTO CuentaTarjeta(codTarjeta,cnum,codCuenta)  VALUES('banco002005',3,19);
+
 
 
 

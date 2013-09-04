@@ -57,7 +57,7 @@ CREATE TABLE Canle(
 	ocupado BOOLEAN DEFAULT 0,
 	recuperado BOOLEAN DEFAULT 1,
 	CONSTRAINT cn_scod_fk FOREIGN KEY (scod) REFERENCES Sesion(scod) ON DELETE CASCADE,
-	CONSTRAINT s_pk PRIMARY KEY (scod,cncod)	
+	CONSTRAINT s_pk PRIMARY KEY (scod,cncod)
 );
 
 CREATE TABLE Mensaxe (
@@ -80,35 +80,35 @@ CREATE TABLE Mensaxe (
 
 -- Valores iniciales das contas do banco.
 
-INSERT INTO Tarxeta VALUES ('pastor42001');
-INSERT INTO Tarxeta VALUES ('pastor42002');
-INSERT INTO Tarxeta VALUES ('pastor42003');
-INSERT INTO Tarxeta VALUES ('pastor42004');
-INSERT INTO Tarxeta VALUES ('pastor42005');
+	INSERT INTO Tarxeta VALUES ('banco002001');
+	INSERT INTO Tarxeta VALUES ('banco002002');
+	INSERT INTO Tarxeta VALUES ('banco002003');
+	INSERT INTO Tarxeta VALUES ('banco002004');
+	INSERT INTO Tarxeta VALUES ('banco002005');
 
-INSERT INTO Conta(ccod,saldo) VALUES (0,0000);
-INSERT INTO Conta(ccod,saldo) VALUES (1,1000);
-INSERT INTO Conta(ccod,saldo) VALUES (2,2000);
-INSERT INTO Conta(ccod,saldo) VALUES (3,3000);
-INSERT INTO Conta(ccod,saldo) VALUES (4,4000);
-INSERT INTO Conta(ccod,saldo) VALUES (5,5000);
-INSERT INTO Conta(ccod,saldo) VALUES (6,6000);
-INSERT INTO Conta(ccod,saldo) VALUES (7,7000);
-INSERT INTO Conta(ccod,saldo) VALUES (8,8000);
-INSERT INTO Conta(ccod,saldo) VALUES (9,9000);
+	INSERT INTO Conta(ccod,saldo) VALUES (0,0000);
+	INSERT INTO Conta(ccod,saldo) VALUES (1,1000);
+	INSERT INTO Conta(ccod,saldo) VALUES (2,2000);
+	INSERT INTO Conta(ccod,saldo) VALUES (3,3000);
+	INSERT INTO Conta(ccod,saldo) VALUES (4,4000);
+	INSERT INTO Conta(ccod,saldo) VALUES (5,5000);
+	INSERT INTO Conta(ccod,saldo) VALUES (6,6000);
+	INSERT INTO Conta(ccod,saldo) VALUES (7,7000);
+	INSERT INTO Conta(ccod,saldo) VALUES (8,8000);
+	INSERT INTO Conta(ccod,saldo) VALUES (9,9000);
 
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',1,1);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',2,2);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',3,3);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',1,1);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',2,3);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',1,4);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',2,5);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',3,6);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',1,7);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',2,8);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',1,0);
-INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',3,9);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002001',1,1);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002001',2,2);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002001',3,3);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002002',1,1);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002002',2,3);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002003',1,4);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002003',2,5);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002003',3,6);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002004',1,7);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002004',2,8);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002005',1,0);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco002005',3,9);
 
 
 -- Tipos de movimento.
