@@ -135,8 +135,6 @@ CREATE TABLE Canal(
 );
 
 
--- DATOS INICIALES REALES
-
 INSERT INTO EstadoBanco VALUES(1,'Abierta');
 INSERT INTO EstadoBanco VALUES(2,'Cerrada');
 INSERT INTO EstadoBanco VALUES(3,'Trafico detenido');

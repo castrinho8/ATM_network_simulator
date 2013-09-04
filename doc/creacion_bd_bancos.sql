@@ -122,8 +122,3 @@ INSERT INTO TipoMovemento VALUES(51,'Cobro de cheque');
 INSERT INTO TipoMovemento VALUES(99,'Otros');
 
 
-SELECT cncod canle, max(msnum) ultmsx
-FROM Canle LEFT JOIN Mensaxe USING (cncod)
-GROUP BY cncod
-WHERE scod = 1
-ORDER BY 1
