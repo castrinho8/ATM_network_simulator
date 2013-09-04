@@ -590,8 +590,9 @@ public class Banco implements AnalizadorMensajes{
 		
 		
 		movs = this.getMovementosConta(conta.getNumero());
-		ind = (movs.size() >= 20) ? 20 : movs.size();
-		for (Movemento m : movs){
+		int count = (movs.size() > 20) ? 20 : movs.size() == 20 ? 19 : movs.size();
+		for (ind = movs.size() > 21 ? movs.size() - 21 : 0; ind >= 0 && count >= 0; ind++, count--){
+			Movemento m = movs.get(ind);
 			CodigosMovimiento c1;
 			try {
 				c1 =  CodigosMovimiento.getTipoMovimiento(m.numtipo);
@@ -599,16 +600,14 @@ public class Banco implements AnalizadorMensajes{
 				this.iu.engadirLinhaLog("Codigo de movemento non recoñecido::" + e.getLocalizedMessage()+ " - " + m.numtipo + "\n");
 				continue;
 			}
-			r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, ind--,
+			r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, count,
 					c1, m.importe >= 0, m.importe > 0 ? m.importe : - m.importe, m.data);
-			this.enviarMensaje(r, "Mensaxe enviada: Movemento("+ c1 + ").\n");
-			
-			if(ind<0)
-				break;
+			this.enviarMensaje(r, "Mensaxe enviada: Movemento #" + count + " ("+ c1 + ").\n");
 		}
-		r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, 0,
-				CodigosMovimiento.OTRO, false, 0, new Date ());
-		this.enviarMensaje(r, "Mensaxe enviada: Movemento(MARCAFIN).\n");
+
+		//r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, 0,
+		//		CodigosMovimiento.OTRO, false, 0, new Date ());
+		//this.enviarMensaje(r, "Mensaxe enviada: Movemento(MARCAFIN).\n");
 		
 		
 		this.iu.actualizar();
@@ -655,6 +654,13 @@ public class Banco implements AnalizadorMensajes{
 		if((conta = this.bd.getConta(numtarx, numConta)) == null){
 			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal,nmsg,online, CodigosRespuesta.CUENTANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Conta Invalida).\n");
+			this.iu.actualizar();
+			return;
+		}
+		
+		if(conta.getSaldo() < importe && online){
+			r = new RespReintegro(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0);
+			this.enviarMensaje(r, "Mensaxe enviada: Error (Saldo insuficiente).\n");
 			this.iu.actualizar();
 			return;
 		}
@@ -707,13 +713,6 @@ public class Banco implements AnalizadorMensajes{
 		if((conta = this.bd.getConta(numtarx, numConta)) == null){
 			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.CUENTANVALIDA, false, 0);
 			this.enviarMensaje(r, "Mensaxe enviada: Error (Conta " + numConta + " Invalida).\n");
-			this.iu.actualizar();
-			return;
-		}
-		
-		if(conta.getSaldo() < importe && online){
-			r = new RespAbono(this.idbanco, this.idconsorcio, ncanal, nmsg, online, CodigosRespuesta.IMPORTEEXCLIMITE, false, 0);
-			this.enviarMensaje(r, "Mensaxe enviada: Error (Saldo insuficiente).\n");
 			this.iu.actualizar();
 			return;
 		}
