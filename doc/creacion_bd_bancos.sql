@@ -78,7 +78,40 @@ CREATE TABLE Mensaxe (
 
 
 
--- Valores iniciales das contas do banco.
+-- Valores iniciales das contas do banco 1.
+
+	INSERT INTO Tarxeta VALUES ('banco001001');
+	INSERT INTO Tarxeta VALUES ('banco001002');
+	INSERT INTO Tarxeta VALUES ('banco001003');
+	INSERT INTO Tarxeta VALUES ('banco001004');
+	INSERT INTO Tarxeta VALUES ('banco001005');
+
+	INSERT INTO Conta(ccod,saldo) VALUES (0,0000);
+	INSERT INTO Conta(ccod,saldo) VALUES (1,1000);
+	INSERT INTO Conta(ccod,saldo) VALUES (2,2000);
+	INSERT INTO Conta(ccod,saldo) VALUES (3,3000);
+	INSERT INTO Conta(ccod,saldo) VALUES (4,4000);
+	INSERT INTO Conta(ccod,saldo) VALUES (5,5000);
+	INSERT INTO Conta(ccod,saldo) VALUES (6,6000);
+	INSERT INTO Conta(ccod,saldo) VALUES (7,7000);
+	INSERT INTO Conta(ccod,saldo) VALUES (8,8000);
+	INSERT INTO Conta(ccod,saldo) VALUES (9,9000);
+
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001001',1,1);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001001',2,2);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001001',3,3);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001002',1,1);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001002',2,3);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001003',1,4);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001003',2,5);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001003',3,6);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001004',1,7);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001004',2,8);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001005',1,0);
+	INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001005',3,9);
+
+
+-- Valores iniciales das contas do banco 2.
 
 	INSERT INTO Tarxeta VALUES ('banco002001');
 	INSERT INTO Tarxeta VALUES ('banco002002');

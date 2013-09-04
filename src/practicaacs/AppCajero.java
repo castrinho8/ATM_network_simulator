@@ -27,8 +27,8 @@ public class AppCajero {
     			System.out.println("Cargando configuracion...");
     			new Cajero(args[0]);
     		}else{
-	    		//new Cajero("/home/castrinho8/Escritorio/UNI/ACS/res/cajero1.properties");
-    			new Cajero("/home/ch01/RepositorioPractica/res/cajero1.properties");
+	    		new Cajero("/home/castrinho8/Escritorio/UNI/ACS/res/cajero1.properties");
+    			//new Cajero("/home/ch01/RepositorioPractica/res/cajero1.properties");
     		}
     	} catch (IOException e) {
 			e.printStackTrace();

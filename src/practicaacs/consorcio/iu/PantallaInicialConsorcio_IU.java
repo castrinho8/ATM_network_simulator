@@ -53,6 +53,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         ButtonEstado = new javax.swing.JButton();
         LabelTarjeta = new javax.swing.JLabel();
         RefreshButton = new javax.swing.JButton();
+        ResetBanco = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -78,14 +79,14 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         cajerosList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = {};
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
         jScrollPane3.setViewportView(cajerosList);
 
         BancosLIst.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = {};
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
@@ -112,9 +113,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         LabelCuenta.setText("Error insertando Cuenta");
-        LabelCuenta.setVisible(false);
-        
-        ButtonEstado.setText("Cerrar Servidor");
+
+        ButtonEstado.setText("Cambiar Estado");
         ButtonEstado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ButtonEstadoActionPerformed(evt);
@@ -122,8 +122,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         LabelTarjeta.setText("Error insertando Tarjeta");
-        LabelTarjeta.setVisible(false);
-        
+
         RefreshButton.setText("Actualizar");
         RefreshButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -131,6 +130,13 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
             }
         });
 
+        ResetBanco.setText("Reset Bancos");
+        ResetBanco.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	ResetBancoActionPerformed(evt);
+            }
+        });
+        
         jMenu1.setText("File");
 
         jMenuItem1.setText("Salir");
@@ -193,7 +199,9 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
                     .addComponent(jScrollPane4)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(ButtonEstado)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ButtonEstado, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(ResetBanco, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -201,12 +209,14 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(ButtonEstado)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(SolButton)
                     .addComponent(TextFieldTarjeta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ButtonTarjeta)
                     .addComponent(RefreshButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ResetBanco)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(LabelTarjeta)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -234,7 +244,6 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         pack();
     }// </editor-fold>                        
 
-                                            
     /**
      * Solicitar Recuperacion
      */
@@ -365,7 +374,15 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     private void RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {
     	this.actualizarListaBancos();
     	this.actualizarListaCajeros();
-    }                                             
+    }    
+    
+    /**
+     * Boton Reset Bancos
+     * @param evt
+     */
+    private void ResetBancoActionPerformed(java.awt.event.ActionEvent evt) {                                           
+    	Database_lib.getInstance().resetearBancos();
+    }
 
     /**
      * @param args the command line arguments
@@ -410,6 +427,7 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     private javax.swing.JLabel LabelCuenta;
     private javax.swing.JLabel LabelTarjeta;
     private javax.swing.JButton RefreshButton;
+    private javax.swing.JButton ResetBanco;
     private javax.swing.JButton SolButton;
     private javax.swing.JTextField TextFieldCuenta;
     private javax.swing.JTextField TextFieldTarjeta;

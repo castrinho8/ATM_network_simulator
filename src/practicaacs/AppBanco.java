@@ -27,7 +27,8 @@ public class AppBanco {
 			new Banco(args[0]);
 		}else{
 			System.out.println("Cargando Banco por defecto...");
-			new Banco("/home/ch01/RepositorioPractica/res/banco1.properties");		
+			//new Banco("/home/ch01/RepositorioPractica/res/banco1.properties");		
+			new Banco("/home/castrinho8/Escritorio/UNI/ACS/res/banco1.properties");		
 		}
 	}
 

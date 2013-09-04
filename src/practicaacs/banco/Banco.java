@@ -63,8 +63,8 @@ public class Banco implements AnalizadorMensajes{
 		this.cs = new ClienteServidorConsorcio(puerto, hostconsorcio, puertoconsorcio, this);
 		this.cs.start();
 		
-		this.portBanco = prop.getProperty("banco.add") + "/" + prop.getProperty("banco.port");
-
+		this.portBanco = prop.getProperty("banco.bd.add") + "/" + prop.getProperty("banco.port");
+		System.out.println("Inicializacion puerto:"+this.portBanco);
 		
 		this.iu = new VentanaBanco(this,prop.getProperty("banco.name"));
 		this.iu.setVisible(true);

@@ -363,8 +363,8 @@ public class Database_lib {
 		if(codonline){
 			if(!Database_lib.getInstance().hayCanalesLibres(id_banco_bd))
 				return CodigosRespuesta.CONSDEN;
-			else
-				return CodigosRespuesta.CONSACEPTADA;
+	//		else
+	//			return CodigosRespuesta.CONSACEPTADA;
 		}
 		
 		if (!this.existeTarjeta(tarjeta))
@@ -1129,6 +1129,17 @@ public class Database_lib {
 	 ----------------------------------------------------*/
 	
 	
+	
+	public synchronized void resetearBancos(){
+		try{
+			this.statement.executeUpdate("UPDATE Banco SET codEBanco=2");
+		}catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+
+	
 	/**
 	 * Método que abre una sesion con el banco indicado.
 	 * Comprueba si ya esta, en ese caso setea el estado a ACTIVA, sino añade una linea a la tabla
@@ -1632,11 +1643,19 @@ public class Database_lib {
 			System.exit(-1);
 		}
 		
-		ResultSet resultSet;
+		ResultSet resultSet,resultSet1;
 		try {
-			//Consultamos los canales libres en la BD
+			
+			//Obtenemos los canales libres no asignados aun
+			resultSet1 = this.getStatement().executeQuery("SELECT codCanal FROM Canal " +
+					"WHERE codBanco = " +id_banco_bd + " AND codUltimoEnvio IS NULL AND codCanal>0");
+
+			if(resultSet1.next())
+				return true;
+			
+			//Consultamos los canales libres en la BD asignados ya a algun envio
 			resultSet = this.getStatement().executeQuery("SELECT DISTINCT c.codCanal FROM Canal c JOIN UltimoEnvio ue " +
-					"ON c.codBanco = " + id_banco_bd + " WHERE c.cabloqueado = 0 AND ue.uecontestado = 1 AND c.codCanal>0");
+					"ON c.codUltimoEnvio=ue.codigoue WHERE c.codBanco = " + id_banco_bd + " AND c.cabloqueado = 0 AND ue.uecontestado = 1 AND c.codCanal>0");
 			
 			//Devolvemos si hay algun canal libre
 			return resultSet.next();
@@ -1671,14 +1690,23 @@ public class Database_lib {
 		int max_channel = this.getNum_canales(id_banco);
 		int selected_channel = last_channel+1%max_channel;
 		
-		ResultSet resultSet;
+		ResultSet resultSet,resultSet1;
 		try {
-			//Consultamos los canales libres en la BD
-			resultSet = this.getStatement().executeQuery("SELECT DISTINCT c.codCanal FROM Canal c JOIN UltimoEnvio ue " +
-					"ON c.codBanco = " + id_banco_bd + " WHERE c.cabloqueado = 0 AND ue.uecontestado = 1 AND c.codCanal>0");
-			
 			//Obtenemos todos los canales que estan libres para ser usados
 			ArrayList<Integer> canales_posibles = new ArrayList<Integer>();
+			
+			//Obtenemos los canales libres no asignados aun
+			resultSet1 = this.getStatement().executeQuery("SELECT codCanal FROM Canal " +
+					"WHERE codBanco = " +id_banco_bd + " AND codUltimoEnvio IS NULL AND codCanal>0");
+			
+			while(resultSet1.next()){
+				canales_posibles.add(resultSet1.getInt(1));
+			}
+			
+			//Consultamos los canales libres asignados anteriormente a otro envio
+			resultSet = this.getStatement().executeQuery("SELECT DISTINCT c.codCanal FROM Canal c JOIN UltimoEnvio ue " +
+					"ON c.codUltimoEnvio=ue.codigoue WHERE c.codBanco = " + id_banco_bd + " AND c.cabloqueado = 0 AND ue.uecontestado = 1 AND c.codCanal>0");
+			
 			while(resultSet.next()){
 				canales_posibles.add(resultSet.getInt(1));
 			}
