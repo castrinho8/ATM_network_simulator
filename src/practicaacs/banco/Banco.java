@@ -588,23 +588,28 @@ public class Banco implements AnalizadorMensajes{
 			return;
 		}
 		
-		
 		movs = this.getMovementosConta(conta.getNumero());
 		int count = (movs.size() > 20) ? 20 : movs.size() == 20 ? 19 : movs.size() - 1;
-		for (ind = movs.size() > 21 ? movs.size() - 21 : 0; ind >= 0 && count >= 0; ind++, count--){
-			Movemento m = movs.get(ind);
-			CodigosMovimiento c1;
-			try {
-				c1 =  CodigosMovimiento.getTipoMovimiento(m.numtipo);
-			} catch (CodigoNoValidoException e) {
-				this.iu.engadirLinhaLog("Codigo de movemento non recoñecido::" + e.getLocalizedMessage()+ " - " + m.numtipo + "\n");
-				continue;
-			}
-			r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, count,
-					c1, m.importe >= 0, m.importe > 0 ? m.importe : - m.importe, m.data);
-			this.enviarMensaje(r, "Mensaxe enviada: Movemento #" + count + " ("+ c1 + ").\n");
-		}
 		
+		if(movs.size()==0){
+			r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, 0,
+					CodigosMovimiento.OTRO,true,0,new Date());
+			this.enviarMensaje(r, "Mensaxe enviada: Movemento(Non hay movementos).\n");
+		}else{
+			for (ind = movs.size() > 21 ? movs.size() - 21 : 0; ind >= 0 && count >= 0; ind++, count--){
+				Movemento m = movs.get(ind);
+				CodigosMovimiento c1;
+				try {
+					c1 =  CodigosMovimiento.getTipoMovimiento(m.numtipo);
+				} catch (CodigoNoValidoException e) {
+					this.iu.engadirLinhaLog("Codigo de movemento non recoñecido::" + e.getLocalizedMessage()+ " - " + m.numtipo + "\n");
+					continue;
+				}
+				r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, count,
+						c1, m.importe >= 0, m.importe > 0 ? m.importe : - m.importe, m.data);
+				this.enviarMensaje(r, "Mensaxe enviada: Movemento #" + count + " ("+ c1 + ").\n");
+			}
+		}
 		this.iu.actualizar();
 	}
 

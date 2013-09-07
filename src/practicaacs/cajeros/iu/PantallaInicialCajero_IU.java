@@ -22,7 +22,7 @@ public class PantallaInicialCajero_IU extends javax.swing.JFrame {
      * Funcion que inicializa las visibilidades y los campos de texto
      */
     private void inicializa_visibilidades(){
-        this.TarjetaTextField.setText("pastor42001");
+        this.TarjetaTextField.setText("banco001001");
         this.CuentaTextFIeld.setText("1");
         this.IncorrectosLabel.setVisible(false);
     }

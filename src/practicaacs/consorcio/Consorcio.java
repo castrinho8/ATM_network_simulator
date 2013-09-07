@@ -102,6 +102,14 @@ public class Consorcio {
 		return bancos_server;
 	}
 
+    public boolean isDownCajerosServer(){
+    	return this.cajeros_server.equals(null);
+    }
+
+    public boolean isDownBancosServer(){
+    	return this.bancos_server==null;
+    }
+    
 	public String getId_consorcio() {
 		return id_consorcio;
 	}

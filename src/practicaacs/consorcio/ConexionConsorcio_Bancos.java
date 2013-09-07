@@ -288,8 +288,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 				//Obtenemos la sesion y creamos un timer
 				Sesion s = servidor.getSesion(envio.getDestino());
 				if(s==null)
-					System.out.println("MERDAAA");
-				s.setTimer(canal);
+					s.setTimer(canal);
 			}
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);

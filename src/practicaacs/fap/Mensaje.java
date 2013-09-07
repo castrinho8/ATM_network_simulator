@@ -104,6 +104,16 @@ public abstract class Mensaje implements java.io.Serializable {
 				);
 	}
 	
+	public boolean es_respuestaDatos(){
+		return ((tipoMensaje == CodigosMensajes.RESSALDO) ||
+				(tipoMensaje == CodigosMensajes.RESMOVIMIENTOS) ||
+				(tipoMensaje == CodigosMensajes.RESABONO) ||
+				(tipoMensaje == CodigosMensajes.RESREINTEGRO)||
+				(tipoMensaje == CodigosMensajes.RESTRASPASO)
+				);
+	}
+	
+	
 	
 	
 	@Override

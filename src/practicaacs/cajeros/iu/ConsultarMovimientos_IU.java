@@ -184,7 +184,7 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 				
 				strlist.add(texto);
 			}else{
-				String[] s =  {(!m.hayMovimientos())?"No hay movimientos":"Error: No hay conexion"};
+				String[] s =  {(!m.hayMovimientos())?"- No hay movimientos para esta cuenta":"Error: No hay conexion"};
 				this.listMovimientos.setListData(s);
 				return;
 			}

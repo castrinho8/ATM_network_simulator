@@ -47,8 +47,8 @@ public class Database_lib {
 		Properties prop = new Properties();
 		InputStream is;
 		//LA SITUACION DEL FICHERO DE CONFIGURACION
-		//String file = "/home/castrinho8/Escritorio/UNI/ACS/res/consorcio.properties";
-		String file = "/home/ch01/RepositorioPractica/res/consorcio.properties";
+		String file = "/home/castrinho8/Escritorio/UNI/ACS/res/consorcio.properties";
+		//String file = "/home/ch01/RepositorioPractica/res/consorcio.properties";
 
 		try {
 			is = new FileInputStream(file);
@@ -2230,6 +2230,8 @@ public class Database_lib {
 			System.exit(-1);
 		}
 	}
+	
+	
 	/*---------------------------------------------------
 	 --------------------- ULTIMOENVIO -----------------------
 	 ----------------------------------------------------*/
@@ -2255,7 +2257,6 @@ public class Database_lib {
 		ResultSet resultSet;
 		int codigo_ultimo_envio = 0;
 		
-		//if canal==0->mensaje de control sin canal
 		//Comprueba si el canal esta ocupado o el mensaje del canal no ha sido respondido
 		if (this.isCanal_ocupado(id_banco, canal)){
 			System.out.println("El canal se encuentra ocupado, no se ha realizado la inserción.");
@@ -2665,7 +2666,6 @@ public class Database_lib {
 
 	/**
 	 * Añade una linea en la tabla MENSAJE
-	 * @param es_envio Valor booleano inidica si es un envio o una recepcion
 	 */
 	public synchronized void almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
 
@@ -2673,6 +2673,7 @@ public class Database_lib {
 		String id_banco = null;
 		int id_banco_bd = -1;
 		boolean online = true;
+		boolean respuestaCorrecta = true;
 		
 		//Añade el id_banco, origen, destino o se obtiene de la tarjeta
 		if(torigen.equals(TipoOrigDest.BANCO))
@@ -2688,6 +2689,8 @@ public class Database_lib {
 			num_mensaje = ((MensajeDatos) message).getNmsg();
 			if(!message.es_consulta() && !message.es_respuestaConsulta())
 				online = ((MensajeDatos) message).getCodonline();
+			if(message.es_respuestaDatos())
+				respuestaCorrecta = ((MensajeRespDatos) message).respuestaCorrecta();
 		}
 			
 		//Si hay banco, obtiene el identificar del banco en la BD
@@ -2699,8 +2702,8 @@ public class Database_lib {
 			}
 		}
 		
-		boolean es_null_codonline = !(message.es_datos() && !message.es_consulta() && !message.es_respuestaConsulta());
-
+		boolean es_null_codonline = (message.es_datos() && (message.es_consulta() || message.es_respuestaConsulta())) || !respuestaCorrecta;
+		
 		try {
 			String q = "INSERT INTO Mensaje(codBanco,meNumMensaje,meonline, codTOrigen,meorigen, codTDestino, medestino,mestringMensaje) " +
 					"VALUES ("+ ((id_banco_bd==-1)?"NULL":id_banco_bd) + ","+ ((num_mensaje==-1)?"NULL":num_mensaje) + "," + ((es_null_codonline)?"NULL":online) + "," + torigen.getNum() +

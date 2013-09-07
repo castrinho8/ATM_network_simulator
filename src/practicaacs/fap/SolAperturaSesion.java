@@ -30,7 +30,7 @@ public class SolAperturaSesion extends Mensaje {
 		assert(ncanales > 0);
 		assert(ncanales < 100);
 		assert(puerto.length() <= 20);
-		
+
 		this.ncanales = ncanales;
 		this.time = time;
 		this.puerto = puerto;
@@ -49,6 +49,7 @@ public class SolAperturaSesion extends Mensaje {
 	public String getIp(){
 		try{
 			String[] port = this.puerto.split("/");
+			System.out.println(":"+port[0]+"-"+puerto+"-");
 			return port[0];
 		}catch(IndexOutOfBoundsException e){
 			e.printStackTrace();
