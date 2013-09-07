@@ -87,22 +87,28 @@ public class ConexionConsorcio_Cajeros extends Thread{
 					System.err.println(e.getLocalizedMessage());
 				}
 				
-				//Casteamos a Mensaje de datos y obtenemos el id
-				MensajeDatos recibido_datos = ((MensajeDatos)recibido);
+				MensajeDatos recibido_datos = null;
 				String id_banco = null;
-				id_banco = recibido_datos.getIdBancoFromTarjeta();
+				//Casteamos a Mensaje de datos y obtenemos el id
+				try{
+					recibido_datos = ((MensajeDatos)recibido);
+					id_banco = recibido_datos.getIdBancoFromTarjeta();
+				}catch(NullPointerException ne){
+					System.out.println("Error en el mensaje recibido. La tarjeta introducida tiene un formato incorrecto.");
+					System.exit(-1);
+				}
 				
 				//Seteamos si el banco esta online o no
 				recibido_datos.setCodonline(Database_lib.getInstance().consultar_protocolo(id_banco));
 				
 				//Guardamos el mensaje en la BD (Tabla de MENSAJES)
-				Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
+				int bd_num_message = Database_lib.getInstance().almacenar_mensaje(recibido,TipoOrigDest.CAJERO,recibido.getOrigen(),TipoOrigDest.CONSORCIO,recibido.getDestino());
 				
 				//Actualizar la interfaz grafica
 				this.consorcio.actualizarIU();
 				
 				//Analizamos el mensaje y realizamos las acciones correspondientes
-				analizar_mensaje(recibido);
+				analizar_mensaje(recibido,bd_num_message);
 				break;
 			}
 			//REENVIO DE MENSAJE DEL BANCO -> CAJERO
@@ -186,27 +192,27 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * Función que selecciona la accion a realizar en funcion del tipo de mensaje recibido.
 	 * @param recibido El mensaje que recibimos.
 	 */
-	private void analizar_mensaje(Mensaje recibido){
+	private void analizar_mensaje(Mensaje recibido,int bd_num_message){
 		
 		switch(recibido.getTipoMensaje()){
 			case SOLSALDO:{
-				consultar_saldo((SolSaldo) recibido);
+				consultar_saldo((SolSaldo) recibido,bd_num_message);
 				break;
 			}
 			case SOLMOVIMIENTOS:{
-				consultar_movimientos((SolMovimientos) recibido);
+				consultar_movimientos((SolMovimientos) recibido,bd_num_message);
 				break;
 			}
 			case SOLREINTEGRO:{
-				realizar_reintegro((SolReintegro) recibido);
+				realizar_reintegro((SolReintegro) recibido,bd_num_message);
 				break;
 			}
 			case SOLABONO:{
-				realizar_abono((SolAbono) recibido);
+				realizar_abono((SolAbono) recibido,bd_num_message);
 				break;
 			}
 			case SOLTRASPASO:{
-				realizar_traspaso((SolTraspaso) recibido);
+				realizar_traspaso((SolTraspaso) recibido,bd_num_message);
 				break;
 			}
 			default:{
@@ -250,7 +256,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * Función que implementa el comportamiento de la consulta de saldo.
 	 * @param recibido El mensaje de consulta de saldo recibido
 	 */
-	public void consultar_saldo(SolSaldo recibido){
+	public void consultar_saldo(SolSaldo recibido,int bd_num_message){
 			
 		String id_banco = recibido.getIdBancoFromTarjeta();
 
@@ -266,6 +272,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
+				
+				//Impide que el mensaje erroneo se reenvie al banco cuando este inicie sesion
+				Database_lib.getInstance().setMessageCodOnlineToNull(bd_num_message);
+				
 				//La respuesta en caso de error.
 				respuesta = new RespSaldo(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 
@@ -286,7 +296,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * Función que implementa el comportamiento de la consulta de movimientos.
 	 * @param recibido El mensaje de consulta de movimientos recibido
 	 */
-	public void consultar_movimientos(SolMovimientos recibido){
+	public void consultar_movimientos(SolMovimientos recibido,int bd_num_message){
 
 		String id_banco = recibido.getIdBancoFromTarjeta();
 
@@ -303,6 +313,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
+
+				//Impide que el mensaje erroneo se reenvie al banco cuando este inicie sesion
+				Database_lib.getInstance().setMessageCodOnlineToNull(bd_num_message);
+
 				//La respuesta en caso de error.
 				respuesta = new RespMovimientos(origen,destino,numcanal,nmsg,codonline,cod_resp,
 						0,CodigosMovimiento.OTRO,true,0,c.getTime());
@@ -323,7 +337,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * Método que realiza un reintegro.
 	 * @param recibido El mensaje a analizar
 	 */
-	public void realizar_reintegro(SolReintegro recibido){
+	public void realizar_reintegro(SolReintegro recibido,int bd_num_message){
 		
 		String id_banco = recibido.getIdBancoFromTarjeta();
 
@@ -339,6 +353,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
+
+				//Impide que el mensaje erroneo se reenvie al banco cuando este inicie sesion
+				Database_lib.getInstance().setMessageCodOnlineToNull(bd_num_message);
+
 				//La respuesta en caso de error.
 				respuesta = new RespReintegro(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0); 
 						
@@ -374,7 +392,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * Método que realiza un abono.
 	 * @param recibido El mensaje a analizar.
 	 */
-	public void realizar_abono(SolAbono recibido){
+	public void realizar_abono(SolAbono recibido,int bd_num_message){
 		
 		String id_banco = recibido.getIdBancoFromTarjeta();
 
@@ -390,6 +408,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
+				
+				//Impide que el mensaje erroneo se reenvie al banco cuando este inicie sesion
+				Database_lib.getInstance().setMessageCodOnlineToNull(bd_num_message);
+
 				//La respuesta en caso de error.
 				respuesta = new RespAbono(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0);
 						
@@ -424,7 +446,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * Método que realiza un traspaso.
 	 * @param recibido El mensaje a analizar.
 	 */
-	public void realizar_traspaso(SolTraspaso recibido){
+	public void realizar_traspaso(SolTraspaso recibido,int bd_num_message){
 		
 		String id_banco = recibido.getIdBancoFromTarjeta();
 
@@ -440,6 +462,10 @@ public class ConexionConsorcio_Cajeros extends Thread{
 		
 		switch(obtiene_tipo_envio(recibido,codonline,cod_resp)){
 			case RECHAZAR_PETICION:{
+
+				//Impide que el mensaje erroneo se reenvie al banco cuando este inicie sesion
+				Database_lib.getInstance().setMessageCodOnlineToNull(bd_num_message);
+
 				//La respuesta en caso de error.
 				respuesta = new RespTraspaso(origen,destino,numcanal,nmsg,codonline,cod_resp,true,0,true,0);
 						

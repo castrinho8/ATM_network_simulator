@@ -2667,7 +2667,7 @@ public class Database_lib {
 	/**
 	 * Añade una linea en la tabla MENSAJE
 	 */
-	public synchronized void almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
+	public synchronized int almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
 
 		int num_mensaje = -1;
 		String id_banco = null;
@@ -2714,9 +2714,30 @@ public class Database_lib {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+		
+		ResultSet resultSet;
+		try{
+			resultSet = this.getStatement().executeQuery("SELECT max(codMensaje) FROM Mensaje;");
+		
+			if(resultSet.next())
+				return resultSet.getInt(1);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return 0;
 	}
 	
 	
+	public synchronized void setMessageCodOnlineToNull(int bd_num_message){
+		try{
+			this.getStatement().executeUpdate("UPDATE Mensaje SET meonline=NULL WHERE codMensaje="+bd_num_message);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
 	
 	/*---------------------------------------------------
 	 --------- GETTERS PARA INTERFAZ GRAFICA ------------
