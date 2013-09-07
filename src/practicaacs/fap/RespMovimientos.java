@@ -119,4 +119,8 @@ public class RespMovimientos extends MensajeRespDatos {
 		return super.formatearMensaje()+"---- Movimiento: "+this.tipo_mov+" "+(this.signo?"+":"-")+this.importe+"€ / "+this.fecha;
 	}
 	
+	public boolean hayMovimientos(){
+		return !this.tipo_mov.equals(CodigosMovimiento.OTRO);
+	}
+	
 }

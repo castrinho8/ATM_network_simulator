@@ -175,7 +175,7 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 		while(it.hasNext()){
 			RespMovimientos m = (RespMovimientos) it.next();
 
-			if(m.getCodonline()){
+			if(m.getCodonline() && m.hayMovimientos()){
 				CodigosRespuesta codigo = m.getCod_resp();
 				if(codigo.equals(CodigosRespuesta.CONSACEPTADA))
 					texto = m.getTipoMov() + " - Importe: " + ((m.getSigno())?"+":"-")+m.getImporte()+"€  Fecha: "+m.getFecha();
@@ -184,7 +184,7 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 				
 				strlist.add(texto);
 			}else{
-				String[] s = {"Error: No hay conexion"};
+				String[] s =  {(!m.hayMovimientos())?"No hay movimientos":"Error: No hay conexion"};
 				this.listMovimientos.setListData(s);
 				return;
 			}
@@ -199,8 +199,9 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 		ArrayList<String> strlist = new ArrayList<String>();
 		String texto = null;
 
-		if(elemento.getCodonline())
+		if(elemento.getCodonline()){
 			texto = "Error: "+elemento.getCod_resp().getMensaje();
+		}
 		else 
 			texto = "Error: No hay conexion";
 

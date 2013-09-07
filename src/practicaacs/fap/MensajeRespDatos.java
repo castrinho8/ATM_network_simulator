@@ -38,6 +38,9 @@ public abstract class MensajeRespDatos extends MensajeDatos {
 		return cod_resp;
 	}
 	
+	public boolean respuestaCorrecta(){
+		return !this.cod_resp.equals(CodigosRespuesta.CONSACEPTADA);
+	}
 	
 	protected String formatearMensaje(){
 		return super.formatearMensaje()+"---- {"+cod_resp+"}";

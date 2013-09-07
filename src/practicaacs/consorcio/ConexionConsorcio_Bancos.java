@@ -287,6 +287,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 			if((!en_recuperacion) && (envio.es_datos())){
 				//Obtenemos la sesion y creamos un timer
 				Sesion s = servidor.getSesion(envio.getDestino());
+				if(s==null)
+					System.out.println("MERDAAA");
 				s.setTimer(canal);
 			}
 			//Enviamos el mensaje

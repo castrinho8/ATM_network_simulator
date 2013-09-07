@@ -23,8 +23,9 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     	actualizarListaCajeros();
     	actualizarListaBancos();
     	this.setLocationRelativeTo(null);
-        this.setExtendedState(MAXIMIZED_BOTH);  
-        this.setExtendedState(ICONIFIED);
+    	this.setSize(new Dimension(1000,700));
+        //this.setExtendedState(MAXIMIZED_BOTH);  
+        //this.setExtendedState(ICONIFIED);
     }
 
     /**
@@ -113,7 +114,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         LabelCuenta.setText("Error insertando Cuenta");
-
+        LabelCuenta.setVisible(false);
+        
         ButtonEstado.setText("Cambiar Estado");
         ButtonEstado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -122,7 +124,8 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
         });
 
         LabelTarjeta.setText("Error insertando Tarjeta");
-
+        LabelTarjeta.setVisible(false);
+        
         RefreshButton.setText("Actualizar");
         RefreshButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

@@ -363,8 +363,6 @@ public class Database_lib {
 		if(codonline){
 			if(!Database_lib.getInstance().hayCanalesLibres(id_banco_bd))
 				return CodigosRespuesta.CONSDEN;
-	//		else
-	//			return CodigosRespuesta.CONSACEPTADA;
 		}
 		
 		if (!this.existeTarjeta(tarjeta))
@@ -383,7 +381,7 @@ public class Database_lib {
 				&& (!codonline))
 			return CodigosRespuesta.CONSDEN;
 		
-		if ((this.consultarGastoOffline(tarjeta)+importe) > 1000)
+		if ((!codonline) && (this.consultarGastoOffline(tarjeta)+importe) > 1000)
 			return CodigosRespuesta.IMPORTEEXCLIMITE;
 
 		if ((tipo.equals(CodigosMensajes.SOLTRASPASO)) && (importe > 9999))
@@ -2675,7 +2673,7 @@ public class Database_lib {
 		String id_banco = null;
 		int id_banco_bd = -1;
 		boolean online = true;
-				
+		
 		//Añade el id_banco, origen, destino o se obtiene de la tarjeta
 		if(torigen.equals(TipoOrigDest.BANCO))
 			id_banco = origen;
