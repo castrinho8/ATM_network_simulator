@@ -194,33 +194,35 @@ public class ClienteBDBanco {
 		try {
 			this.statement.executeUpdate("delete from Conta where true");
 			this.statement.executeUpdate("delete from Tarxeta where true");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42001')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42002')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42003')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42004')");
-			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('pastor42005')");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (0,0000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (1,1000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (2,2000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (3,3000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (4,4000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (5,5000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (6,6000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (7,7000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (8,8000)");
-			this.statement.executeUpdate("INSERT INTO Conta VALUES (9,9000)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',1,1)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',2,2)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42001',3,3)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',1,1)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42002',2,3)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',1,4)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',2,5)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42003',3,6)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',1,7)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42004',2,8)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',1,0)");
-			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('pastor42005',3,9)");	
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('banco001001')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('banco001002')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('banco001003')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('banco001004')");
+			this.statement.executeUpdate("INSERT INTO Tarxeta VALUES ('banco001005')");
+
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (0,0000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (1,1000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (2,2000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (3,3000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (4,4000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (5,5000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (6,6000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (7,7000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (8,8000)");
+			this.statement.executeUpdate("INSERT INTO Conta(ccod,saldo) VALUES (9,9000)");
+
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001001',1,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001001',2,2)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001001',3,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001002',1,1)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001002',2,3)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001003',1,4)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001003',2,5)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001003',3,6)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001004',1,7)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001004',2,8)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001005',1,0)");
+			this.statement.executeUpdate("INSERT INTO ContaTarxeta(tcod,cnum,ccod)  VALUES('banco001005',3,9)");	
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

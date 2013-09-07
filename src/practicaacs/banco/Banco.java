@@ -590,7 +590,7 @@ public class Banco implements AnalizadorMensajes{
 		
 		
 		movs = this.getMovementosConta(conta.getNumero());
-		int count = (movs.size() > 20) ? 20 : movs.size() == 20 ? 19 : movs.size();
+		int count = (movs.size() > 20) ? 20 : movs.size() == 20 ? 19 : movs.size() - 1;
 		for (ind = movs.size() > 21 ? movs.size() - 21 : 0; ind >= 0 && count >= 0; ind++, count--){
 			Movemento m = movs.get(ind);
 			CodigosMovimiento c1;
@@ -604,11 +604,6 @@ public class Banco implements AnalizadorMensajes{
 					c1, m.importe >= 0, m.importe > 0 ? m.importe : - m.importe, m.data);
 			this.enviarMensaje(r, "Mensaxe enviada: Movemento #" + count + " ("+ c1 + ").\n");
 		}
-
-		//r = new RespMovimientos(this.idbanco, this.idconsorcio, ncanal, nmsg, true, CodigosRespuesta.CONSACEPTADA, 0,
-		//		CodigosMovimiento.OTRO, false, 0, new Date ());
-		//this.enviarMensaje(r, "Mensaxe enviada: Movemento(MARCAFIN).\n");
-		
 		
 		this.iu.actualizar();
 	}
