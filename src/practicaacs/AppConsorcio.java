@@ -22,8 +22,7 @@ public class AppConsorcio {
 		}
         
     	try {
-			//new Consorcio("/home/ch01/RepositorioPractica/res/consorcio.properties");
-			new Consorcio("/home/castrinho8/Escritorio/UNI/ACS/res/consorcio.properties");
+			new Consorcio("/home/ch01/RepositorioPractica/res/consorcio.properties");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
