@@ -43,5 +43,11 @@ public enum CodigosRespuesta {
 		
 		throw new CodigoNoValidoException("O valor '" + string + "' non é un código válido.");
 	}
+
+	public boolean respuestaAceptada(){
+		return this.valor == 00;
+	}
+	
+	
 	
 }
