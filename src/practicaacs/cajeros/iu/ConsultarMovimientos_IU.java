@@ -175,6 +175,13 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
 		while(it.hasNext()){
 			RespMovimientos m = (RespMovimientos) it.next();
 
+			if(m.getCodonline() && !m.getCod_resp().respuestaAceptada()){
+				texto = "Error: "+m.getCod_resp().getMensaje();
+				strlist.clear();
+				strlist.add(texto);
+				break;
+			}
+			
 			if(m.getCodonline() && m.hayMovimientos()){
 				CodigosRespuesta codigo = m.getCod_resp();
 				if(codigo.equals(CodigosRespuesta.CONSACEPTADA))

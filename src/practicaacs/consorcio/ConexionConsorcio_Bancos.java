@@ -288,7 +288,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 				//Obtenemos la sesion y creamos un timer
 				Sesion s = servidor.getSesion(envio.getDestino());
 				if(s==null)
-					s.setTimer(canal);
+					System.out.println("Error colocando el timmer, la sesión del banco: " + envio.getDestino() + " no existe.");
+				s.setTimer(canal);
 			}
 			//Enviamos el mensaje
 			this.output_socket.send(enviarPaquete);
