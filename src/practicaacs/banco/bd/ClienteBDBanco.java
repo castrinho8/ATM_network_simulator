@@ -1,6 +1,7 @@
 package practicaacs.banco.bd;
 
 import java.sql.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -148,18 +149,23 @@ public class ClienteBDBanco {
 	public ArrayList<Movemento> getMovementos(int numeroconta) {
 		ResultSet resultSet;
 		try {
-			resultSet = this.statement.executeQuery("SELECT mcod,tmnome,importe,data,tmcod FROM Movemento JOIN" +
+			resultSet = this.statement.executeQuery("SELECT mcod,tmnome,importe, DATE_FORMAT(data, '%Y-%m-%d %H:%i:%S'),tmcod FROM Movemento JOIN" +
 					" TipoMovemento USING (tmcod) WHERE ccod = " + numeroconta);
 			
 			ArrayList<Movemento> res = new ArrayList<Movemento>();
 			
 			while(resultSet.next()){
-				res.add(new Movemento(resultSet.getInt(1),resultSet.getInt(3),resultSet.getDate(4),resultSet.getString(2),resultSet.getInt(5)));
+				java.util.Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(resultSet.getString(4));
+				res.add(new Movemento(resultSet.getInt(1),resultSet.getInt(3),date,resultSet.getString(2),resultSet.getInt(5)));
 			}
 			
 			return res;
 		} catch (SQLException e) {
 			System.err.println(e);
+			return null;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -301,9 +307,8 @@ public class ClienteBDBanco {
 		r.next();
 		int num_mov = r.getInt(1); 
 		
-		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());	
 		this.statement.executeUpdate("INSERT INTO Movemento(mcod,ccod,data,importe,tmcod) values("+ (num_mov +1) + ", " + num_conta +
-				", '" + date + "', " + importe + ", " + tipo_mensaxe + ")");
+				", NOW(), " + importe + ", " + tipo_mensaxe + ")");
 	}
 	
 	public void facerReintegro(int sesion, int num_conta, int importe) {
