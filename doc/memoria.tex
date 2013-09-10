@@ -99,8 +99,22 @@ Para implementar a interación entre interface e base de datos intentouse empreg
 
 Para programar os diferentes estados nos que se pode atopar o banco empregouse un patrón estado de forma que se delega a acción a realizar nunha clase estado que a súa vez chama con uns parametros determinados a unha funcion da clase Banco.
 
+
 \subsection {Consorcio}
+Nos servidores de bancos e de caixeiros, decidímonos por utilizar a capacidade de extender a clase Thread para facilitar a posibilidade de deter e reabrir ditos servidores. Cada vez que se produce unha conexión, cada un dos servidores lanza un novo fío extra, para tratar cada una das mesmas.
+
+Esta característica é a que nos obriga a reiniciar os bancos que se atopen con conexións abertas no consorcio cando se utiliza o boton de pechar o servidor de bancos, de forma que unha vez volvemos a restablecer o servidor, os bancos teñen que volver a abrir sesións contra o consorcio para asi evitar erros de consistencia.
+
+Optouse tamén pola utilización de un patrón Singleton para o ficheiro de acceso a base de datos do Consorcio coa finalidade de simplificar dito acceso dende os servidores de caixeiros/bancos, asi como dende as propias conexións.
+
+
+
 \subsection {Caixeiro}
+Para a implementacion da interfaz gráfica dos caixeiros, vímonos na necesidade de utilizar unha clase abstracta para as funcionalidades de actualización de movementos, buscando unificar dito método de actulización da IU.
+
+Outra cousa que cómpre mencionar é o caso no que se solicita unha consulta de movementos e non hay ningun realizado. É enton cando o banco responde con unha mensaxe con contador de envios restantes a cero e con tipo OTRO para que o caixeiro poida indicar que non hay movementos.
+
+
 \newpage
 
 \clearpage
