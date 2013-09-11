@@ -91,13 +91,22 @@ Marcos Chavarría Teijeiro \\ \small{(marcos.chavarria@udc.es)}}
 \newpage
 
 \section {Explicación do funcionamento}
-A práctica dividese en tres programas que se comunican entre si, os caixeros, os bancos e o consorcio. Cada un destes programas executase a través das clases AppCajero, AppBanco e AppConsorcio que poden recibir como parametro o ficheiro de configuración.
+A práctica dividese en tres programas que se comunican entre si, os caixeros, os bancos e o consorcio. Cada un destes programas execútase a través das clases AppCajero, AppBanco e AppConsorcio que poden recibir como parámetro o ficheiro de configuración.
 
-O abrirse a aplicación do caixeiro veremos unha venta onde se nos permite poñer a tarxeta e mais a conta asocidad a dita tarxeta. Se prememos Continuar entraremos noutra pantalla que permite realizar as operacións ca conta indicada, é dicir, consultar saldos e movementos e facer abonos, reintegros e traspasos. Cada unha destasa opcións levaranos a unha interface nova na que se nos pediran cantidades e/ou mostrarase o saldo resultante despois de facer a operación.
+O abrirse a aplicación do caixeiro veremos unha ventá onde se nos permite poñer a tarxeta e máis a conta asocidada a dita tarxeta. Se prememos  Continuar entraremos noutra pantalla que permite realizar as operacións ca conta indicada, é dicir, consultar saldos e movementos e facer abonos, reintegros e traspasos. Cada unha destasa opcións levaranos a unha interface nova na que se nos pediran cantidades e/ou mostrarase o saldo resultante despois de facer a operación.
 
-O ficheiro de configuración do caixeiro especifica o nome deste, direción IP e datos do consorcio o que se vai conectar.
+Dispoñemos dun ficheiro de configuración do caixeiro para especificar o nome deste, direción IP e datos do consorcio o que se vai conectar.
 
-A aplicación do banco ten unha interface na que se poden ver o estado das contas e as contas asociadas a cada tarxeta. Ademais ten un panel no que se poden ver as canles e as mensaxes enviadas e recibidas polo banco e botóns que permiten abrir sesión, deter trafico, reanudalo e cerrar o trafico.
+O funcionamente dun envio comeza cando enviamos unha petición, o caixeiro conéctase co servidor de caixeiros que se atopa no consorcio e este crea un novo fío para atender a conexión.
+En función do estado no que se atope o banco ao que vai dirixida a mensaxe, o consorcio decide si reenviarlle a petición a dito banco ou responderlle ao Caixeiro con unha mensaxe de erro (se é solicitude de saldo/movementos) ou realizar a operación solicitada no consorcio (se é solicitude de abono/reintegro/traspaso). Cando o banco abra a sesión co consorcio, este mandaralle as operacións que se realizaron con el mentres non había sesión activa.
+
+No caso de que a conexión co banco se atope levantada, o fío de conexión chama a unha función do servidor dos bancos para que este cree un fío de conexión co banco e pásalle a mensaxe a enviarlle.
+O banco recibe a solicitude e procesaa, gardando as modificacións na súa base de datos para a conta e a tarxeta que está a realizar a operación e respondelle ao servidor de bancos do consorcio unha resposta de datos.
+
+Cando o servidor de bancos recibe unha resposta de datos, selecciona na súa base de datos, en función do canal polo que chega a mensaxe, o caixeiro ao que reenviar a resposta e crea un novo fío de resposta entre o servidor de caixeiros e o propio caixeiro que recibe a resposta e imprime a mensaxe indicada. 
+
+
+A aplicación do banco ten unha interface na que se poden ver o estado das tarxetas e as contas asociadas a cada tarxeta. Ademais ten un panel no que se poden ver as canles e as mensaxes enviadas e recibidas polo banco e botóns que permiten abrir sesión, deter trafico, reanudalo e cerrar o trafico.
 
 Se queremos silenciar unha canle para forzar o modo recuperación teremos que selecionar dita canle e premer o boton silenciar canle. A partir de ese momento o banco non responderá as mensaxes que recibe por esa canle.
 
