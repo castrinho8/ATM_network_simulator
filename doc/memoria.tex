@@ -90,6 +90,22 @@ Marcos Chavarría Teijeiro \\ \small{(marcos.chavarria@udc.es)}}
 
 \newpage
 
+\section {Explicación do funcionamento}
+A práctica dividese en tres programas que se comunican entre si, os caixeros, os bancos e o consorcio. Cada un destes programas executase a través das clases AppCajero, AppBanco e AppConsorcio que poden recibir como parametro o ficheiro de configuración.
+
+O abrirse a aplicación do caixeiro veremos unha venta onde se nos permite poñer a tarxeta e mais a conta asocidad a dita tarxeta. Se prememos Continuar entraremos noutra pantalla que permite realizar as operacións ca conta indicada, é dicir, consultar saldos e movementos e facer abonos, reintegros e traspasos. Cada unha destasa opcións levaranos a unha interface nova na que se nos pediran cantidades e/ou mostrarase o saldo resultante despois de facer a operación.
+
+O ficheiro de configuración do caixeiro especifica o nome deste, direción IP e datos do consorcio o que se vai conectar.
+
+A aplicación do banco ten unha interface na que se poden ver o estado das contas e as contas asociadas a cada tarxeta. Ademais ten un panel no que se poden ver as canles e as mensaxes enviadas e recibidas polo banco e botóns que permiten abrir sesión, deter trafico, reanudalo e cerrar o trafico.
+
+Se queremos silenciar unha canle para forzar o modo recuperación teremos que selecionar dita canle e premer o boton silenciar canle. A partir de ese momento o banco non responderá as mensaxes que recibe por esa canle.
+
+O ficheiro de configuración do banco permite especificar o seu nome, direción IP e porto e os datos da base de datos do banco e do consorcio ó que se conecta.
+
+O consorcio presenta dúas ventanas, nunha podese ver o estado das bases de datos e na outra podese ver os mensaxes nun formato máis comodo e con botóns que permiten reiniciar a conexión cos bancos por parte do consorcio e solicitar o inicio ou fin de modo de recuperación.
+
+
 \section{Decisiones de Diseño}
 \subsection {FAP}
 Para facer máis sinxelo a elaboración da practica creamos unha librería que permite crear mensaxes a partir do valor dos seus campos e a partir dun string co formato indicado. Isto permitenos reducir a complexidade de traballar con unha gran cantidade de mensaxes con diferentes formatos. Ademais creamos test de unidade para comprobar que non existisen erros nesta parte da práctica.
