@@ -7,13 +7,12 @@ import java.util.TimerTask;
 import practicaacs.consorcio.ServidorConsorcio_Bancos;
 
 /**
- * Clase que modela una Sesion y siver para gestionar los Timers de cada canal
+ * Clase que modela una Sesion y sive para gestionar los Timers de cada canal
  * de una sesion con un banco. Contiene un hashmap con todos los canales y el timer
  * que tienen asociado asi como un manejador para la tarea que deberá realizar si 
  * se sobrepasa el tiempo.
  *
  */
-
 public class Sesion {
 
 	private String id_banco;
@@ -41,7 +40,7 @@ public class Sesion {
 
 	/**
 	 * Metodo que crea un timer en el canal indicado.
-	 * @param canal EL canal en el que crear el timer.
+	 * @param canal El canal en el que crear el timer.
 	 */
 	public void setTimer(int canal){
 		System.out.println("Timmer añadido en canal: "+canal);

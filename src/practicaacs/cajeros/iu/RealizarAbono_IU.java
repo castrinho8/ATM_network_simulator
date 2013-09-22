@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 
 import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
+import practicaacs.fap.CodigoNoValidoException;
 import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
@@ -233,6 +234,10 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
     // End of variables declaration//GEN-END:variables
     
     
+	/**
+	 * Método que realiza el envio de una operación.
+	 * @param env El Envio a partir del cual se creará el mensaje a enviar.
+	 */
 	@Override
     public void envia_consulta(Envio env){
     	env.setTipoMensaje(CodigosMensajes.SOLABONO);
@@ -240,6 +245,11 @@ public class RealizarAbono_IU extends ConsultaAbstracta {
     	this.cajero.enviar_mensaje(envio,this);
     }
     
+	/**
+	 * Método que actualiza la IU.
+	 * @param message El mensaje recibido con el que actualizar la IU.
+	 * @throws CodigoNoValidoException Excepción que se lanza cuando se utiliza el método en una consulta no debida.
+	 */
 	@Override
     public void actualizarIU(MensajeRespDatos respuesta){
 		

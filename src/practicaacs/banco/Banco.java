@@ -16,6 +16,9 @@ import practicaacs.banco.csconsorcio.ClienteServidorConsorcio;
 import practicaacs.banco.estados.*;
 import practicaacs.banco.iu.VentanaBanco;
 
+/**
+ * Clase que implementa o funcionamiento de un Banco
+ */
 public class Banco implements AnalizadorMensajes{
 	
 	private ClienteBDBanco bd;
@@ -205,7 +208,7 @@ public class Banco implements AnalizadorMensajes{
 	
 	/**
 	 * Método que devolve a lista de canles da sesión.
-	 * @return
+	 * @return Devolve un arraylist de canles
 	 */
 	public ArrayList<Canal> getCanales(){
 		return this.bd.getCanales(this.idSesion);
@@ -214,7 +217,7 @@ public class Banco implements AnalizadorMensajes{
 	
 	/**
 	 * Método que devolve a lista de canles recibidas.
-	 * @return
+	 * @return Devolve un arraylist de canles
 	 */
 	public ArrayList<Mensaxe> getMensaxesRecibidas(){
 		return this.bd.getMensaxesRecibidas();
@@ -223,7 +226,7 @@ public class Banco implements AnalizadorMensajes{
 	
 	/**
 	 * Metodo que devolve a lista de canles enviadas.
-	 * @return
+	 * @return Devolve un arraylist de canles
 	 */
 	public ArrayList<Mensaxe> getMensaxesEnviadas(){
 		return this.bd.getMensaxesEnviadas();
@@ -268,8 +271,8 @@ public class Banco implements AnalizadorMensajes{
 	}
 	
 	/**
-	 * 
-	 * @param canal
+	 * Método que silencia a canle pasada por parámetro.
+	 * @param canal A canle a cal non responder os mensaxes.
 	 */
 	public void silenciarCanle(int canal) {
 		this.canalBloqueado = canal;
@@ -282,8 +285,8 @@ public class Banco implements AnalizadorMensajes{
 	
 	
 	/**
-	 * 
-	 * @return
+	 * Método que comproba si a sesión está aberta.
+	 * @return True si esta e False en caso contrario.
 	 */
 	public boolean sesionAberta() {
 		return this.estado.sesionAberta();
@@ -291,8 +294,8 @@ public class Banco implements AnalizadorMensajes{
 
 
 	/**
-	 * 
-	 * @return
+	 * Método que comproba si está o tráfico activo.
+	 * @return True si está e False en caso contrario.
 	 */
 	public boolean traficoActivo() {
 		return this.estado.traficoActivo();
@@ -300,8 +303,8 @@ public class Banco implements AnalizadorMensajes{
 	
 	
 	/**
-	 * 
-	 * @return
+	 * Método que comproba si está en recuperacion.
+	 * @return True si está e False en caso contrario.
 	 */
 	public boolean recuperacion() {
 		return this.estado.recuperacion();
@@ -316,7 +319,7 @@ public class Banco implements AnalizadorMensajes{
 	
 	/**
 	 * Método que analiza unha mensaxe recibida.
-	 * @param bs mensaxe recibido
+	 * @param bs Mensaxe recibido.
 	 */
 	@Override
 	public void analizarMensaje(String bs) {
@@ -391,8 +394,8 @@ public class Banco implements AnalizadorMensajes{
 
 	/**
 	 * Método que rexistra no log un erro nunha solicitude.
-	 * @param cm 
-	 * @param ce
+	 * @param cm O tipo de mensaxe.
+	 * @param ce O erro a rexistrar.
 	 */
 	public void errorRespuestaSolicitud(CodigosMensajes cm, CodigosError ce){
 		String s = null;

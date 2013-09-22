@@ -29,7 +29,12 @@ import practicaacs.fap.*;
 
 
 /**
- * Libreria de acceso a la base de datos
+ * Clase que contiene todas las funciones que realizan acceso a la BD
+ * del consorcio a través de JDBC.
+ * La clase está pensado como un patrón Singleton para facilitar su 
+ * acceso desde cualquier parte.
+ * 
+ * NOTA: Es necesario configurar el lugar en donde se encuentra el fichero de configuración.
  */
 public class Database_lib {
 	
@@ -39,16 +44,16 @@ public class Database_lib {
 	private Statement statement = null;
 	
 	/**
-	 * Constructor de la clase que realiza el acceso a la BASE DE DATOS
+	 * Constructor de la clase que realiza el acceso a la Base de Datos
 	 */
 	private Database_lib() {
 		
     	//Obtenemos los datos del fichero properties
 		Properties prop = new Properties();
 		InputStream is;
+		
 		//LA SITUACION DEL FICHERO DE CONFIGURACION
 		String file = "/home/castrinho8/Escritorio/UNI/ACS/res/consorcio.properties";
-		//String file = "/home/ch01/RepositorioPractica/res/consorcio.properties";
 
 		try {
 			is = new FileInputStream(file);
@@ -86,7 +91,7 @@ public class Database_lib {
 	
 	
 	/**
-	 * Devuelve la instancia del singleton
+	 * Devuelve la instancia del singleton. Si no existe lo crea.
 	 * @return El singleton de acceso a la base de datos
 	 */
 	static synchronized public Database_lib getInstance(){
@@ -113,7 +118,8 @@ public class Database_lib {
 	
 	
 	/**
-	 * Método que comprueba si existe la pareja Tarjeta,Cuenta en la BD. En caso de que no exista la inserta.
+	 * Método que comprueba si existe la pareja Tarjeta,Cuenta en la BD.
+	 * En caso de que no exista la inserta.
 	 * @param tarjeta El string correspondiente a la tarjeta.
 	 * @param cuenta El int correspondiente a la cuenta.
 	 */
@@ -144,7 +150,8 @@ public class Database_lib {
 	
 	
 	/**
-	 * Método que comprueba si existe la tarjeta en la BD. En caso de que no exista la inserta.
+	 * Método que comprueba si existe la tarjeta en la BD.
+	 * En caso de que no exista la inserta.
 	 * @param tarjeta El string correspondiente a la tarjeta.
 	 */
 	private synchronized void comprueba_tarjeta(String tarjeta){
@@ -175,9 +182,9 @@ public class Database_lib {
 	
 	/**
 	 * Comprueba si un banco existe y en caso contrario lo inserta.
-	 * @param id_banco El banco a comprobar
-	 * @return El int con el codigo que identifica al banco en la BD
-	 * @throws ConsorcioBDException Lanza una excepcion cuando no existe el banco y no puede ser añadido
+	 * @param id_banco El banco a comprobar.
+	 * @return El int con el codigo que identifica al banco en la BD.
+	 * @throws ConsorcioBDException Lanza una excepcion cuando no existe el banco y no puede ser añadido.
 	 */
 	private synchronized int comprueba_banco(String id_banco) throws ConsorcioBDException{
 
@@ -213,8 +220,8 @@ public class Database_lib {
 	
 	/**
 	 * Método que comprueba si existe la tarjeta indicada y devuelve un booleano que lo indica.
-	 * @param tarjeta La tarjeta a comprobar
-	 * @return True si existe y False en caso contrario
+	 * @param tarjeta La tarjeta a comprobar.
+	 * @return True si existe y False en caso contrario.
 	 */
 	public synchronized boolean existeTarjeta(String tarjeta){
 		ResultSet resultSet;
@@ -230,6 +237,13 @@ public class Database_lib {
 		return false;
 	}
 
+	/**
+	 * Método que obtiene el número de cuenta real a partir del número de tarjeta 
+	 * y del valor que indica cual es dicha cuenta para esa tarjeta.
+	 * @param tarjeta El número de tarjeta.
+	 * @param cnum El valor que indica cual es la cuenta para dicha tarjeta.
+	 * @return El valor real de cuenta dentro del sistema.
+	 */
 	private synchronized int getNumCuenta(String tarjeta, int cnum){
 		ResultSet resultSet;
 		try{
@@ -247,10 +261,11 @@ public class Database_lib {
 	}
 	
 	/**
-	 * Método que comprueba si existe la cuenta para la tarjeta indicadas y devuelve un booleano que lo indica.
-	 * @param tarjeta La tarjeta a la que pertenece la cuenta
-	 * @param cuenta La cuenta a comprobar
-	 * @return True si existe y False en caso contrario
+	 * Método que comprueba si existe la cuenta para la tarjeta indicadas
+	 * y devuelve un booleano que lo indica.
+	 * @param tarjeta La tarjeta a la que pertenece la cuenta.
+	 * @param cuenta La cuenta a comprobar.
+	 * @return True si existe y False en caso contrario.
 	 */
 	public synchronized boolean existeCuenta(String tarjeta, int cuenta){
 		ResultSet resultSet;
@@ -267,6 +282,11 @@ public class Database_lib {
 		return false;
 	}
 	
+	/**
+	 * Método que obtiene el número de cuentas que una tarjeta tiene abiertas en el sistema.
+	 * @param tarjeta El número de tarjeta a comprobar.
+	 * @return El número de cuentas que la tarjeta tiene asociadas.
+	 */
 	public synchronized int getNumCuentas(String tarjeta){
 		ResultSet resultSet;
 		try {
@@ -283,6 +303,10 @@ public class Database_lib {
 		return 0;
 	}
 	
+	/**
+	 * Método que inserta una tarjeta en el sistema.
+	 * @param tarjeta La tarjeta a insertar.
+	 */
 	public synchronized void insertarTarjeta(String tarjeta){
 		try {
 			this.getStatement().executeUpdate("INSERT INTO Tarjeta(codTarjeta) VALUES ('" + tarjeta + "')");
@@ -292,6 +316,11 @@ public class Database_lib {
 		}
 	}
 	
+	/**
+	 * Método que inserta una cuenta para una tarjeta indicada.
+	 * @param tarjeta La tarjeta correspondiente.
+	 * @param cuenta La cuenta a insertar.
+	 */
 	public synchronized void insertarCuenta(String tarjeta, int cuenta){
 		try {
 			this.getStatement().executeUpdate("INSERT INTO Cuenta(codTarjeta,codCuenta) VALUES ('" + tarjeta + "'," + cuenta + ")");
@@ -301,7 +330,11 @@ public class Database_lib {
 		}
 	}
 	
-	
+	/**
+	 * Método que obtiene las tarjetas del banco indicado.
+	 * @param id_banco El banco en el que se consulta.
+	 * @return Un arrayList con las tarjetas de ese banco.
+	 */
 	private synchronized ArrayList<String> getTarjetasFromBanco(String id_banco){
 		ArrayList<String> tarjetas = new ArrayList<String>();
 		ResultSet resultSet = null;
@@ -346,6 +379,7 @@ public class Database_lib {
 	 * @param cuenta_destino La cuenta sobre la que se realiza la operacion
 	 * @param tipo El tipo de operación que se realiza.
 	 * @param importe La cantidad de dinero que se maneja en la operación.
+	 * @param codonline El codigo que indica si la sesión estaba abierta o no cuando se envió el mensaje.
 	 * @return El CodigosRespuesta correspondiente en función de si ha habido errores o no.
 	 */
 	public synchronized CodigosRespuesta comprobar_condiciones(String tarjeta, int cuenta_origen, int cuenta_destino,
@@ -426,6 +460,11 @@ public class Database_lib {
 		}
 	}
 
+	/**
+	 * Método que settea el gasto offline al importe introducido.
+	 * @param tarjeta La tarjeta a modificar su gasto.
+	 * @param importe El nuevo importe del gasto offline.
+	 */
 	private synchronized void setGastoOffline(String tarjeta, int importe){
 		
 		//Comprobamos si existen tarjeta
@@ -452,6 +491,7 @@ public class Database_lib {
 	/**
 	 * Recalcula el saldo actual de la cuenta indicada.
 	 * @param cuenta La cuenta a actualizar el saldo.
+	 * @param tarjeta La tarjeta a la que pertenece la cuenta.
 	 * @param importe El importe a modificar.
 	 * @param signo El signo que indica si se debe sumar o restar.
 	 */
@@ -487,6 +527,7 @@ public class Database_lib {
 	/**
 	 * Obtiene el saldo a partir del atributo que hay en cuenta.
 	 * ERROR: Devuelve -1 si hay error
+	 * @param tarjeta La tarjeta a la que pertenece la cuenta.
 	 * @param cuenta La cuenta a consultar.
 	 * @return Devuelve el saldo actual de la cuenta y null en caso de error
 	 */
@@ -604,11 +645,11 @@ public class Database_lib {
 	/**
 	 * Método que realiza un reintegro en la BD.
 	 * Añade el movimiento a la tabla MOVIMIENTO, actualiza el saldo actual de la CUENTA y 
-	 * si es offline
+	 * si es offline.
 	 * @param tarjeta La tarjeta en la que realizar la operacion.
 	 * @param cuenta La cuenta en la que realizar la operacion.
 	 * @param importe El importe del que realizar el reintegro.
-	 * @param codonline Valor booleano que indica true si es online y false si es offline
+	 * @param codonline El codigo que indica si la sesión con el banco está abierta o no.
 	 * @return El saldo actual de la cuenta despues de realizar la operacion.
 	 */
 	public synchronized int realizar_reintegro(String tarjeta,int cuenta,int importe,boolean codonline){
@@ -657,6 +698,7 @@ public class Database_lib {
 	 * @param tarjeta La tarjeta correspondiente a la cuenta que realiza el movimiento.
 	 * @param cuenta_origen La cuenta que realiza el traspaso.
 	 * @param cuenta_destino La cuenta que recibe el traspaso.
+	 * @param codonline El codigo que indica si la sesión con el banco está abierta o no.
 	 * @param importe El importe a traspasar.
 	 * @return El nuevo saldo de la cuenta destino.
 	 */
@@ -712,6 +754,7 @@ public class Database_lib {
 	 * Método que realiza un abono en la cuenta indicada. 
 	 * @param tarjeta La tarjeta que realiza el abono.
 	 * @param cuenta La cuenta en la que se abona el importe.
+	 * @param codonline El codigo que indica si la sesión con el banco está abierta o no.
 	 * @param importe La cantidad a abonar.
 	 * @return El nuevo saldo actual de la cuenta despues de realizar el abono.
 	 */
@@ -763,7 +806,7 @@ public class Database_lib {
 
 	/**
 	 * Método general que obtiene la suma de todos los importes para el tipo de movimiento introducido.
-	 * @param codigo_mov El codigo correspondiente al tipo de movimiento.
+	 * @param cod_m El codigo correspondiente al tipo de movimiento.
 	 * @param id_banco El banco del cual obtener la suma de los movimientos.
 	 * @return Un int con el sumatorio de los importes de todos los movimientos.
 	 */
@@ -870,9 +913,9 @@ public class Database_lib {
 	 * Admite nulos en cualquier campo excepto en el codigo online.
 	 * @param cuenta_orig La cuenta origen.
 	 * @param cuenta_dest La cuenta destino. 
-	 * @param cod_tmovimiento El tipo del movimiento.
+	 * @param codigo_m El tipo del movimiento.
 	 * @param importe El importe del movimiento.
-	 * @param codonline El booleando que indica si es online o offline.
+	 * @param codonline El codigo que indica si la sesión con el banco está abierta o no.
 	 * @param banco El número del banco.
 	 */
 	private synchronized void insertar_movimiento(String tarjeta,int cuenta_orig,int cuenta_dest,CodigosMovimiento codigo_m,
@@ -999,8 +1042,8 @@ public class Database_lib {
 	
 	/**
 	 * Método que obtiene el id del cajero a partir del banco/canal que se le pasa por parámetro.
-	 * @param id_banco El banco
-	 * @param canal El canal del que obtener el codigo del cajero
+	 * @param id_banco El banco donde se encuentra el canal.
+	 * @param canal El canal del que obtener el codigo del cajero.
 	 * @return El codigo que identifica al cajero en la BD que participó en el ultimo mensaje enviado por el canal indicado.
 	 */
 	private synchronized int getCodCajeroBD(String id_banco, int canal){
@@ -1038,9 +1081,9 @@ public class Database_lib {
 	
 	/**
 	 * Obtiene el nombre del cajero a partir del identificador del cajero correspondiente.
-	 * @param id_cajero EL identificador del cajero en la BD
+	 * @param id_cajero El identificador del cajero en la BD.
 	 * @return El nombre correspondiente al id.
-	 * @throws ConsorcioBDException En caso de que no exista el cajero en la BD
+	 * @throws ConsorcioBDException En caso de que no exista el cajero en la BD.
 	 */
 	public synchronized String getNameCajeroBD(int id_cajero) throws ConsorcioBDException{
 		
@@ -1063,7 +1106,7 @@ public class Database_lib {
 	
 	/**
 	 * Método que obtiene la ip del cajero con el identificador pasado por parámetro.
-	 * @param cod_cajero El codigo identificador del cajero dentro de la BD
+	 * @param cod_cajero El codigo identificador del cajero dentro de la BD.
 	 * @return La dirección ip en donde se encuentra el cajero. NULL en caso de que haya errores.
 	 */
 	private synchronized InetAddress getIpFromCajero(int cod_cajero){
@@ -1097,8 +1140,8 @@ public class Database_lib {
 	}
 	
 	/**
-	 * Método que obtiene EL PUERTO del cajero con el identificador pasado por parámetro.
-	 * @param cod_cajero El codigo identificador del cajero dentro de la BD
+	 * Método que obtiene el peurto del cajero con el identificador pasado por parámetro.
+	 * @param cod_cajero El codigo identificador del cajero dentro de la BD.
 	 * @return El puerto en donde se encuentra el cajero. 0 en caso de que haya errores.
 	 */
 	private int getPuertoFromCajero(int cod_cajero){
@@ -1126,8 +1169,9 @@ public class Database_lib {
 	 ----------------- SESIONES/BANCOS -------------------
 	 ----------------------------------------------------*/
 	
-	
-	
+	/**
+	 * Método que resetea el estado de los bancos a cerrados en la BD.
+	 */
 	public synchronized void resetearBancos(){
 		try{
 			this.statement.executeUpdate("UPDATE Banco SET codEBanco=2");
@@ -1222,9 +1266,9 @@ public class Database_lib {
 	
 	
 	/**
-	 * Método que inserta un BANCO
-	 * @param id_banco El id del banco
-	 * @param estado El estado en el que se encuentra.
+	 * Método que inserta un Banco.
+	 * @param id_banco El id del banco.
+	 * @param state El estado en el que se encuentra.
 	 * @param puerto El puerto en el que escucha el banco.
 	 * @param ip La ip en la que se encuentra el banco.
 	 * @param num_canales El numero maximo de canales.
@@ -1245,9 +1289,9 @@ public class Database_lib {
 	
 	
 	/**
-	 * Comprueba en BANCO si el banco introducido por parámetro tiene sesión que acepte mensajes
+	 * Comprueba en Banco si el banco introducido por parámetro tiene sesión que acepte mensajes.
 	 * @param id_banco El banco a buscar.
-	 * @return True si la sesion es ACTIVA y False en caso contrario.
+	 * @return True si la sesion es Activa o en Recuperación y False en caso contrario.
 	 */
 	public synchronized boolean aceptaMensajes(String id_banco){
 		
@@ -1292,7 +1336,7 @@ public class Database_lib {
 	 * Método que obtiene el ID real que identifica al banco pasado por 
 	 * parámetro en la BD.
 	 * @param id_banco El id del banco que funciona como el nombre
-	 * @return El int que indentifica al banco con el string pasado por parámetro, dentro de la BD.
+	 * @return El int que indentifica al banco dentro de la BD.
 	 * @throws ConsorcioBDException Si no existe el banco se lanza la excepción.
 	 */
 	private synchronized int getIdBancoBD(String id_banco) throws ConsorcioBDException{
@@ -1347,7 +1391,7 @@ public class Database_lib {
 
 	
 	/**
-	 * Getter en BANCO del numero de canales
+	 * Getter en BANCO del numero de canales.
 	 * @param id_banco El banco a buscar.
 	 * @return El número máximo de canales del banco.
 	 */
@@ -1379,8 +1423,8 @@ public class Database_lib {
 	
 	
 	/**
-	 * Getter en BANCO del puerto del banco
-	 * Devuelve 0 en caso de que no exista
+	 * Getter en BANCO del puerto del banco.
+	 * Devuelve 0 en caso de que no exista.
 	 * @param id_banco El banco a buscar.
 	 * @return El puerto correspondiente. 
 	 */
@@ -1413,10 +1457,9 @@ public class Database_lib {
 	
 	/**
 	 * Getter en BANCO de la ip del banco.
-	 * Devuelve NULL en caso de que no exista
+	 * Devuelve NULL en caso de que no exista.
 	 * @param id_banco El banco a buscar.
 	 * @return La ip correspondiente. 
-	 * @throws UnknownHostException 
 	 */
 	public synchronized InetAddress getIpBanco(String id_banco){
 		
@@ -1450,8 +1493,8 @@ public class Database_lib {
 	
 	
 	/**
-	 * Getter del ultimo canal utilizado por el BANCO
-	 * @param id_banco El banco del que obtener el ultimo canal utilizado
+	 * Getter del ultimo canal utilizado por el BANCO.
+	 * @param id_banco El banco del que obtener el ultimo canal utilizado.
 	 * @return El int que identifica al ultimo canal utilizado.
 	 */
 	public synchronized int getLastChannelUsed(String id_banco){
@@ -1483,9 +1526,9 @@ public class Database_lib {
 	
 	
 	/**
-	 * Método que obtiene una lista con los identificadores de todos los BANCO que tienen sesión 
+	 * Método que obtiene una lista con los identificadores de todos los BANCO que tienen sesión
 	 * con el codigo de sesion que se pasa por parámetro.
-	 * @param codigo_estado El codigo de sesión por el que filtrar los bancos
+	 * @param codigo_estado El codigo de sesión por el que filtrar los bancos.
 	 * @return Un array list de String con los id de todos los BANCOS que tienen la sesión del tipo indicado.
 	 */
 	public synchronized ArrayList<String> getSesiones(int codigo_estado) {
@@ -1515,7 +1558,7 @@ public class Database_lib {
 	
 	
 	/**
-	 * Setter en BANCO del estado de la conexion
+	 * Setter en BANCO del estado de la conexion.
 	 * @param id_banco El banco al que cambiar el estado.
 	 * @param estado El nuevo estado.
 	 * @throws ConsorcioBDException Se produce cuando se trata de settear a un estado que no esta insertado en la BD.
@@ -1552,7 +1595,7 @@ public class Database_lib {
 	
 	
 	/**
-	 * Setter del puerto en BANCO
+	 * Setter del puerto en BANCO.
 	 * @param id_banco El banco al que cambiar el puerto.
 	 * @param puerto El nuevo puerto.
 	 */
@@ -1570,9 +1613,9 @@ public class Database_lib {
 	
 	
 	/**
-	 * Setter de la ip en el BANCO
+	 * Setter de la ip en el BANCO.
 	 * @param id_banco El banco al que cambiar el puerto.
-	 * @param ip La nueva ip
+	 * @param ip La nueva ip.
 	 */
 	private synchronized void setIpBanco(String id_banco,String ip){
 		
@@ -1588,9 +1631,9 @@ public class Database_lib {
 	
 	
 	/**
-	 * Setter del maximo de canales en el BANCO
+	 * Setter del maximo de canales en el BANCO.
 	 * @param id_banco El banco al que cambiar el puerto.
-	 * @param num_canales El nuevo número máximo de canales
+	 * @param num_canales El nuevo número máximo de canales.
 	 */
 	private synchronized void setNumCanalesBanco(String id_banco, int num_canales){
 		
@@ -1607,8 +1650,8 @@ public class Database_lib {
 	
 	/**
 	 * Setter del ultimo canal usado del BANCO.
-	 * @param id_banco El id del banco 
-	 * @param last_channel El valor del ultimo canal utilizado que se va a actualizar en la BD
+	 * @param id_banco El id del banco.
+	 * @param last_channel El valor del ultimo canal utilizado que se va a actualizar en la BD.
 	 */
 	private synchronized void setLastChannelUsed(String id_banco, int last_channel){
 		try {
@@ -1626,9 +1669,9 @@ public class Database_lib {
 	 ----------------------------------------------------*/
 	
 	/**
-	 * Método que comprueba si hay canales libres en el banco para enviar mensajes
+	 * Método que comprueba si hay canales libres en el banco para enviar mensajes.
 	 * @param id_banco El nombre que identifica al banco.
-	 * @return True si hay canales libres y False en caso contrario
+	 * @return True si hay canales libres y False en caso contrario.
 	 */
 	public synchronized boolean hayCanalesLibres(String id_banco){
 		
@@ -1643,7 +1686,6 @@ public class Database_lib {
 		
 		ResultSet resultSet,resultSet1;
 		try {
-			
 			//Obtenemos los canales libres no asignados aun
 			resultSet1 = this.getStatement().executeQuery("SELECT codCanal FROM Canal " +
 					"WHERE codBanco = " +id_banco_bd + " AND codUltimoEnvio IS NULL AND codCanal>0");
@@ -1667,8 +1709,8 @@ public class Database_lib {
 
 	/**
 	 * Obtiene en CANAL el siguiente canal disponible para realizar un envio.
-	 * El algorítmo de selección consiste en (ULTIMO_CANAL_USADO+1) MOD TOTALCANALES 
-	 * ERROR: Devuelve -1 en caso de que no haya canales que puedan ser usados
+	 * El algorítmo de selección consiste en (ULTIMO_CANAL_USADO+1) MOD TOTALCANALES .
+	 * ERROR: Devuelve -1 en caso de que no haya canales que puedan ser usados.
 	 * @param id_banco El banco de donde obtener un nuevo canal.
 	 * @return Un entero con el canal correspondiente.
 	 */
@@ -1729,8 +1771,12 @@ public class Database_lib {
 		return selected_channel;
 	}
 	
-	
-	
+	/**
+	 * Método que obtiene el último número de envio que se ha realizado en el canal indicado.
+	 * @param id_banco_bd El banco al que pertenece el canal.
+	 * @param canal El canal en el que comprobar el último número de envío.
+	 * @return El número de último envio realizado por el canal indicado.
+	 */
 	private int getNumUltimoEnvioFromCanal(int id_banco_bd, int canal){
 		
 		int num_envio = -1;
@@ -1748,7 +1794,13 @@ public class Database_lib {
 		return num_envio;
 	}
 	
-	
+	/**
+	 * Método que comprueba si la secuencia de mensajes en el canal es correcta.
+	 * @param id_banco El banco al que pertenece el canal.
+	 * @param canal El número de canal.
+	 * @param num_mensaje El número de mensaje a comprobar
+	 * @return True si la secuencia es correcta y False en caso contrario.
+	 */
 	public boolean comprobarSecuenciaMensajesEnCanal(String id_banco, int canal, int num_mensaje){
 		
 		//Obtenemos el ID del banco en la BD
@@ -1767,7 +1819,7 @@ public class Database_lib {
 	/**
 	 * Obtiene en CANAL el siguiente numero de mensaje para el banco y canal indicado 
 	 * y le suma 1.
-	 * ERROR: Devuelve -1 en caso de que no haya un next_numMensaje para el banco y canal indicados
+	 * ERROR: Devuelve -1 en caso de que no haya un next_numMensaje para el banco y canal indicados.
 	 * @param id_banco El banco en el que se encuentra el canal.
 	 * @param id_canal El canal de donde seleccionar el numero de mensaje.
 	 * @return Un entero con el número de mensaje a utilizar.
@@ -1916,9 +1968,9 @@ public class Database_lib {
 	}
 
 	/**
-	 * Metodo que obtiene los id_cajeros de los ultimos mensajes enviamos por los canales
-	 * @param id_banco El banco en el que buscar los id's
-	 * @return Un arraylist con los id's de los cajeros
+	 * Metodo que obtiene los id_cajeros de los ultimos mensajes enviamos por los canales.
+	 * @param id_banco El banco en el que buscar los ids.
+	 * @return Un arraylist con los ids de los cajeros.
 	 */
 	public synchronized ArrayList<String> recupera_idCajeros_ultimos_mensajes(String id_banco){
 		
@@ -2038,7 +2090,7 @@ public class Database_lib {
 	
 	
 	/**
-	 * Desbloquea todos los canales del banco
+	 * Desbloquea todos los canales del banco.
 	 * @param id_banco El banco para el cual desbloquear todos los canales.
 	 */
 	public synchronized void desbloquearCanales(String id_banco){
@@ -2074,7 +2126,7 @@ public class Database_lib {
 	/**
 	 * Método que comprueba si el ultimo mensaje del canal ha sido respondido.
 	 * @param id_banco El banco en el que comprobar.
-	 * @param canal EL canal concreto del banco en el que se encuentra el envio.
+	 * @param canal El canal concreto del banco en el que se encuentra el envio.
 	 * @return El valor booleando del atributo "contestado" del último envio del canal.
 	 */
 	public synchronized boolean isContestado(String id_banco, int canal){
@@ -2194,7 +2246,12 @@ public class Database_lib {
 		}
 	}
 	
-	
+	/**
+	 * Método que comprueba si el canal está en recuperación.
+	 * @param id_banco El banco al que pertenece el canal.
+	 * @param canal El canal a comprobar.
+	 * @return True si está en recuperacion y False en caso contrario.
+	 */
 	public boolean isCanalEnRecuperacion(String id_banco, int canal){
 		
 		//Obtiene el id real que identifica al banco en la BD.
@@ -2221,6 +2278,13 @@ public class Database_lib {
 		return false;
 	}
 	
+	/**
+	 * Métdo que setea la columna caenRecuperación a True o False según la variable 
+	 * booleana que se le indica.
+	 * @param id_banco_bd El banco al que pertenece el canal.
+	 * @param canal El canal indicado.
+	 * @param en_recuperacion Variable booleana que contiene el nuevo valor para la columna.
+	 */
 	private void setCanalEnRecuperacion(int id_banco_bd, int canal,boolean en_recuperacion){
 		try {
 			 this.getStatement().executeUpdate("UPDATE Canal SET caenRecuperacion = " + ((en_recuperacion)?1:0) 
@@ -2240,7 +2304,10 @@ public class Database_lib {
 	 * Cambia el ultimo envio del canal indicado, por el pasado por parametro.
 	 * Si el canal esta ocupado no se inserta como ultimo envio.
 	 * @param message El mensaje a añadir.
+	 * @param codCajero El código de cajero que envió el mensaje.
 	 * @param canal El canal correspondiente.
+	 * @param respondido Variable booleana que indica si está respondido el mensaje o no.
+	 * @param en_recuperacion Variable booleana que indica si está en recuperación o no.
 	 */
 	public synchronized void anhadir_ultimo_envio(Mensaje message,String codCajero,int canal,boolean respondido,boolean en_recuperacion){
 
@@ -2290,8 +2357,8 @@ public class Database_lib {
 	
 	/**
 	 * Método que settea el codigo de ultimo envio en el banco/canal indicados, al codigo pasado por parámetro.
-	 * @param id_banco_bd El id del banco
-	 * @param canal EL canal a settear
+	 * @param id_banco_bd El id del banco.
+	 * @param canal EL canal a settear.
 	 * @param cod_ultimo_envio El nuevo codigo de ultimo envio.
 	 */
 	private synchronized void settearCodigoUltimoEnvioEnCanal(int id_banco_bd, int canal, int cod_ultimo_envio){
@@ -2349,12 +2416,10 @@ public class Database_lib {
 
 	
 	/**
-	 * Método privado que inserta el ultimo envio en la tabla
-	 * @param mensaje El mensaje a insertar
-	 * @param codCajero El cajero del que proviene
-	 * @param ip_cajero La ip del cajero del que proviene
-	 * @param puerto_cajero El puerto del cajero del que proviene
-	 * @return El codigo de ultimo envio
+	 * Método privado que inserta el ultimo envio en la tabla.
+	 * @param mensaje El mensaje a insertar.
+	 * @param id_cajero El cajero del que proviene.
+	 * @return El codigo de ultimo envio.
 	 */
 	private synchronized int insertar_ultimo_envio(Mensaje mensaje,String id_cajero,boolean respondido){
 		
@@ -2424,7 +2489,7 @@ public class Database_lib {
 	/**
 	 * Método que elimina el ultimo envio con el codigo pasado por parámetro.
 	 * Si no hay ninguno con el codigo indicado no se hace nada.
-	 * @param codigo_ultimo_envio EL codigo de ultimo envio a eliminar
+	 * @param codigo_ultimo_envio EL codigo de ultimo envio a eliminar.
 	 */
 	private synchronized void eliminar_ultimo_envio(int codigo_ultimo_envio){
 		try {
@@ -2442,8 +2507,8 @@ public class Database_lib {
 	/**
 	 * Getter de la IP del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
 	 * @param id_banco El banco correspondiente.
-	 * @param num_canal El canal del que obtener.
-	 * @return La ip correspondiente. NULL en caso de error
+	 * @param canal El canal del que obtener.
+	 * @return La ip correspondiente. NULL en caso de error.
 	 */
 	public synchronized InetAddress getIpEnvio(String id_banco, int canal){
 		//Obtenemos el codigo que identifica al cajero en la BD
@@ -2455,9 +2520,9 @@ public class Database_lib {
 	
 	/**
 	 * Getter del puerto del ULTIMOENVIO que indica en donde se encuentra el cajero a contestar.
-	 * ERROR: Devuelve 0 cuando no hay puerto o ha habido un error
+	 * ERROR: Devuelve 0 cuando no hay puerto o ha habido un error.
 	 * @param id_banco El banco correspondiente.
-	 * @param num_canal El canal del que obtener.
+	 * @param canal El canal del que obtener.
 	 * @return La puerto correspondiente.
 	 */
 	public synchronized int getPortEnvio(String id_banco, int canal){
@@ -2472,7 +2537,7 @@ public class Database_lib {
 	 * Getter del id del Cajero del ULTIMOENVIO.
 	 * ERROR: Devuelve NULL cuando no existe cajero.
 	 * @param id_banco El banco en el que obtener el id.
-	 * @param num_canal El canal en el que se encuentra el Envio con la id del cajero que lo realizó.
+	 * @param canal El canal en el que se encuentra el Envio con la id del cajero que lo realizó.
 	 * @return Un string que identifica al cajero que realizó el envio.
 	 */
 	public synchronized String getNombreCajero(String id_banco, int canal){
@@ -2665,7 +2730,13 @@ public class Database_lib {
 	
 
 	/**
-	 * Añade una linea en la tabla MENSAJE
+	 * Método que almacena un mensaje en la tabla de Mensajes.
+	 * @param message El mensaje a insertar.
+	 * @param torigen El tipo de origen del mensaje.
+	 * @param origen El identificador del origen del mensaje.
+	 * @param tdestino El tipo de destino del mensaje.
+	 * @param destino El identificador del destino del mensaje.
+	 * @return El número identificativo en la BD del mensaje almacenado.
 	 */
 	public synchronized int almacenar_mensaje(Mensaje message,TipoOrigDest torigen,String origen,TipoOrigDest tdestino,String destino){
 
@@ -2729,7 +2800,10 @@ public class Database_lib {
 		return 0;
 	}
 	
-	
+	/**
+	 * Método que settea el codigo online a Null en la tabla de mensajes para un mensaje concreto.
+	 * @param bd_num_message El id del mensaje a modificar.
+	 */
 	public synchronized void setMessageCodOnlineToNull(int bd_num_message){
 		try{
 			this.getStatement().executeUpdate("UPDATE Mensaje SET meonline=NULL WHERE codMensaje="+bd_num_message);
@@ -2743,6 +2817,10 @@ public class Database_lib {
 	 --------- GETTERS PARA INTERFAZ GRAFICA ------------
 	 ----------------------------------------------------*/
 	
+	/**
+	 * Método que obtiene todos los bancos de la BD.
+	 * @return Un arrayList con los Bancos.
+	 */
 	public synchronized ArrayList<ArrayList<String>> getBancos(){
 		
 		ResultSet resultSet;
@@ -2778,6 +2856,10 @@ public class Database_lib {
 		return elementos;
 	}
 	
+	/**
+	 * Método que obtiene todos los canales de la BD.
+	 * @return Un arrayList con los Canales.
+	 */
 	public synchronized ArrayList<ArrayList<String>> getCanales(){
 		
 		ResultSet resultSet;
@@ -2813,6 +2895,10 @@ public class Database_lib {
 		return elementos;
 	}
 
+	/**
+	 * Método que obtiene todas las tarjetas de la BD.
+	 * @return Un arrayList con las tarjetas.
+	 */
 	public synchronized ArrayList<ArrayList<String>> getTarjetas(){
 
 		ResultSet resultSet;
@@ -2839,7 +2925,10 @@ public class Database_lib {
 		return elementos;
 	}
 	
-	
+	/**
+	 * Método que obtiene todas las cuentas de la BD.
+	 * @return Un arrayList con las cuentas.
+	 */
 	public synchronized ArrayList<ArrayList<String>> getCuentas(){
 		
 		ResultSet resultSet;
@@ -2868,7 +2957,10 @@ public class Database_lib {
 		return elementos;
 	}
 	
-	
+	/**
+	 * Método que obtiene todos los ultimos envios de la BD.
+	 * @return Un arrayList con los ultimos envios.
+	 */
 	public synchronized ArrayList<ArrayList<String>> getUltimosEnvios(){
 		
 		ResultSet resultSet;
@@ -2911,6 +3003,10 @@ public class Database_lib {
 		return elementos;
 	}
 	
+	/**
+	 * Método que obtiene todos los movimientos de la BD.
+	 * @return Un arrayList con los movimientos.
+	 */
 	public synchronized ArrayList<ArrayList<String>> getMovimientos(){
 		ResultSet resultSet;
 		ArrayList<ArrayList<String>> elementos = new ArrayList<ArrayList<String>>();
@@ -2954,6 +3050,10 @@ public class Database_lib {
 		return elementos;
 	}
 	
+	/**
+	 * Método que obtiene todos los mensajes de la BD.
+	 * @return Un arrayList con los mensajes.
+	 */
 	public synchronized ArrayList<ArrayList<String>> getMensajes(){
 		
 		ResultSet resultSet;

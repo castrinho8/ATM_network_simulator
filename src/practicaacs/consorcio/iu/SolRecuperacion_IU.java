@@ -172,6 +172,10 @@ public final class SolRecuperacion_IU extends javax.swing.JFrame {
     	this.jList1.setListData(sesiones_abiertas.toArray());
     }    
     
+    /**
+     * Método que solicita la recuperación de un banco.
+     * @param id_banco El banco a recuperar.
+     */
     private void solicitar_recuperacion(String id_banco) {
     	this.consorcio.realizar_recuperacion(id_banco);
     }

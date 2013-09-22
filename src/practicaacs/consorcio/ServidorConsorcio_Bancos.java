@@ -27,7 +27,9 @@ import practicaacs.consorcio.aux.TipoAccion;
 import practicaacs.consorcio.bd.Database_lib;
 import practicaacs.fap.*;
 
-
+/**
+ * Clase que implementa un servidor para la recepción de mensajes de los bancos.
+ */
 public class ServidorConsorcio_Bancos extends Thread{
 
 	private int port;
@@ -52,28 +54,53 @@ public class ServidorConsorcio_Bancos extends Thread{
 	}
 	
 	//-------GETTERS & SETTERS-------
+	
+	/**
+	 * Getter del puerto del servidor.
+	 * @return El puerto del servidor de bancos.
+	 */
 	public int getPuerto() {
 		return port;
 	}
 	
+	/**
+	 * Método que comprueba si está levantado el servidor.
+	 * @return True si está levantado, false en caso contrario.
+	 */
 	public boolean isOnline() {
 		return this.abierto_serv_bancos;
 	}
 	
+	/**
+	 * Getter de la sesión para el banco indicado.
+	 * @param id_banco El identificador del banco.
+	 * @return La Sesión correspondiente al banco indicado.
+	 */
 	public Sesion getSesion(String id_banco){
 		return this.sesiones.get(id_banco);
 	}
 	
+	/**
+	 * Método que inserta una Sesión en la lista de Sesiones.
+	 * @param ses La sesión a insertar.
+	 */
 	public void insertaSesion(Sesion ses){
     	this.sesiones.put(ses.getId(),ses);
     }
 	
+	/**
+	 * Método que elimina la Sesión de la lista de Sesiones.
+	 * @param id_banco El identificador del banco cuya sesión se busca eliminar.
+	 */
 	public void eliminarSesion(String id_banco){
 		this.sesiones.remove(id_banco);
 	}
 	
 	//-------END GETTERS & SETTERS-------
 	
+	/**
+	 * Método RUN para el Thread.
+	 */
 	@Override
 	public void run() {
 		abrir_servidorBancos();
@@ -84,7 +111,6 @@ public class ServidorConsorcio_Bancos extends Thread{
      * Levanta el servidorBancos hasta que la variable que controla el estado se ponga a False.
      * El servidor espera la recepcion de mensajes y para cada uno crea un thread para realizar las tareas
      * que sean necesarias.
-	 * @throws IOException 
      */
     public void recibir_servidorBancos(){
     		
@@ -132,8 +158,7 @@ public class ServidorConsorcio_Bancos extends Thread{
     
     /**
      * Cierra el servidorBancos.
-     * Para ello cierra todas las sesiones con los bancos
-     * @throws IOException 
+     * Para ello cierra todas las sesiones con los bancos en la BD.
      */
     public void cerrar_servidorBancos(){
     	this.abierto_serv_bancos = false;
@@ -147,6 +172,7 @@ public class ServidorConsorcio_Bancos extends Thread{
     	i.addAll(Database_lib.getInstance().getSesiones(4));
     	String id_banco;
     	Iterator it = i.iterator();
+    	
     	//Cerrar todas las conexiones con los bancos
     	while(it.hasNext()){
     		id_banco = (String) it.next(); 
@@ -159,8 +185,8 @@ public class ServidorConsorcio_Bancos extends Thread{
 
     
     /**
-     * Método que envia un mensaje de solicitar Recuperacion
-     * @param id_banco 
+     * Método que envia un mensaje de solicitar Recuperacion.
+     * @param id_banco El identificador del banco con el que iniciar la recuperación.
      */
     public void solicitar_recuperacion(String id_banco){
     	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.RECUPERACION, id_banco, consorcio, this, socketServidor);
@@ -168,8 +194,8 @@ public class ServidorConsorcio_Bancos extends Thread{
     }
     
     /**
-     * Método que envia un mensaje de finalizar recuperacion
-     * @param id_banco
+     * Método que envia un mensaje de finalizar recuperación.
+     * @param id_banco El identificador del banco con el que finalizar la recuperación.
      */
     public void solicitar_fin_recuperacion(String id_banco){
     	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.FIN_RECUPERACION,id_banco, consorcio, this, socketServidor);
@@ -180,6 +206,7 @@ public class ServidorConsorcio_Bancos extends Thread{
      * Método que envia el mensaje pasado por parámetro.
      * CAJERO->CONSORCIO->BANCOS
      * @param message El mensaje a enviar.
+     * @param id_cajero El id del cajero que realizó el envio.
      */
     public void sendToBanco(MensajeDatos message,String id_cajero){
     	ConexionConsorcio_Bancos c = new ConexionConsorcio_Bancos(TipoAccion.ENVIO,message,id_cajero,consorcio,this,socketServidor);

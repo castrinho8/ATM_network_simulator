@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 
 import practicaacs.cajeros.Cajero;
 import practicaacs.cajeros.Envio;
+import practicaacs.fap.CodigoNoValidoException;
 import practicaacs.fap.CodigosMensajes;
 import practicaacs.fap.CodigosRespuesta;
 import practicaacs.fap.Mensaje;
@@ -149,7 +150,10 @@ public class ConsultarSaldo_IU extends ConsultaAbstracta {
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
     
-    
+	/**
+	 * Método que realiza el envio de una operación.
+	 * @param env El Envio a partir del cual se creará el mensaje a enviar.
+	 */
 	@Override
     public void envia_consulta(Envio env){
     	env.setTipoMensaje(CodigosMensajes.SOLSALDO);
@@ -158,9 +162,13 @@ public class ConsultarSaldo_IU extends ConsultaAbstracta {
     	this.cajero.enviar_mensaje(envio,this);
     }
     
+	/**
+	 * Método que actualiza la IU.
+	 * @param message El mensaje recibido con el que actualizar la IU.
+	 * @throws CodigoNoValidoException Excepción que se lanza cuando se utiliza el método en una consulta no debida.
+	 */
 	@Override
     public void actualizarIU(MensajeRespDatos respuesta){
-		System.out.println("ENTRA");
 		
 		this.ConsultandoLabel.setVisible(false);
 	
@@ -180,9 +188,7 @@ public class ConsultarSaldo_IU extends ConsultaAbstracta {
 		}else{
 			texto = String.valueOf("No se puede realizar la operacion, inténtelo de nuevo más tarde.");
 		}
-			
 		this.jTextField1.setText(texto);
-
     }
 
 }

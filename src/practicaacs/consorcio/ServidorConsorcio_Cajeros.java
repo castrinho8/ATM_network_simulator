@@ -36,20 +36,20 @@ public class ServidorConsorcio_Cajeros extends Thread{
 			 System.out.println("Error al crear el objeto socket servidor Consorcio_Cajeros::" + e.getLocalizedMessage());
 			 System.exit(-1);
 		 }
-		//Establece un timeout
-		/*try {
-			socketServidor.setSoTimeout(100000);
-		} catch (SocketException e) {
-			 System.out.println("Error estableciendo el timeout");
-			 e.printStackTrace();
-			 System.exit(-1);
-		}*/
 	}
 	
+	/**
+	 * Getter del puerto del consorcio.
+	 * @return El int con el puerto correspondiente.
+	 */
 	public int getPuerto() {
 		return port;
 	}
 	
+	/**
+	 * Métdo que comprueba si está levantado.
+	 * @return True si esta levantado y false en caso contrario.
+	 */
     public boolean isOnline() {
 		return abierto_serv_cajeros;
 	}
@@ -112,9 +112,11 @@ public class ServidorConsorcio_Cajeros extends Thread{
     }
     
     /**
-     * Método que envia la respuestas del MENSAJE DE DATOS al cajero.
+     * Método que renvia la respuestas del MENSAJE DE DATOS al cajero.
      * BANCOS->CONSORCIO->CAJERO
      * @param respuesta El mensaje a enviar.
+     * @param ip_destino La dirección IP del cajero que recibirá el mensaje.
+     * @param puerto_destino El puerto del cajero que recibirá el mensaje.
      */
     public void sendToCajero(MensajeDatos respuesta, InetAddress ip_destino, int puerto_destino){
 		ConexionConsorcio_Cajeros c = new ConexionConsorcio_Cajeros(TipoAccion.ENVIO,respuesta,this.consorcio,socketServidor,ip_destino,puerto_destino);

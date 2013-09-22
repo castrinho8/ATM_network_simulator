@@ -171,6 +171,10 @@ public class FinRecuperacion_IU extends javax.swing.JFrame {
     	this.jList1.setListData(sesiones_abiertas.toArray());
     }
 
+    /**
+     * Método que llama a la finalización de la recuperación.
+     * @param id_banco El banco para el que finalizar la recuperación.
+     */
     public void finalizar_recuperacion(String id_banco){
     	this.consorcio.realizar_finRecuperacion(id_banco);
     }

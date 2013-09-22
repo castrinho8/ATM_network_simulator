@@ -42,7 +42,12 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	  --------------------------------------*/
 
 	/**
-	 * Constructor de la clase ConexionConsorcio_Cajeros.
+	 * Constructor de la clase.
+	 * 
+	 * @param tipo El tipo de acción a realizar.
+	 * @param paquete El paquete que se recibe.
+	 * @param cons El consorcio que realiza la conexión.
+	 * @param socket El socket de conexión.
 	 */
 	public ConexionConsorcio_Cajeros(TipoAccion tipo,DatagramPacket paquete,Consorcio cons, DatagramSocket socket) {
 		this.consorcio = cons;
@@ -54,6 +59,14 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	
 	/**
 	 * Constructor de la clase.
+	 * Se utiliza para los envios CONSORCIO->CAJERO
+	 * 
+	 * @param tipo El tipo de acción a realizar.
+	 * @param resp La respuesta recibida.
+	 * @param cons El consorcio que realiza la conexión.
+	 * @param socket EL socket de la conexión.
+	 * @param ip La ip a donde realizar el envio.
+	 * @param port El puerto a donde realizar el envio.
 	 */
 	public ConexionConsorcio_Cajeros(TipoAccion tipo, MensajeDatos resp,Consorcio cons, DatagramSocket socket,InetAddress ip,int port){
 		this.consorcio = cons;
@@ -128,6 +141,8 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	 * Funcion que envia el mensaje pasado por parámetro con los datos de la conexion.
 	 * Por lo tanto, solo sirve para responder el envio hacia el Cajero.
 	 * @param respuesta El mensaje a enviar
+	 * @param ip_cajero La IP del cajero a donde se envía la respuesta.
+	 * @param port_cajero El puerto del cajero a donde se envía la respuesta.
 	 */
 	public void sendToCajero(MensajeDatos respuesta,InetAddress ip_cajero,int port_cajero){
 		
@@ -191,6 +206,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	/**
 	 * Función que selecciona la accion a realizar en funcion del tipo de mensaje recibido.
 	 * @param recibido El mensaje que recibimos.
+	 * @param bd_num_message El número que identifica al mensaje en la BD.
 	 */
 	private void analizar_mensaje(Mensaje recibido,int bd_num_message){
 		
@@ -254,7 +270,8 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	
 	/**
 	 * Función que implementa el comportamiento de la consulta de saldo.
-	 * @param recibido El mensaje de consulta de saldo recibido
+	 * @param recibido El mensaje de consulta de saldo recibido.
+	 * @param bd_num_message El número que identifica al mensaje en la BD.
 	 */
 	public void consultar_saldo(SolSaldo recibido,int bd_num_message){
 			
@@ -295,6 +312,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	/**
 	 * Función que implementa el comportamiento de la consulta de movimientos.
 	 * @param recibido El mensaje de consulta de movimientos recibido
+	 * @param bd_num_message El número que identifica al mensaje en la BD.
 	 */
 	public void consultar_movimientos(SolMovimientos recibido,int bd_num_message){
 
@@ -336,6 +354,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	/**
 	 * Método que realiza un reintegro.
 	 * @param recibido El mensaje a analizar
+	 * @param bd_num_message El número que identifica al mensaje en la BD.
 	 */
 	public void realizar_reintegro(SolReintegro recibido,int bd_num_message){
 		
@@ -391,6 +410,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	/**
 	 * Método que realiza un abono.
 	 * @param recibido El mensaje a analizar.
+	 * @param bd_num_message El número que identifica al mensaje en la BD.
 	 */
 	public void realizar_abono(SolAbono recibido,int bd_num_message){
 		
@@ -445,6 +465,7 @@ public class ConexionConsorcio_Cajeros extends Thread{
 	/**
 	 * Método que realiza un traspaso.
 	 * @param recibido El mensaje a analizar.
+	 * @param bd_num_message El número que identifica al mensaje en la BD.
 	 */
 	public void realizar_traspaso(SolTraspaso recibido,int bd_num_message){
 		

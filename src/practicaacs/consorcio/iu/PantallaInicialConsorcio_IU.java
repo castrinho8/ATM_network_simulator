@@ -447,12 +447,18 @@ public class PantallaInicialConsorcio_IU extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     // End of variables declaration                   
 
+    /**
+     * Método que actualiza la lista de cajeros.
+     */
     public void actualizarListaCajeros(){
     	ArrayList<String> lista = Database_lib.getInstance().getMensajesCajeroToString();
         this.cajerosList.setListData(lista.toArray());
     	this.interfaz_bd.actualizar();
    }
     
+    /**
+     * Método que actualiza la lista de bancos.
+     */
     public void actualizarListaBancos(){
     	ArrayList<String> lista = Database_lib.getInstance().getMensajesBancoToString();
         this.BancosLIst.setListData(lista.toArray());

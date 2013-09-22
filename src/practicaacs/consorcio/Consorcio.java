@@ -13,6 +13,9 @@ import practicaacs.consorcio.bd.*;
 import practicaacs.consorcio.iu.MostrarBD_IU;
 import practicaacs.consorcio.iu.PantallaInicialConsorcio_IU;
 
+/**
+ * Clase que implementa el funcionamiento de un Consorcio.
+ */
 public class Consorcio {
 
 	static private int next_id_consorcio = 1;
@@ -29,7 +32,7 @@ public class Consorcio {
 	/**
 	 * Constructor de la clase Consorcio
 	 * @param file El path al archivo de propiedades.
-	 * @throws IOException 
+	 * @throws IOException Excepción que se lanza cuando la IP del consorcio no esta correctamente indicada.
 	 */
     public Consorcio(String file) throws IOException{
     	
@@ -60,6 +63,9 @@ public class Consorcio {
 		
 	}
 
+    /**
+     * Método que inicia el Servidor de Cajeros.
+     */
     private void iniciarCajerosServer(){
 		try {
 			this.cajeros_server = new ServidorConsorcio_Cajeros(this,puerto_cajeros);
@@ -69,6 +75,9 @@ public class Consorcio {
 		this.cajeros_server.start();
     }
     
+    /**
+     * Método que inicia el Servidor de Bancos.
+     */
     private void iniciarBancosServer(){
 		try {
 			this.bancos_server = new ServidorConsorcio_Bancos(this,puerto_bancos);
@@ -78,12 +87,19 @@ public class Consorcio {
 		this.bancos_server.start();
     }
     
+    /**
+     * Método que cierra el Servidor de Bancos.
+     */
     private void cerrarBancosServer(){
     	this.bancos_server.cerrar_servidorBancos();
     	this.bancos_server = null;
     }
     
     
+    /**
+     * Método que cambia el estado del Servidor de Bancos.
+     * @return Se devuelve el String correspondiente a la acción contraria a la que se ha realizado.
+     */
     public String cambiarEstadoBancosServer(){
     	if(this.bancos_server==null){
     		this.iniciarBancosServer();
@@ -94,42 +110,84 @@ public class Consorcio {
     	}
     }
     
+    /**
+     * Getter del servidor de Cajeros.
+     * @return
+     */
 	public ServidorConsorcio_Cajeros getCajeros_server() {
 		return cajeros_server;
 	}
     
+	/**
+	 * Getter del servidor de Bancos.
+	 * @return
+	 */
     public ServidorConsorcio_Bancos getBancos_server() {
 		return bancos_server;
 	}
 
+    /**
+     * Método que comprueba si el servidor de cajeros esta cerrado.
+     * @return True si está cerrado y False en caso contrario.
+     */
     public boolean isDownCajerosServer(){
     	return this.cajeros_server.equals(null);
     }
 
+    /**
+     * Método que comprueba si el servidor de cajeros esta cerrado.
+     * @return True si está cerrado y False en caso contrario.
+     */
     public boolean isDownBancosServer(){
     	return this.bancos_server==null;
     }
     
+    /**
+     * Getter del ID del consorcio.
+     * @return El identificador del consorcio.
+     */
 	public String getId_consorcio() {
 		return id_consorcio;
 	}
 
+	/**
+	 * Getter de la IP del consorcio.
+	 * @return La IP correspondiente.
+	 */
 	public InetAddress getAddress() {
 		return address;
 	}
 	
+	/**
+	 * Método que delega en el servidor de Bancos para 
+	 * realizar una recuperación.
+	 * @param id_banco El identificador del banco con el que realizar la operación.
+	 */
 	public void realizar_recuperacion(String id_banco){
 		this.bancos_server.solicitar_recuperacion(id_banco);
 	}
 	
+	/**
+	 * Método que delega en el servidor de Bancos para 
+	 * realizar una finalización de recuperación.
+	 * @param id_banco El identificador del banco con el que realizar la operación.
+	 */
 	public void realizar_finRecuperacion(String id_banco){
 		this.bancos_server.solicitar_fin_recuperacion(id_banco);
 	}
 
+	/**
+	 * Getter de la IU del consorcio.
+	 * @return La pantalla inicial de la IU.
+	 */
 	public PantallaInicialConsorcio_IU getIu() {
 		return iu;
 	}
 	
+	/**
+	 * Método que delega en la IU para actualizar las listas de mensajes que 
+	 * involucran tanto a los Bancos como a los Cajeros.
+	 */
 	public void actualizarIU(){
 		this.iu.actualizarListaBancos();
 		this.iu.actualizarListaCajeros();

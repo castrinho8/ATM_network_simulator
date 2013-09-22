@@ -7,6 +7,9 @@ import javax.swing.UnsupportedLookAndFeelException;
 import practicaacs.banco.Banco;
 import practicaacs.cajeros.Cajero;
 
+/**
+ * Clase que ejecuta un Cajero
+ */
 public class AppCajero {
 	
 	public static void main(String[] args) {
@@ -27,8 +30,8 @@ public class AppCajero {
     			System.out.println("Cargando configuracion...");
     			new Cajero(args[0]);
     		}else{
-	    		new Cajero("/home/castrinho8/Escritorio/UNI/ACS/res/cajero1.properties");
-	    		//new Cajero("/home/ch01/RepositorioPractica/res/cajero1.properties");
+        		//Seleccionar la ruta local en la que se encuentra el fichero de configuracion
+    			new Cajero("/home/castrinho8/Escritorio/UNI/ACS/res/cajero1.properties");
     		}
     	} catch (IOException e) {
 			e.printStackTrace();

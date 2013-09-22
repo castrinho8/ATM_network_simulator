@@ -741,6 +741,9 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane7;
     // End of variables declaration                   
     
+    /**
+     * Método que actualiza todas las tablas de la interfaz.
+     */
     public void actualizar(){
     	this.actualizarListaBancos();
     	this.actualizarListaCanales();
@@ -751,6 +754,10 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     	this.actualizarListaMensajes();
     }
     
+    /**
+     * Método que limpia por completo una tabla.
+     * @param table La tabla a limpiar.
+     */
     private void clearTable(final javax.swing.JTable table) {
 	   for (int i = 0; i < table.getRowCount(); i++){
 	      for(int j = 0; j < table.getColumnCount(); j++) {
@@ -758,7 +765,10 @@ public class MostrarBD_IU extends javax.swing.JFrame {
 	      }
 	   }
     }
-
+    
+    /**
+     * Método que actualiza la lista de bancos.
+     */
     private void actualizarListaBancos(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getBancos();
     	
@@ -776,7 +786,10 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     			modelo.addRow(new Object[7]);
     	}
     }
-    
+ 
+    /**
+     * Método que actualiza la lista de canales.
+     */
     private void actualizarListaCanales(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getCanales();
     	
@@ -795,6 +808,9 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     	}
     }
    
+    /**
+     * Método que actualiza la lista de tarjetas.
+     */
     private void actualizarListaTarjetas(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getTarjetas();
     	
@@ -813,6 +829,9 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     	}
     }
     
+    /**
+     * Método que actualiza la lista de cuentas.
+     */
     private void actualizarListaCuentas(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getCuentas();
     	
@@ -830,6 +849,10 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     			modelo.addRow(new Object[3]);
     	}
     }
+    
+    /**
+     * Método que actualiza la lista de ultimos envios.
+     */
     public void actualizarListaUltimosEnvios(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getUltimosEnvios();
     	
@@ -847,6 +870,9 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     	}
     }
     
+    /**
+     * Método que actualiza la lista de movimientos.
+     */
     public void actualizarListaMovimientos(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getMovimientos();
 
@@ -864,6 +890,9 @@ public class MostrarBD_IU extends javax.swing.JFrame {
     	}
     }
     
+    /**
+     * Método que actualiza la lista de mensajes.
+     */
     public void actualizarListaMensajes(){
     	ArrayList<ArrayList<String>> lista = Database_lib.getInstance().getMensajes();
     	

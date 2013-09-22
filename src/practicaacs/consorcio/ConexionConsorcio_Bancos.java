@@ -64,11 +64,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 	/**
 	 * Constructor CONEXION BANCO/CONSORCIO
-	 * @param tipo
-	 * @param paquete
-	 * @param cons
-	 * @param s
-	 * @param socket
+	 * @param tipo El tipo de acción correspondiente.
+	 * @param paquete El datagrama recibido.
+	 * @param cons El consorcio.
+	 * @param s El servidor que realiza la conexión.
+	 * @param socket El socket de conexión.
 	 */
 	public ConexionConsorcio_Bancos(TipoAccion tipo, DatagramPacket paquete,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
@@ -82,14 +82,14 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 	/**
 	 * Constructor SEND TO BANCO
-	 * @param tipo
-	 * @param env
-	 * @param caj
-	 * @param ip_caj
-	 * @param puerto_caj
-	 * @param cons
-	 * @param s
-	 * @param socket
+	 * @param tipo El tipo de acción correspondiente.
+	 * @param env El mensaje que se enviará.
+	 * @param caj El cajero que realizó el envío.
+	 * @param ip_caj La IP del cajero.
+	 * @param puerto_caj El puerto del cajero.
+	 * @param cons El consorcio.
+	 * @param s El servidor que realiza la conexión.
+	 * @param socket El socket de conexión.
 	 */
 	public ConexionConsorcio_Bancos(TipoAccion tipo,MensajeDatos env,String caj, Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
@@ -104,11 +104,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	/**
 	 * Constructor SOLICITAR/FIN RECUPERACION
-	 * @param tipo
-	 * @param id_b
-	 * @param cons
-	 * @param s
-	 * @param socket
+	 * @param tipo El tipo de acción correspondiente.
+	 * @param id_b El id del banco con el que se va a realizar el inicio/fin de recuperación.
+	 * @param cons El consorcio.
+	 * @param s El servidor que realiza la conexión.
+	 * @param socket El socket de conexión.
 	 */
 	public ConexionConsorcio_Bancos(TipoAccion tipo,String id_b,Consorcio cons,ServidorConsorcio_Bancos s,DatagramSocket socket) {
 		super();
@@ -188,7 +188,11 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * Cambia el origen/destino, obtiene IP y puerto para el envio
 	 *  y delega en el Servidor de Cajeros para realizarlo.
 	 * BANCO->CONSORCIO->CAJERO
-	 * @param respuesta
+	 * @param respuesta El mensaje respuesta a enviar.
+	 * @param origen El origen de donde proviene el mensaje.
+	 * @param destino El destino del mensaje.
+	 * @param ip_dest La IP del cajero a donde se enviará.
+	 * @param puerto_dest El puerto del cajero a donde se enviará.
 	 */
 	public void sendToCajero(MensajeDatos respuesta,String origen, String destino,InetAddress ip_dest,int puerto_dest){
 		
@@ -205,6 +209,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 	 * que invoca el método.
 	 * ENVIA MENSAJES DE CONTROL -  CONSORCIO->BANCO
 	 * @param envio El mensaje a enviar.
+	 * @param ip La ip a donde se enviará el mensaje.
+	 * @param puerto El puerto a donde se enviará el mensaje.
+	 * @param esta_respondido Valor booleano que indica si el mensaje está respondido o no.
 	 */
 	private void sendToBanco(Mensaje envio,InetAddress ip, int puerto,boolean esta_respondido){
 		
@@ -239,8 +246,12 @@ public class ConexionConsorcio_Bancos extends Thread {
 	/**
 	 * Metodo que reenvia el mensaje a la IP y puerto introducidos por parámetro
 	 * ENVIA MENSAJES DE DATOS - CONSORCIO->BANCO
-	 * @param envio
-	 * @throws ConsorcioBDException 
+	 * @param envio El mensaje a reenviar al banco.
+	 * @param seleccionarCanalyNum Valor booleano que indica si hay que volver a seleccionar 
+	 * un canal o se usa el que viene en el mensaje.
+	 * @param en_recuperacion Valor booleano que indica si está en recuperación.
+	 * @param esta_respondido Valor booleano que indica si el mensaje está respondido o no.
+	 * @throws ConsorcioBDException Excepción que se lanza cuando no hay canales libres. 
 	 */
 	private void resendToBanco(MensajeDatos envio,boolean seleccionarCanalyNum,boolean en_recuperacion,boolean esta_respondido) throws ConsorcioBDException{
 
@@ -453,9 +464,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 	----------- METODOS DE COMPORTAMIENTO ----------
 	-------------------------------------------------*/
 	
-	
 	/**
-	 * LLama a abrir sesion y crea un mensaje respuesta para ello
+	 * LLama a abrir sesion, crea un mensaje respuesta para ello y lo envía.
 	 * @param recibido El mensaje recibido.
 	 */
 	private void manejar_abrir_sesion(SolAperturaSesion recibido){
@@ -512,7 +522,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	
 	/**
-	 * LLama a cerrar sesion y crea un mensaje respuesta para ello
+	 * LLama a cerrar sesion, crea un mensaje respuesta para ello y lo envía.
 	 * @param recibido El mensaje recibido.
 	 */	
 	private void manejar_cerrar_sesion(SolCierreSesion recibido){
@@ -567,7 +577,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	}
 	
 	/**
-	 * LLama a detener trafico y crea un mensaje respuesta para ello
+	 * LLama a detener trafico, crea un mensaje respuesta para ello y lo envía.
 	 * @param recibido El mensaje recibido.
 	 */	
 	private void manejar_detener_trafico(SolDetTrafico recibido){
@@ -601,7 +611,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	}	
 	
 	/**
-	 * LLama a reanudar trafico y crea un mensaje respuesta para ello
+	 * LLama a reanudar trafico, crea un mensaje respuesta para ello y lo envía.
 	 * @param recibido El mensaje recibido.
 	 */
 	private void manejar_reanudar_trafico(SolReanTrafico recibido){
@@ -655,7 +665,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 	}
 	
 	/**
-	 * Metodo que inicia la recuperacion
+	 * Metodo que inicia la recuperacion. 
+	 * Coloca el estado a "En recuperacion" y reenvia al banco el último
+	 * mensaje enviado por cada canal.
 	 * @param recibido El mensaje recibido.
 	 */
 	public void manejar_iniciar_recuperacion(RespIniTraficoRec recibido){
@@ -713,7 +725,8 @@ public class ConexionConsorcio_Bancos extends Thread {
 
 	
 	/**
-	 * Método que finaliza la recuperacion
+	 * Método que finaliza la recuperacion y coloca el estado de la conexión
+	 * a "Abierta".
 	 * @param recibido El mensaje recibido.
 	 */
 	private void manejar_finalizar_recuperacion(RespFinTraficoRec recibido){
@@ -771,7 +784,7 @@ public class ConexionConsorcio_Bancos extends Thread {
 	/**
 	 * Genera y envia un mensaje de solicitud de fin de trafico en recuperación:
 	 * SOLFINTRAFICOREC
-	 * @param id_banco EL banco con el que finalizar la recuperacion.
+	 * @param id_banco El banco con el que finalizar la recuperacion.
 	 */
 	private void solicitar_finalizar_recuperacion(String id_banco){
 
@@ -799,6 +812,9 @@ public class ConexionConsorcio_Bancos extends Thread {
 	
 	/**
 	 * Método que se ejecuta para dar respuesta a los mensajes de datos recibidos por el banco.
+	 * Si no nay ningún error se responde hacia el cajero, en caso de que lo haya se responde 
+	 * al banco indicando dicho error.
+	 * Si está en recuperación, el canal es bloqueado.
 	 * @param recibido El mensaje recibido.
 	 */
 	private void maneja_mensajes_datos(MensajeRespDatos recibido){

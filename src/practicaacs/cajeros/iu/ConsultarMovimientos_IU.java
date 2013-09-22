@@ -157,6 +157,10 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
     // End of variables declaration                
     
 
+	/**
+	 * Método que realiza el envio de una operación.
+	 * @param env El Envio a partir del cual se creará el mensaje a enviar.
+	 */
 	@Override
     public void envia_consulta(Envio env){
     	env.setTipoMensaje(CodigosMensajes.SOLMOVIMIENTOS);
@@ -164,6 +168,11 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
     	this.cajero.enviar_mensaje(envio,this);
     }
     
+    /**
+     * Método que actualiza la IU para la ventana de movimientos.
+     * @param lista La lista de mensajes con los movimientos recibida.
+     * @throws CodigoNoValidoException Excepción que se lanza cuando se utiliza el método en una consulta no debida.
+     */
 	@Override
     public void actualizarIUmovimientos(ArrayList<RespMovimientos> lista) throws CodigoNoValidoException{
 		this.ConsultandoLabel.setVisible(false);
@@ -199,6 +208,11 @@ public class ConsultarMovimientos_IU extends ConsultaAbstracta {
         this.listMovimientos.setListData(strlist.toArray());
 	}
 	
+    /**
+     * Método que actualiza la IU para la ventana de movimientos cuando se recibe un error.
+     * @param elemento El mensaje respuesta de error recibido.
+     * @throws CodigoNoValidoException Excepción que se lanza cuando se utiliza el método en una consulta no debida.
+     */	
 	@Override
     public void actualizarIUmovimientos(RespMovimientosError elemento) throws CodigoNoValidoException{
 		this.ConsultandoLabel.setVisible(false);

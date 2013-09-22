@@ -18,6 +18,11 @@ import practicaacs.fap.RespMovimientos;
 import practicaacs.fap.RespMovimientosError;
 import practicaacs.fap.SolMovimientos;
 
+/**
+ * Clase que implementa la conexión con el consorcio.
+ * Extiende la clase Thread para que se puedan realizar varias
+ * conexiones simultáneas.
+ */
 public class ConexionCajero extends Thread{
 
 	private Mensaje envio;
@@ -25,9 +30,10 @@ public class ConexionCajero extends Thread{
 	private ConsultaAbstracta interfaz;
 	
 	/**
-	 * Constructor de la clase
-	 * @param env EL envio a realizar.
+	 * Constructor de la clase.
+	 * @param env El envio a realizar.
 	 * @param caj El cajero que envia el mensaje.
+	 * @param ventana La ventana de la IU que realiza la conexión.
 	 */
 	public ConexionCajero(Mensaje env, Cajero caj,ConsultaAbstracta ventana) {
 		this.envio = env;
@@ -35,6 +41,10 @@ public class ConexionCajero extends Thread{
 		this.interfaz = ventana;
 	}
 	
+
+	/**
+	 * Método run del thread
+	 */
 	@Override
 	public void run() {
 		
@@ -103,11 +113,7 @@ public class ConexionCajero extends Thread{
 
 	
 	/**
-     * Envia el mensaje y se queda esperando una respuesta.
-     * @param envio El mensaje a enviar.
-     * @param address La dirección a donde enviar el mensaje.
-     * @param port El puerto a donde enviar el mensaje.
-     * @return El mensaje de respuesta correspondiente.
+     * Método que realiza el envio del mensaje.
      */
     private void enviar_mensaje(){
     	
@@ -125,7 +131,10 @@ public class ConexionCajero extends Thread{
 		}
     }
     
-    
+    /**
+     * Método que recibe el datagrama y lo parsea para obtener el Mensaje.
+     * @return El Mensaje Respuesta de Datos correspondiente al datagrama recibido.
+     */
     public MensajeRespDatos recibir_mensaje(){
     
     	Calendar time = Calendar.getInstance();

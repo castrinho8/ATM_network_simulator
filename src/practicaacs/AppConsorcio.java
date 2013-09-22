@@ -6,6 +6,9 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import practicaacs.consorcio.Consorcio;
 
+/**
+ * Clase que lanza un consorcio
+ */
 public class AppConsorcio {
 	
 	public static void main(String[] args) {
@@ -22,7 +25,7 @@ public class AppConsorcio {
 		}
         
     	try {
-			//new Consorcio("/home/ch01/RepositorioPractica/res/consorcio.properties");
+    		//Seleccionar la ruta local en la que se encuentra el fichero de configuracion
 			new Consorcio("/home/castrinho8/Escritorio/UNI/ACS/res/consorcio.properties");
 		} catch (IOException e) {
 			e.printStackTrace();
